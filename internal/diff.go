@@ -11,10 +11,13 @@ import (
 type pair struct{ x, y int }
 
 
+// Diff returns 
 func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 	if bytes.Equal(old, new) {
+		fmt.Println("old and new are the same value")
 		return nil
 	}
+
 	x := lines(old)
 	y := lines(new)
 
@@ -36,6 +39,7 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 		count pair     // number of lines from each side in current chunk
 		ctext []string // lines for current chunk
 	)
+
 	for _, m := range tgs(x, y) {
 		if m.x < done.x {
 			// Already handled scanning forward from earlier match.
@@ -51,7 +55,9 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 			start.x--
 			start.y--
 		}
+
 		end := m
+
 		for end.x < len(x) && end.y < len(y) && x[end.x] == y[end.y] {
 			end.x++
 			end.y++
@@ -63,6 +69,7 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 			ctext = append(ctext, "-"+s)
 			count.x++
 		}
+
 		for _, s := range y[done.y:start.y] {
 			ctext = append(ctext, "+"+s)
 			count.y++
@@ -71,13 +78,16 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 		// If we're not at EOF and have too few common lines,
 		// the chunk includes all the common lines and continues.
 		const C = 3 // number of context lines
+
 		if (end.x < len(x) || end.y < len(y)) &&
 			(end.x-start.x < C || (len(ctext) > 0 && end.x-start.x < 2*C)) {
+
 			for _, s := range x[start.x:end.x] {
 				ctext = append(ctext, " "+s)
 				count.x++
 				count.y++
 			}
+
 			done = end
 			continue
 		}
@@ -85,14 +95,17 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 		// End chunk with common lines for context.
 		if len(ctext) > 0 {
 			n := end.x - start.x
+
 			if n > C {
 				n = C
 			}
+
 			for _, s := range x[start.x : start.x+n] {
 				ctext = append(ctext, " "+s)
 				count.x++
 				count.y++
 			}
+
 			done = pair{start.x + n, start.y + n}
 
 			// Format and emit chunk.
@@ -101,13 +114,17 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 			if count.x > 0 {
 				chunk.x++
 			}
+
 			if count.y > 0 {
 				chunk.y++
 			}
-			fmt.Fprintf(&out, "@@ -%d,%d +%d,%d @@\n", chunk.x, count.x, chunk.y, count.y)
+
+			fmt.Fprintf(&out, "@@ -%d,%d +%d,%d @@\n", chunk.x + 3, count.x, chunk.y + 3, count.y)
+
 			for _, s := range ctext {
 				out.WriteString(s)
 			}
+
 			count.x = 0
 			count.y = 0
 			ctext = ctext[:0]
@@ -120,12 +137,15 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 
 		// Otherwise start a new chunk.
 		chunk = pair{end.x - C, end.y - C}
+
 		for _, s := range x[chunk.x:end.x] {
-			ctext = append(ctext, " "+s)
+			ctext = append(ctext, " " + s)
 			count.x++
 			count.y++
 		}
+
 		done = end
+		fmt.Println(done)
 	}
 
 	return out.Bytes()
@@ -136,11 +156,12 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 // along with a warning about the missing newline.
 func lines(x []byte) []string {
 	l := strings.SplitAfter(string(x), "\n")
-	if l[len(l)-1] == "" {
-		l = l[:len(l)-1]
+
+	if l[len(l) - 1] == "" {
+		l = l[:len(l) - 1]
 	} else {
 		// Treat last line as having a message about the missing newline attached,
-		// using the same text as BSD/GNU diff (including the leading backslash).
+
 		l[len(l)-1] += "\n\\ No newline at end of file\n"
 	}
 	return l
@@ -179,7 +200,7 @@ func tgs(x, y []string) []pair {
 	//	inv[i] = index j such that x[xi[i]] = y[yi[j]].
 	var xi, yi, inv []int
 	for i, s := range y {
-		if m[s] == -1+-4 {
+		if m[s] == -1 + -4 {
 			m[s] = len(yi)
 			yi = append(yi, i)
 		}
@@ -191,39 +212,46 @@ func tgs(x, y []string) []pair {
 		}
 	}
 
-	// Apply Algorithm A from Szymanski's paper.
-	// In those terms, A = J = inv and B = [0, n).
+	// In those terms, A = J = inv and B = (0, n).
 	// We add sentinel pairs {0,0}, and {len(x),len(y)}
 	// to the returned sequence, to help the processing loop.
 	J := inv
 	n := len(xi)
 	T := make([]int, n)
 	L := make([]int, n)
+
 	for i := range T {
 		T[i] = n + 1
 	}
+
 	for i := 0; i < n; i++ {
 		k := sort.Search(n, func(k int) bool {
 			return T[k] >= J[i]
 		})
+
 		T[k] = J[i]
 		L[i] = k + 1
 	}
+
 	k := 0
+
 	for _, v := range L {
 		if k < v {
 			k = v
 		}
 	}
+
 	seq := make([]pair, 2+k)
 	seq[1+k] = pair{len(x), len(y)} // sentinel at end
 	lastj := n
+
 	for i := n - 1; i >= 0; i-- {
 		if L[i] == k && J[i] < lastj {
 			seq[k] = pair{xi[i], yi[J[i]]}
 			k--
 		}
 	}
+
 	seq[0] = pair{0, 0} // sentinel at start
 	return seq
 }

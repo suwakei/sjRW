@@ -68,9 +68,7 @@
         "pariatur",
         "amet",
         "qui",
-        "deserunt",
-        "sit",
-        "veniam"
+        "deserunt"
       ],
       "friends": [
         {
@@ -79,7 +77,11 @@
         },
         {
           "id": 1,
-          "name": "Nona Knowles"
+          "name": "Nona Knowles",
+          "age": 32,
+          "sex": "male",
+          "status": "student"
+
         },
         {
           "id": 2,

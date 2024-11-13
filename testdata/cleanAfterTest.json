@@ -1,7 +1,6 @@
 [
     {
       "_id": "672d31b26f1316908fa81a41",
-      "id2": "12344",
       "index": 0,
       "guid": "126bf441-05a3-4b3e-9868-43827b2054c4",
       "isActive": false,
@@ -124,7 +123,7 @@
           "name": "Alma Neal"
         },
         {
-          "id": 232323232323,
+          "id": 1,
           "name": "Trudy Crawford"
         },
         {
@@ -138,7 +137,6 @@
     {
       "_id": "672d31b2e474ce8b790e060e",
       "index": 3,
-      "index2": 44,
       "guid": "879c9095-f972-4519-af5e-e84878cc8ae9",
       "isActive": false,
       "balance": "$2,673.28",
