@@ -12,7 +12,7 @@ type pair struct{ x, y int }
 
 
 // Diff returns 
-func Diff(oldName string, old []byte, newName string, new []byte) []byte {
+func Diff[bytesOrStr []bytes | string] (oldName string, old bytesOrStr, newName string, new bytesOrStr) []byte {
 	if bytes.Equal(old, new) {
 		fmt.Println("old and new are the same value")
 		return nil
