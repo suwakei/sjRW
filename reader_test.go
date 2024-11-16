@@ -34,8 +34,8 @@ func BenchmarkReadAsBytes(b *testing.B) {
 
 
 func TestDiff(t *testing.T) {
-	var jsonPath1 string = "./testdata/readtest.json"
-	var jsonPath2 string = "./testdata/readtest2.json"
+	var jsonPath1 string = "./testdata/difftest.json"
+	var jsonPath2 string = "./testdata/difftest2.json"
 	sj1 := SjReader{JsonPath: jsonPath1}
 	sj2 := SjReader{JsonPath: jsonPath2}
 	s1, _ := sj1.ReadAsBytes()
