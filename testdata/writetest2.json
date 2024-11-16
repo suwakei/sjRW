@@ -1,0 +1,18 @@
+{
+    "add": [
+        "git add .",
+        "git add README.md",
+        "git add .gitignore"
+    ],
+    "commit": "git commit -m \"first commit\"",
+    "push": [
+        "git push origin main",
+        "git push origin master",
+        "git push origin dev",
+        "git push origin release"
+    ],
+    "reset": [
+        "git reset --soft",
+        "git reset --hard HEAD^"
+    ]
+}
