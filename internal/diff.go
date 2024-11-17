@@ -7,11 +7,9 @@ import (
 	"strings"
 )
 
-
 type pair struct{ x, y int }
 
-
-// Diff returns result of comparing "from" and "to". two dimention map of "rm" line list and "add" line list 
+// Diff returns result of comparing "from" and "to". two dimention map of "rm" line list and "add" line list
 // and diff log as []byte
 func Diff(fromName string, from []byte, toName string, to []byte) (map[string]map[int]string, []byte) {
 	if bytes.Equal(from, to) {
@@ -42,10 +40,10 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 			continue
 		}
 
-			// Expand matching lines as far as possible,
-			// establishing that x[start.x:end.x] == y[start.y:end.y].
-			// Note that on the first (or last) iteration we may (or definitely do)
-			// have an empty match: start.x==end.x and start.y==end.y.
+		// Expand matching lines as far as possible,
+		// establishing that x[start.x:end.x] == y[start.y:end.y].
+		// Note that on the first (or last) iteration we may (or definitely do)
+		// have an empty match: start.x==end.x and start.y==end.y.
 		start := m
 		for start.x > done.x && start.y > done.y && x[start.x-1] == y[start.y-1] {
 			start.x--
@@ -62,12 +60,12 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 		// Emit the mismatched lines before start into this chunk.
 		// (No effect on first sentinel iteration, when start = {0,0}.)
 		for _, s := range x[done.x:start.x] {
-			ctext = append(ctext, "-" + s)
+			ctext = append(ctext, "-"+s)
 			count.x++
 		}
 
 		for _, s := range y[done.y:start.y] {
-			ctext = append(ctext, "+" + s)
+			ctext = append(ctext, "+"+s)
 			count.y++
 		}
 
@@ -76,10 +74,10 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 		const C = 3 // number of context lines
 
 		if (end.x < len(x) || end.y < len(y)) &&
-			(end.x - start.x < C || (len(ctext) > 0 && end.x - start.x < 2*C)) {
+			(end.x-start.x < C || (len(ctext) > 0 && end.x-start.x < 2*C)) {
 
 			for _, s := range x[start.x:end.x] {
-				ctext = append(ctext, " " + s)
+				ctext = append(ctext, " "+s)
 				count.x++
 				count.y++
 			}
@@ -96,8 +94,8 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 				n = C
 			}
 
-			for _, s := range x[start.x : start.x + n] {
-				ctext = append(ctext, " " + s)
+			for _, s := range x[start.x : start.x+n] {
+				ctext = append(ctext, " "+s)
 				count.x++
 				count.y++
 			}
@@ -115,7 +113,7 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 				chunk.y++
 			}
 
-			fmt.Fprintf(&out, "@@ '%s' %d,%d | '%s' %d,%d @@\n", fromName, chunk.x + 2, count.x, toName, chunk.y + 3, count.y)
+			fmt.Fprintf(&out, "@@ '%s' %d,%d | '%s' %d,%d @@\n", fromName, chunk.x+2, count.x, toName, chunk.y+3, count.y)
 
 			out.WriteString(fmt.Sprintf("Lines being removed or added from [%s]\n", fromName))
 			out.WriteString(spl)
@@ -138,7 +136,7 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 		chunk = pair{end.x - C, end.y - C}
 
 		for _, s := range x[chunk.x:end.x] {
-			ctext = append(ctext, " " + s)
+			ctext = append(ctext, " "+s)
 			count.x++
 			count.y++
 		}
@@ -167,12 +165,12 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 
 	for idx, s := range strarr {
 		flag := strings.Split(s, "")[0:1][0]
-		if flag ==  "+" {
-			editMap["rm"][idx + 1] = strings.Replace(s, "+", "", 1)
+		if flag == "+" {
+			editMap["rm"][idx+1] = strings.Replace(s, "+", "", 1)
 		}
 
 		if flag == "-" {
-			editMap["add"][idx + 1] = strings.Replace(s, "-", "", 1)
+			editMap["add"][idx+1] = strings.Replace(s, "-", "", 1)
 		}
 	}
 
@@ -186,8 +184,8 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 func lines(x []byte) []string {
 	l := strings.SplitAfter(string(x), "\n")
 
-	if l[len(l) - 1] == "" {
-		l = l[:len(l) - 1]
+	if l[len(l)-1] == "" {
+		l = l[:len(l)-1]
 	} else {
 		l[len(l)-1] += "\n\\ No newline at end of file\n"
 	}
@@ -219,7 +217,7 @@ func tgs(x, y []string) []pair {
 	//	inv[i] = index j such that x[xi[i]] = y[yi[j]].
 	var xi, yi, inv []int
 	for i, s := range y {
-		if m[s] == -1 + -4 {
+		if m[s] == -1+-4 {
 			m[s] = len(yi)
 			yi = append(yi, i)
 		}
