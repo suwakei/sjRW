@@ -11,13 +11,14 @@ import (
 type pair struct{ x, y int }
 
 
-// Diff returns result of comparing "from" and "to" "rm" line list and "add" line list as two dimention map
+// Diff returns result of comparing "from" and "to". two dimention map of "rm" line list and "add" line list 
 // and diff log as []byte
-func Diff (fromName string, from []byte, toName string, to []byte) (map[string]map[int]string, []byte) {
+func Diff(fromName string, from []byte, toName string, to []byte) (map[string]map[int]string, []byte) {
 	if bytes.Equal(from, to) {
 		fmt.Printf("%s and %s are the same value", fromName, toName)
 		return nil, nil
 	}
+	fmt.Println(fromName, toName)
 
 	x := lines(from)
 	y := lines(to)
@@ -166,12 +167,12 @@ func Diff (fromName string, from []byte, toName string, to []byte) (map[string]m
 
 	for idx, s := range strarr {
 		flag := strings.Split(s, "")[0:1][0]
-		if flag ==  "-" {
-			editMap["rm"][idx + 1] = s
+		if flag ==  "+" {
+			editMap["rm"][idx + 1] = strings.Replace(s, "+", "", 1)
 		}
 
-		if flag == "+" {
-			editMap["add"][idx + 1] = s
+		if flag == "-" {
+			editMap["add"][idx + 1] = strings.Replace(s, "-", "", 1)
 		}
 	}
 
