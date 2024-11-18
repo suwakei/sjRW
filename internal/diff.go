@@ -9,10 +9,10 @@ import (
 
 type pair struct{ x, y int }
 
-// Diff returns result of comparing "from" and "to". two dimention map of "rm" line list and "add" line list
+// Diff returns result of comparing "from" and "to". two dimention map "mapFromDiff" of "rm" line list and "add" line list
 // and diff log as []byte.
-// log used for debug.
-func Diff(fromName string, from []byte, toName string, to []byte) (map[string]map[int]string, []byte) {
+// "mapLog" used for debug.
+func Diff(fromName string, from []byte, toName string, to []byte) (mapFromDiff map[string]map[int]string, mapLog []byte) {
 	if bytes.Equal(from, to) {
 		fmt.Printf("%s and %s are the same value", fromName, toName)
 		return nil, nil
@@ -175,8 +175,10 @@ func Diff(fromName string, from []byte, toName string, to []byte) (map[string]ma
 		}
 	}
 
-	var log []byte = out.Bytes()
-	return editMap, log
+	mapFromDiff = editMap
+
+	mapLog = out.Bytes()
+	return mapFromDiff, mapLog
 }
 
 // lines returns the lines in the file x, including newlines.

@@ -38,11 +38,10 @@ func GetEditLineMap[targetType []byte | string] (str targetType, editMapFromDiff
 	return indexes
 }
 
-
-func GetKey(m map[int]string) []int {
-	var arr []int
+// GetKey returns keySlice of "m"
+func GetKey(m map[int]string) (keySlice []int) {
 	for k, _ := range m {
-		arr = append(arr, k)
+		keySlice = append(keySlice, k)
 	}
-	return arr
+	return keySlice
 }
