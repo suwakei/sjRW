@@ -8,9 +8,9 @@ import (
 
 func BenchmarkReadAsStr(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	sj := Sj{ReadFilePath: jsonPath}
+	var sj Sj
 	for i := 0; i < 100; i++ {
-	_, err := sj.ReadAsStr()
+	_, err := sj.ReadAsStrFrom(jsonPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,9 +20,9 @@ func BenchmarkReadAsStr(b *testing.B) {
 
 func BenchmarkReadAsBytes(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	sj := Sj{ReadFilePath: jsonPath}
+	var sj Sj
 	for i := 0; i < 100; i++ {
-	_, err := sj.ReadAsBytes()
+	_, err := sj.ReadAsBytesFrom(jsonPath)
 	if err != nil {
 		log.Fatal(err)
 	}
