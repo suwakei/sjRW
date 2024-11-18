@@ -10,7 +10,8 @@ import (
 type pair struct{ x, y int }
 
 // Diff returns result of comparing "from" and "to". two dimention map of "rm" line list and "add" line list
-// and diff log as []byte
+// and diff log as []byte.
+// log used for debug.
 func Diff(fromName string, from []byte, toName string, to []byte) (map[string]map[int]string, []byte) {
 	if bytes.Equal(from, to) {
 		fmt.Printf("%s and %s are the same value", fromName, toName)
