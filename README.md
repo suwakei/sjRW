@@ -1,7 +1,7 @@
-# sjrw
+# SJRW
 
 ## overview
 
-sjrw stands for "Simple Json Reader and Writer"
+SJRW stands for "Simple Json Reader and Writer"
 
 ## usage
