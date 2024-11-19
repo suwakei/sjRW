@@ -25,9 +25,6 @@ jobs:
         with:
           go-version: ${{matrix.gover}}
 
-      - name: OS Version
-        run: cat /etc/os-release
-
       - name: Go Version
         run: go version
 
@@ -39,13 +36,13 @@ jobs:
           go build -v ./...
 
       - name: Go Test
-        run: go test -v .
+        run: go test -v *_test.go
 
 
       - name: Slack Notification on Failure
         uses: rtCamp/action-slack-notify@v2
         if: ${{ failure() }}
         env:
-            SLACK_TITLE: Deploy / Failure
+            SLACK_TITLE: CI / Failure
             SLACK_COLOR: danger
             SLACK_MESSAGE: ci failed!!!
