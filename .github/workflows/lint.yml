@@ -6,24 +6,33 @@ on:
 
 jobs:
   lint:
+    strategy:
+      matrix:
+        go-versions: [1.21.0, 1.22.0, 1.23.0]
+        os: [ubuntu-latest]
+
     permissions:
       checks: write
       contents: read
       pull-requests: write
 
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
     steps:
-      - name: Go lint with reviewdog
+      - name: Checkout
         uses: actions/checkout@v4
-      - uses: reviewdog/action-golangci-lint@v2
+
+      - name: Go lint with reviewdog
+        uses: reviewdog/action-golangci-lint@v2
         with:
-          go_version: 1.23.0
+          go_version: ${{matrix.go-versions}}
+
           # reviewdog の動作モードの指定
           reporter: github-pr-review
 
           github_token: ${{github.token}}
 
           filter_mode: nofilter
+
           #このファイルパスにgolangciの設定ymlファイルをおく
           golangci_lint_flags: "--config=.golangci.toml"
 
