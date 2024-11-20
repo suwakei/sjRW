@@ -11,7 +11,7 @@ import (
 
 func BenchmarkReadAsStrfrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	sj :=  &SjReader{}
+	var sj SjReader
 	b.ResetTimer()
 
 	for i := 0; i < 100; i++ {
@@ -25,7 +25,7 @@ func BenchmarkReadAsStrfrom(b *testing.B) {
 
 func BenchmarkReadAsBytefrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	sj :=  &SjReader{}
+	var sj SjReader
 	b.ResetTimer()
 
 	for i := 0; i < 100; i++ {
@@ -38,13 +38,13 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 
 
 func TestReadAsStr(t *testing.T) {
-	// var jsonPath1 string = "./testdata/readtest.json"
-	// sj1 := &SjReader{}
-	// input1, _ := sj1.ReadAsStrFrom(jsonPath1)
+	var jsonPath1 string = "./testdata/readtest.json"
+	var sj1 SjReader
+	input1, _ := sj1.ReadAsStrFrom(jsonPath1)
 
-	// var jsonPath2 string = "./testdata/readtest2.json"
-	// var sj2 SjReader
-	// input2, _ := sj2.ReadAsStrFrom(jsonPath2)
+	var jsonPath2 string = "./testdata/readtest2.json"
+	var sj2 SjReader
+	input2, _ := sj2.ReadAsStrFrom(jsonPath2)
 
 	var jsonPath3 string = "./testdata/readtest3.json"
 	var sj3 SjReader
@@ -58,14 +58,14 @@ func TestReadAsStr(t *testing.T) {
 			input3,
 			expected3,
 		},
-		// {
-		// 	input2,
-		// 	expected2,
-		// },
-		// {
-		// 	input1,
-		// 	expected1,
-		// },
+		{
+	 	input2,
+			expected2,
+		},
+		{
+			input1,
+			expected1,
+		},
 	}
 
 	for _, tt := range tests {
