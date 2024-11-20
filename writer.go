@@ -11,10 +11,13 @@ import (
 	"github.com/suwakei/sjrw/internal"
 )
 
+type SjWriter struct {
+}
+
 // TODO: 必ずそれぞれの関数でベンチマークもとる
 
 // WriteFromStr writes str to filepathToWrite
-func (sj *Sj) WriteFromStr(str, filepathToWrite string) {
+func (sj *SjWriter) WriteFromStr(str, filepathToWrite string) {
 	from := []byte(str)
 	var to []byte
 
@@ -60,9 +63,9 @@ func (sj *Sj) WriteFromStr(str, filepathToWrite string) {
 
 
 
-func (sj *Sj) WriteFromByte(byteSlice []byte, filePath string) {
+func (sj *SjWriter) WriteFromByte(byteSlice []byte, filePath string) {
 }
 
 
-func (sj *Sj) WriteFromTextFile(readFile, writeFile string) {
+func (sj *SjWriter) WriteFromTextFile(readFile, writeFile string) {
 }

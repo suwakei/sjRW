@@ -12,7 +12,7 @@ import (
 
 
 func TestWriteFromStr(t *testing.T) {
-	var sj Sj
+	var sj SjWriter
 	str := `
 	{
 	"add": [
@@ -131,7 +131,7 @@ func writerTestSetup() (string, map[string]map[int]string) {
 
 	testEditMapFromDiff["add"][2] = `    "status": "git status",`
 
-	var sj Sj
+	var sj SjReader
 
 	str, _ := sj.ReadAsStrFrom("./testdata/writetest.json")
 
@@ -141,8 +141,8 @@ func writerTestSetup() (string, map[string]map[int]string) {
 func TestDiff(t *testing.T) {
 	var jsonPath1 string = "./testdata/difftest.json"
 	var jsonPath2 string = "./testdata/difftest2.json"
-	var sj1 Sj
-	var sj2 Sj
+	var sj1 SjReader
+	var sj2 SjReader
 	s1, _ := sj1.ReadAsBytesFrom(jsonPath1)
 	s2, _ := sj2.ReadAsBytesFrom(jsonPath2)
 	editMapFromDiff, _ := internal.Diff(filepath.Base(jsonPath2), s2, filepath.Base(jsonPath1), s1)

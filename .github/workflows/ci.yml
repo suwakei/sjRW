@@ -45,7 +45,6 @@ jobs:
       - name: Go Benchmark
         run: go test -bench=.
 
-
       - name: Slack Notification on Failure
         uses: rtCamp/action-slack-notify@v2
         if: ${{ failure() }}

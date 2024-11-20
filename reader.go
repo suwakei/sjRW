@@ -9,18 +9,17 @@ import (
 )
 
 
-type Sj struct {
+type SjReader struct {
 }
 
 //ReadAsStr returns json content as string
-func (sj *Sj) ReadAsStrFrom(readFilePath string) (string, error) {
+func (sj *SjReader) ReadAsStrFrom(readFilePath string) (string, error) {
 	var jsonByte []byte
 	path := readFilePath
 
 	if _, err := os.Stat(path); err != nil {
 		log.Fatalf("this path is not exist %s", path)
 	}
-
 
 	f, err := os.OpenFile(path, os.O_RDONLY, 0666)
 
@@ -49,7 +48,7 @@ func (sj *Sj) ReadAsStrFrom(readFilePath string) (string, error) {
 }
 
 
-func (sj *Sj) ReadAsBytesFrom(readFilePath string) ([]byte, error) {
+func (sj *SjReader) ReadAsBytesFrom(readFilePath string) ([]byte, error) {
 	var jsonByte []byte
 	path := readFilePath
 
