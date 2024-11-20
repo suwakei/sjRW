@@ -59,7 +59,7 @@ func TestReadAsStr(t *testing.T) {
 			expected3,
 		},
 		{
-	 	input2,
+	 input2,
 			expected2,
 		},
 		{
