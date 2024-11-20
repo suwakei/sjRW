@@ -1,9 +1,13 @@
 name: ci-SJRW
 
 on:
-　　push:
-     branches: [ main ]
-   workflow_dispatch:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
 
 env:
   SLACK_USERNAME: ci failure notification
@@ -11,28 +15,29 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
+# go-versionsに書かれているバージョンでビルドとテスト、失敗したらスラックに通知
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    strategy:
+          matrix:
+            go-versions: [1.19.0, 1.20.0, 1.21.0, 1.22.0, 1.23.0]
+            os: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Go
-        strategy:
-          matrix:
-           gover: [1.19.0, 1.20.x, 1.21.x, 1.22.x, 1.23.0]
-
         uses: actions/setup-go@v5
         with:
-          go-version: ${{matrix.gover}}
+          go-version: ${{matrix.go-versions}}
 
       - name: Go Version
         run: go version
 
       - name: Go Build
-        run: |
-          go build -v ./...
+        run: go build -v ./...
 
       - name: Go Test
         run: go test -v *_test.go

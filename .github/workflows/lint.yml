@@ -1,18 +1,20 @@
 name: lint with reviewdog
 
-on: push
-  branches: [main]
+on:
+  push:
+    branches: [main]
 
 jobs:
   lint:
-    permissins:
+    permissions:
       checks: write
       contents: read
-      pull-request: write
+      pull-requests: write
+
     runs-on: ubuntu-latest
     steps:
       - name: Go lint with reviewdog
-      - uses: actions/checkout@v4
+        uses: actions/checkout@v4
       - uses: reviewdog/action-golangci-lint@v2
         with:
           go_version: 1.23.0
