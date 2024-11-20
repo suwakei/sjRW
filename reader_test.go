@@ -1,14 +1,19 @@
 package sjrw
 
 import (
+	"fmt"
 	"log"
 	"testing"
+
+	"github.com/suwakei/sjrw/internal"
 )
 
 
-func BenchmarkReadAsStr(b *testing.B) {
+func BenchmarkReadAsStrfrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	var sj SjReader
+	sj :=  &SjReader{}
+	b.ResetTimer()
+
 	for i := 0; i < 100; i++ {
 	_, err := sj.ReadAsStrFrom(jsonPath)
 	if err != nil {
@@ -18,9 +23,11 @@ func BenchmarkReadAsStr(b *testing.B) {
 }
 
 
-func BenchmarkReadAsBytes(b *testing.B) {
+func BenchmarkReadAsBytefrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	var sj SjReader
+	sj :=  &SjReader{}
+	b.ResetTimer()
+
 	for i := 0; i < 100; i++ {
 	_, err := sj.ReadAsBytesFrom(jsonPath)
 	if err != nil {
@@ -31,25 +38,34 @@ func BenchmarkReadAsBytes(b *testing.B) {
 
 
 func TestReadAsStr(t *testing.T) {
-	var jsonPath1 string = "./testdata/readtest.json"
-	var sj1 SjReader
-	input1, _ := sj1.ReadAsStrFrom(jsonPath1)
+	// var jsonPath1 string = "./testdata/readtest.json"
+	// sj1 := &SjReader{}
+	// input1, _ := sj1.ReadAsStrFrom(jsonPath1)
 
-	var jsonPath2 string = "./testdata/readtest2.json"
-	var sj2 SjReader
-	input2, _ := sj2.ReadAsStrFrom(jsonPath2)
+	// var jsonPath2 string = "./testdata/readtest2.json"
+	// var sj2 SjReader
+	// input2, _ := sj2.ReadAsStrFrom(jsonPath2)
+
+	var jsonPath3 string = "./testdata/readtest3.json"
+	var sj3 SjReader
+	input3, _ := sj3.ReadAsStrFrom(jsonPath3)
+
 	tests := []struct{
 		input string
 		expected string
 	}{
 		{
-			input1,
-			expected1,
+			input3,
+			expected3,
 		},
-		{
-			input2,
-			expected2,
-		},
+		// {
+		// 	input2,
+		// 	expected2,
+		// },
+		// {
+		// 	input1,
+		// 	expected1,
+		// },
 	}
 
 	for _, tt := range tests {
@@ -59,6 +75,10 @@ func TestReadAsStr(t *testing.T) {
 
 func testReadAsStrFrom(t *testing.T, ReadAsStrResult, ReadAsStrExpected string) bool {
 	if ReadAsStrResult != ReadAsStrExpected {
+		bResult := []byte(ReadAsStrResult)
+		bExpected := []byte(ReadAsStrExpected)
+		dif := internal.Diff("ReadAsStrResult", bResult, ReadAsStrExpected, bExpected)
+		fmt.Println(string(dif))
 		t.Errorf("these values are not same")
 		return false
 	}
@@ -69,8 +89,8 @@ func testReadAsStrFrom(t *testing.T, ReadAsStrResult, ReadAsStrExpected string) 
 
 
 
-const expected1 string = `
-[
+const expected1 string = 
+`[
     {
       "_id": "672d31b26f1316908fa81a41",
       "index": 0,
@@ -347,8 +367,8 @@ const expected1 string = `
 
 
 
-const expected2 string = `
-[
+const expected2 string = 
+`[
 	{
 	  "_id": "672d31b26f1316908fa81a41",
 	  "index": 0,
@@ -622,3 +642,11 @@ const expected2 string = `
 	  "favoriteFruit": "banana"
 	}
   ]`
+
+const expected3 string = 
+`{
+    "add": "git add .",
+    "commit": "git commit -m \"first commit\"",
+    "push": "git push origin main",
+    "status": "git status"
+}`

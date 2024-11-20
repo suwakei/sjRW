@@ -12,7 +12,7 @@ type pair struct{ x, y int }
 // Diff returns result of comparing "from" and "to". two dimention map "mapFromDiff" of "rm" line list and "add" line list
 // and diff log as []byte.
 // "mapLog" used for debug.
-func Diff(fromName string, from []byte, toName string, to []byte) (mapFromDiff map[string]map[int]string, mapLog []byte) {
+func DiffReturn(fromName string, from []byte, toName string, to []byte) (mapFromDiff map[string]map[int]string, mapLog []byte) {
 	if bytes.Equal(from, to) {
 		fmt.Printf("%s and %s are the same value", fromName, toName)
 		return nil, nil
@@ -274,4 +274,117 @@ func tgs(x, y []string) []pair {
 
 	seq[0] = pair{0, 0} // sentinel at start
 	return seq
+}
+
+
+
+
+func Diff(oldName string, old []byte, newName string, new []byte) []byte {
+	//type pair struct{ x, y int }
+
+	if bytes.Equal(old, new) {
+		return nil
+	}
+	x := lines(old)
+	y := lines(new)
+
+	// Print diff header.
+	var out bytes.Buffer
+	fmt.Fprintf(&out, "diff %s %s\n", oldName, newName)
+	fmt.Fprintf(&out, "--- %s\n", oldName)
+	fmt.Fprintf(&out, "+++ %s\n", newName)
+
+
+	var (
+		done  pair     // printed up to x[:done.x] and y[:done.y]
+		chunk pair     // start lines of current chunk
+		count pair     // number of lines from each side in current chunk
+		ctext []string // lines for current chunk
+	)
+	for _, m := range tgs(x, y) {
+		if m.x < done.x {
+			// Already handled scanning forward from earlier match.
+			continue
+		}
+
+
+		start := m
+		for start.x > done.x && start.y > done.y && x[start.x-1] == y[start.y-1] {
+			start.x--
+			start.y--
+		}
+		end := m
+		for end.x < len(x) && end.y < len(y) && x[end.x] == y[end.y] {
+			end.x++
+			end.y++
+		}
+
+
+		for _, s := range x[done.x:start.x] {
+			ctext = append(ctext, "-"+s)
+			count.x++
+		}
+		for _, s := range y[done.y:start.y] {
+			ctext = append(ctext, "+"+s)
+			count.y++
+		}
+
+
+		const C = 3 // number of context lines
+		if (end.x < len(x) || end.y < len(y)) &&
+			(end.x-start.x < C || (len(ctext) > 0 && end.x-start.x < 2*C)) {
+			for _, s := range x[start.x:end.x] {
+				ctext = append(ctext, " "+s)
+				count.x++
+				count.y++
+			}
+			done = end
+			continue
+		}
+
+		// End chunk with common lines for context.
+		if len(ctext) > 0 {
+			n := end.x - start.x
+			if n > C {
+				n = C
+			}
+			for _, s := range x[start.x : start.x+n] {
+				ctext = append(ctext, " "+s)
+				count.x++
+				count.y++
+			}
+			done = pair{start.x + n, start.y + n}
+
+
+			if count.x > 0 {
+				chunk.x++
+			}
+			if count.y > 0 {
+				chunk.y++
+			}
+			fmt.Fprintf(&out, "@@ -%d,%d +%d,%d @@\n", chunk.x, count.x, chunk.y, count.y)
+			for _, s := range ctext {
+				out.WriteString(s)
+			}
+			count.x = 0
+			count.y = 0
+			ctext = ctext[:0]
+		}
+
+		// If we reached EOF, we're done.
+		if end.x >= len(x) && end.y >= len(y) {
+			break
+		}
+
+		// Otherwise start a new chunk.
+		chunk = pair{end.x - C, end.y - C}
+		for _, s := range x[chunk.x:end.x] {
+			ctext = append(ctext, " "+s)
+			count.x++
+			count.y++
+		}
+		done = end
+	}
+
+	return out.Bytes()
 }
