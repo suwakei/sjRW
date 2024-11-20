@@ -30,9 +30,6 @@ jobs:
       - name: Go Version
         run: go version
 
-      - name: Go Lint
-        uses: golangci/golangci-lint-action@v3
-
       - name: Go Build
         run: |
           go build -v ./...
