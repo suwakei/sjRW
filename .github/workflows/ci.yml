@@ -42,6 +42,9 @@ jobs:
       - name: Go Test
         run: go test -v *_test.go
 
+      - name: Go Benchmark
+        run: go test -bench=.
+
 
       - name: Slack Notification on Failure
         uses: rtCamp/action-slack-notify@v2
