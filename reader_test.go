@@ -3,6 +3,7 @@ package sjrw
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"testing"
 
 	"github.com/suwakei/sjrw/internal"
@@ -29,55 +30,86 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < 100; i++ {
-	_, err := sj.ReadAsBytesFrom(jsonPath)
+	_, err := sj.ReadAsByteFrom(jsonPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 }
 
+// func BenchmarkReadAsMapfrom(b *testing.B) {
+// 	var jsonPath string = "./testdata/readtest4.json"
+// 	var sj SjReader
+// 	b.ResetTimer()
+
+// 	for i := 0; i < 100; i++ {
+// 	_, err := sj.ReadAsMapFrom(jsonPath)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
+// }
+
 
 func TestReadAsStr(t *testing.T) {
 	var jsonPath1 string = "./testdata/readtest.json"
 	var sj1 SjReader
 	input1, _ := sj1.ReadAsStrFrom(jsonPath1)
+  uses1 := filepath.Base(jsonPath1)
 
 	var jsonPath2 string = "./testdata/readtest2.json"
 	var sj2 SjReader
 	input2, _ := sj2.ReadAsStrFrom(jsonPath2)
+  uses2 := filepath.Base(jsonPath2)
 
 	var jsonPath3 string = "./testdata/readtest3.json"
 	var sj3 SjReader
 	input3, _ := sj3.ReadAsStrFrom(jsonPath3)
+  uses3 := filepath.Base(jsonPath3)
 
-	tests := []struct{
+  var jsonPath4 string = "./testdata/readtest4.json"
+	var sj4 SjReader
+	input4, _ := sj4.ReadAsStrFrom(jsonPath4)
+  uses4 := filepath.Base(jsonPath4)
+
+	testCases := []struct{
 		input string
 		expected string
+    uses string
 	}{
 		{
 			input1,
 			expected1,
+      uses1,
 		},
 		{
 			input2,
 			expected2,
+      uses2,
 		},
 		{
 			input3,
 			expected3,
+      uses3,
 		},
+    {
+      input4,
+      expected4,
+      uses4,
+    },
 	}
 
-	for _, tt := range tests {
-		testReadAsStrFrom(t, tt.input, tt.expected)
+	for _, tc := range testCases {
+		testReadAsStrFrom(t, tc.input, tc.expected, tc.uses)
 	}
 }
 
-func testReadAsStrFrom(t *testing.T, ReadAsStrResult, ReadAsStrExpected string) bool {
+func testReadAsStrFrom(t *testing.T, ReadAsStrResult, ReadAsStrExpected, uses string) bool {
 	if ReadAsStrResult != ReadAsStrExpected {
 		bResult := []byte(ReadAsStrResult)
 		bExpected := []byte(ReadAsStrExpected)
-		dif := internal.Diff("ReadAsStrResult", bResult, ReadAsStrExpected, bExpected)
+
+		dif := internal.Diff(uses, bResult, "ReadAsStrExpected", bExpected)
 		fmt.Println(string(dif))
 		t.Errorf("these values are not same")
 		return false
@@ -86,6 +118,67 @@ func testReadAsStrFrom(t *testing.T, ReadAsStrResult, ReadAsStrExpected string) 
 }
 
 
+func TestReadAsByteFrom(t *testing.T) {
+  var jsonPath1 string = "./testdata/readtest.json"
+	var sj1 SjReader
+	input1, _ := sj1.ReadAsByteFrom(jsonPath1)
+  uses1 := filepath.Base(jsonPath1)
+
+	var jsonPath2 string = "./testdata/readtest2.json"
+	var sj2 SjReader
+	input2, _ := sj2.ReadAsByteFrom(jsonPath2)
+  uses2 := filepath.Base(jsonPath2)
+
+	var jsonPath3 string = "./testdata/readtest3.json"
+	var sj3 SjReader
+	input3, _ := sj3.ReadAsByteFrom(jsonPath3)
+  uses3 := filepath.Base(jsonPath3)
+
+  var jsonPath4 string = "./testdata/readtest4.json"
+	var sj4 SjReader
+	input4, _ := sj4.ReadAsByteFrom(jsonPath4)
+  uses4 := filepath.Base(jsonPath4)
+
+  testCases := []struct{
+		input []byte
+		expected []byte
+    uses string
+	}{
+		{
+			input1,
+			[]byte(expected1),
+      uses1,
+		},
+		{
+			input2,
+			[]byte(expected2),
+      uses2,
+		},
+		{
+			input3,
+			[]byte(expected3),
+      uses3,
+		},
+    {
+      input4,
+      []byte(expected4),
+      uses4,
+    },
+	}
+  for _, tc := range testCases {
+    testReadAsbyteFrom(t, tc.input, tc.expected, tc.uses)
+  }
+}
+
+func testReadAsbyteFrom(t *testing.T, ReadAsByteResult, ReadAsByteExpected []byte, uses string) bool {
+	if string(ReadAsByteResult) == string(ReadAsByteExpected) {
+		diff := internal.Diff(uses, ReadAsByteResult, "ReadAsByteExpected", ReadAsByteExpected)
+		fmt.Println(diff)
+		t.Errorf("these values are not same")
+		return false
+	}
+	return true
+}
 
 
 
@@ -650,3 +743,51 @@ const expected3 string =
     "push": "git push origin main",
     "status": "git status"
 }`
+
+
+const expected4 string = 
+`{
+      "_id": "672d31b26f1316908fa81a41",
+      "index": 0,
+      "guid": "126bf441-05a3-4b3e-9868-43827b2054c4",
+      "isActive": false,
+      "balance": "$1,509.41",
+      "picture": "http://placehold.it/32x32",
+      "age": 26,
+      "eyeColor": "green",
+      "name": "Sue Irwin",
+      "gender": "female",
+      "company": "VURBO",
+      "email": "sueirwin@vurbo.com",
+      "phone": "+1 (829) 544-2803",
+      "address": "196 Pierrepont Street, Bartonsville, Idaho, 2203",
+      "about": "Duis nisi Lorem occaecat do eu fugiat consectetur. Reprehenderit ut magna velit est reprehenderit Lorem. Excepteur consequat velit enim veniam quis velit velit enim aliquip nisi commodo ex. Pariatur consequat laboris amet fugiat nulla quis duis irure proident duis. Elit irure officia consequat reprehenderit commodo ad. Reprehenderit amet pariatur voluptate laboris dolor et veniam non ex. Consectetur ipsum in sunt irure cupidatat voluptate id ipsum.\r\n",
+      "registered": "2024-01-07T08:57:16 -09:00",
+      "latitude": 48.927862,
+      "longitude": -79.629704,
+      "tags": [
+        "consequat",
+        "ex",
+        "tempor",
+        "dolor",
+        "nisi",
+        "occaecat",
+        "quis"
+      ],
+      "friends": [
+        {
+          "id": 0,
+          "name": "Michael Rojas"
+        },
+        {
+          "id": 1,
+          "name": "Rodgers Pennington"
+        },
+        {
+          "id": 2,
+          "name": "Cardenas Monroe"
+        }
+      ],
+      "greeting": "Hello, Sue Irwin! You have 7 unread messages.",
+      "favoriteFruit": "banana"
+    }`
