@@ -39,7 +39,7 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 
 func TestReadAsStr(t *testing.T) {
 	var jsonPath1 string = "./testdata/readtest.json"
-	sj1 := &SjReader{}
+	var sj1 SjReader
 	input1, _ := sj1.ReadAsStrFrom(jsonPath1)
 
 	var jsonPath2 string = "./testdata/readtest2.json"
