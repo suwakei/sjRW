@@ -11,7 +11,7 @@ import (
 
 func BenchmarkReadAsStrfrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	sj :=  &SjReader{}
+	var sj SjReader
 	b.ResetTimer()
 
 	for i := 0; i < 100; i++ {
@@ -25,7 +25,7 @@ func BenchmarkReadAsStrfrom(b *testing.B) {
 
 func BenchmarkReadAsBytefrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
-	sj :=  &SjReader{}
+	var sj SjReader
 	b.ResetTimer()
 
 	for i := 0; i < 100; i++ {
