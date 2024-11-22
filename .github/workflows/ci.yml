@@ -1,9 +1,9 @@
-name: ci-SJRW
+name: build-test-SJRW
 
 on:
   push:
     branches: [ main ]
-    paths: ['**/*.go'] # goファイル変更時のみ
+    paths: ['**/*.go', '**/**/*/yml'] # goファイル, ymlファイル変更時のみ
   workflow_dispatch:
 
 defaults:
@@ -18,11 +18,11 @@ env:
 
 # go-versionsに書かれているバージョンでビルドとテスト、失敗したらスラックに通知
 jobs:
-  ci:
+  build:
     strategy:
-          matrix:
-            go-versions: [1.21.0, 1.22.0, 1.23.0]
-            os: [ubuntu-latest]
+      matrix:
+        go-versions: [1.21.0, 1.22.0, 1.23.0]
+        os: [ubuntu-latest]
     runs-on: ${{matrix.os}}
     timeout-minutes: 5
 
@@ -38,16 +38,35 @@ jobs:
       - name: Go Build
         run: go build -v ./...
 
+      - name: Slack Failure Notification on Build step
+        uses: rtCamp/action-slack-notify@v2
+        if: ${{ failure() }}
+        env:
+          SLACK_TITLE: sjrw-build / Failure
+          SLACK_COLOR: danger
+          SLACK_MESSAGE: sjrw build failed!!!
+
+  test:
+    needs: build
+
+    strategy:
+      matrix:
+        go-versions: [1.21.0, 1.22.0, 1.23.0]
+        os: [ubuntu-latest]
+    runs-on: ${{matrix.os}}
+    timeout-minutes: 5
+
+    steps:
       - name: Go Test
         run: go test -v .
 
       - name: Go Benchmark
         run:  go test -bench . -benchmem
 
-      - name: Slack Notification on Failure
+      - name: Slack Failure Notification test 
         uses: rtCamp/action-slack-notify@v2
         if: ${{ failure() }}
         env:
-            SLACK_TITLE: CI / Failure
+            SLACK_TITLE: sjrw-test / Failure
             SLACK_COLOR: danger
-            SLACK_MESSAGE: ci failed!!!
+            SLACK_MESSAGE: sjrw test failed!!!
