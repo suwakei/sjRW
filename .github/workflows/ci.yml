@@ -3,7 +3,7 @@ name: ci-SJRW
 on:
   push:
     branches: [ main ]
-    paths: ['go/**/*go'] # goファイル変更時のみ
+    paths: ['sjrw/**/*go'] # goファイル変更時のみ
   workflow_dispatch:
 
 defaults:
