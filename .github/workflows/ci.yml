@@ -24,6 +24,7 @@ jobs:
             go-versions: [1.21.0, 1.22.0, 1.23.0]
             os: [ubuntu-latest]
     runs-on: ${{matrix.os}}
+    timeout-minutes: 5
 
     steps:
       - name: Checkout
