@@ -788,6 +788,12 @@ const expected4 string =
           "name": "Cardenas Monroe"
         }
       ],
+      "object": {
+        "objcontent": 123,
+        "objcontent_no2": "123",
+        "objcontent3": true,
+        "objcontent4": 1.23
+      },
       "greeting": "Hello, Sue Irwin! You have 7 unread messages.",
       "favoriteFruit": "banana"
     }`
