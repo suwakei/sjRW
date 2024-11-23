@@ -38,7 +38,7 @@ func GetEditLineMap[targetType []byte | string] (str targetType, editMapFromDiff
 
 // GetKey returns keySlice of "m"
 func GetKey(m map[int]string) (keySlice []int) {
-	for k, _ := range m {
+	for k := range m {
 		keySlice = append(keySlice, k)
 	}
 	return keySlice
