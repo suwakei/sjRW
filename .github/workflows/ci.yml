@@ -57,6 +57,14 @@ jobs:
     timeout-minutes: 5
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{matrix.go-versions}}
+
       - name: Go Test
         run: go test -v .
 
@@ -70,3 +78,45 @@ jobs:
             SLACK_TITLE: sjrw-test / Failure
             SLACK_COLOR: danger
             SLACK_MESSAGE: sjrw test failed!!!
+
+  lint:
+    needs: test
+
+    strategy:
+      matrix:
+        go-versions: [1.23.0]
+        os: [ubuntu-latest]
+
+    permissions:
+      checks: write
+      contents: read
+
+    timeout-minutes: 5
+
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{matrix.go-versions}}
+
+      - name: Go lint with reviewdog
+        uses: reviewdog/action-golangci-lint@v2
+        with:
+          go_version: ${{matrix.go-versions}}
+
+          # reviewdog の動作モードの指定
+          reporter: github-pr-review
+
+          github_token: ${{github.token}}
+
+          filter_mode: nofilter
+
+          #このファイルパスにgolangciの設定ymlファイルをおく
+          golangci_lint_flags: "--config=.golangci.toml"
+
+          # Github Status へのレポートレベルの指定
+          level: warning
