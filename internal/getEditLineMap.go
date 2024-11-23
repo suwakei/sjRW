@@ -10,7 +10,8 @@ func GetEditLineMap[targetType []byte | string] (str targetType, editMapFromDiff
 	content := strings.TrimSpace(string(str))
 	contentLines := strings.Split(content, "\n")
 
-	indexes := make(map[int]string)
+	indexes := make(map[int]string, 0)
+
 	for i, line := range contentLines {
 		indexes[i + 1] = line
 	}
@@ -38,6 +39,7 @@ func GetEditLineMap[targetType []byte | string] (str targetType, editMapFromDiff
 
 // GetKey returns keySlice of "m"
 func GetKey(m map[int]string) (keySlice []int) {
+	keySlice = make([]int, len(m))
 	for k := range m {
 		keySlice = append(keySlice, k)
 	}
