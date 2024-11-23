@@ -146,7 +146,7 @@ func DiffReturn(fromName string, from []byte, toName string, to []byte) (mapFrom
 		done = end
 	}
 
-	var editMap map[string]map[int]string = make(map[string]map[int]string)
+	var editMap map[string]map[int]string = make(map[string]map[int]string, 0)
 
 	// prepare two dimenton map for return value
 	if _, ok := editMap["rm"]; !ok {
