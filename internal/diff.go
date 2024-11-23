@@ -17,6 +17,7 @@ func DiffReturn(fromName string, from []byte, toName string, to []byte) (mapFrom
 		fmt.Printf("%s and %s are the same value", fromName, toName)
 		return nil, nil
 	}
+
 	fmt.Println(fromName, toName)
 
 	x := lines(from)
@@ -46,6 +47,7 @@ func DiffReturn(fromName string, from []byte, toName string, to []byte) (mapFrom
 		// Note that on the first (or last) iteration we may (or definitely do)
 		// have an empty match: start.x==end.x and start.y==end.y.
 		start := m
+
 		for start.x > done.x && start.y > done.y && x[start.x-1] == y[start.y-1] {
 			start.x--
 			start.y--
@@ -76,7 +78,6 @@ func DiffReturn(fromName string, from []byte, toName string, to []byte) (mapFrom
 
 		if (end.x < len(x) || end.y < len(y)) &&
 			(end.x-start.x < C || (len(ctext) > 0 && end.x-start.x < 2*C)) {
-
 			for _, s := range x[start.x:end.x] {
 				ctext = append(ctext, " "+s)
 				count.x++
@@ -146,6 +147,7 @@ func DiffReturn(fromName string, from []byte, toName string, to []byte) (mapFrom
 	}
 
 	var editMap map[string]map[int]string = make(map[string]map[int]string)
+
 	// prepare two dimenton map for return value
 	if _, ok := editMap["rm"]; !ok {
 		editMap["rm"] = make(map[int]string)
@@ -166,6 +168,7 @@ func DiffReturn(fromName string, from []byte, toName string, to []byte) (mapFrom
 
 	for idx, s := range strarr {
 		flag := strings.Split(s, "")[0:1][0]
+
 		if flag == "+" {
 			editMap["rm"][idx+1] = strings.Replace(s, "+", "", 1)
 		}
@@ -201,11 +204,13 @@ func tgs(x, y []string) []pair {
 	// for the x side and 0, -4, -8 for the y side.
 	// Using negative numbers now lets us distinguish positive line numbers later.
 	m := make(map[string]int)
+
 	for _, s := range x {
 		if c := m[s]; c > -2 {
 			m[s] = c - 1
 		}
 	}
+
 	for _, s := range y {
 		if c := m[s]; c > -8 {
 			m[s] = c - 4
@@ -219,8 +224,9 @@ func tgs(x, y []string) []pair {
 	//	yi[i] = increasing indexes of unique strings in y.
 	//	inv[i] = index j such that x[xi[i]] = y[yi[j]].
 	var xi, yi, inv []int
+
 	for i, s := range y {
-		if m[s] == -1+-4 {
+		if m[s] == -1 + -4 {
 			m[s] = len(yi)
 			yi = append(yi, i)
 		}
@@ -301,19 +307,21 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 		count pair     // number of lines from each side in current chunk
 		ctext []string // lines for current chunk
 	)
+
 	for _, m := range tgs(x, y) {
 		if m.x < done.x {
 			// Already handled scanning forward from earlier match.
 			continue
 		}
 
-
 		start := m
 		for start.x > done.x && start.y > done.y && x[start.x-1] == y[start.y-1] {
 			start.x--
 			start.y--
 		}
+
 		end := m
+
 		for end.x < len(x) && end.y < len(y) && x[end.x] == y[end.y] {
 			end.x++
 			end.y++
@@ -324,6 +332,7 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 			ctext = append(ctext, "-"+s)
 			count.x++
 		}
+
 		for _, s := range y[done.y:start.y] {
 			ctext = append(ctext, "+"+s)
 			count.y++
@@ -331,6 +340,7 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 
 
 		const C = 3 // number of context lines
+
 		if (end.x < len(x) || end.y < len(y)) &&
 			(end.x-start.x < C || (len(ctext) > 0 && end.x-start.x < 2*C)) {
 			for _, s := range x[start.x:end.x] {
@@ -345,27 +355,32 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 		// End chunk with common lines for context.
 		if len(ctext) > 0 {
 			n := end.x - start.x
+
 			if n > C {
 				n = C
 			}
+
 			for _, s := range x[start.x : start.x+n] {
 				ctext = append(ctext, " "+s)
 				count.x++
 				count.y++
 			}
-			done = pair{start.x + n, start.y + n}
 
+			done = pair{start.x + n, start.y + n}
 
 			if count.x > 0 {
 				chunk.x++
 			}
+
 			if count.y > 0 {
 				chunk.y++
 			}
+
 			fmt.Fprintf(&out, "@@ -%d,%d +%d,%d @@\n", chunk.x, count.x, chunk.y, count.y)
 			for _, s := range ctext {
 				out.WriteString(s)
 			}
+
 			count.x = 0
 			count.y = 0
 			ctext = ctext[:0]
@@ -378,11 +393,13 @@ func Diff(oldName string, old []byte, newName string, new []byte) []byte {
 
 		// Otherwise start a new chunk.
 		chunk = pair{end.x - C, end.y - C}
+
 		for _, s := range x[chunk.x:end.x] {
 			ctext = append(ctext, " "+s)
 			count.x++
 			count.y++
 		}
+
 		done = end
 	}
 

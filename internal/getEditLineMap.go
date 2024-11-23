@@ -1,11 +1,9 @@
 package internal
 
 import (
-	"strings"
 	"sort"
+	"strings"
 )
-
-
 
 // getEditLineMap returns a map with only the difference changed from the original string
 func GetEditLineMap[targetType []byte | string] (str targetType, editMapFromDiff map[string]map[int]string) map[int]string {
