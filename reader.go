@@ -2,9 +2,11 @@ package sjrw
 
 import (
 	"bufio"
+	"errors"
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -19,6 +21,10 @@ func (sj *SjReader) ReadAsStrFrom(readFilePath string) (contentAsStr string, err
 
 	if _, err := os.Stat(readFilePath); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", readFilePath)
+	}
+
+	if filepath.Ext(readFilePath) != ".json" {
+		return "", errors.New("read file is not json file")
 	}
 
 	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0666)
@@ -61,6 +67,10 @@ func (sj *SjReader) ReadAsByteFrom(readFilePath string) (contentAsByte []byte, e
 		log.Fatalf("this path is not exist \"%s\"", readFilePath)
 	}
 
+	if filepath.Ext(readFilePath) != ".json" {
+		return []byte(""), errors.New("read file is not json file")
+	}
+
 	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0666)
 
 	if err != nil {
@@ -93,7 +103,7 @@ func (sj *SjReader) ReadAsByteFrom(readFilePath string) (contentAsByte []byte, e
 }
 
 
-//[]map[string]any
+// 本当に一行ずつ取得とかではなくて配列またはオブジェクトがキーの中にあったらそれをすべて参照できるようにする
 func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map[string]any, err error) {
 	var (
 		jsonByte []byte = make([]byte, 0)
@@ -101,6 +111,10 @@ func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map
 
 	if _, err := os.Stat(readFilePath); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", readFilePath)
+	}
+
+	if filepath.Ext(readFilePath) != ".json" {
+		return nil, errors.New("read file is not json file")
 	}
 
 	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0666)
@@ -131,7 +145,7 @@ func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map
 			log.Fatal("could not read content")
 		}
 	}
-	// 行の順番を持ったマップとjsonのキーをキーとしたマップ
+
 	trimedString := strings.TrimSpace(string(jsonByte))
 
 	contentAsMap = assembleMap(trimedString)
@@ -167,11 +181,21 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 		strLength int = len(runifiedStr)
 		doubleQuoteCnt int = 0
 		lineCount int = 0
+		keyMode bool = true
+		firstLoop bool = true
 		key string
 		value string
 
-		strBuf strings.Builder
+		keyBuf strings.Builder
+		valBuf strings.Builder
 	)
+
+	// メモリの事前割り当て
+	var keyBufMemoryNumber = float64(strLength) * 0.2
+	keyBuf.Grow(int(keyBufMemoryNumber))
+
+	var valBufMemoryNumber float64 = float64(strLength) * 0.8
+	valBuf.Grow(int(valBufMemoryNumber))
 
 	for idx := range runifiedStr {
 		curToken = runifiedStr[idx]
@@ -181,6 +205,14 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 		peekToken = runifiedStr[idx + 1]
 		}
 
+		if firstLoop {
+			keyBuf.WriteRune(curToken)
+			key = keyBuf.String()
+			firstLoop = false
+			keyMode = false
+			continue
+		}
+
 		// 最後のトークンの時
 		if idx + 1 == strLength {
 			lineCount += 1
@@ -188,45 +220,70 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 				initMap[lineCount] = make(map[string]any, 0)
 			}
 			initMap[lineCount][string(curToken)] = ""
+			keyBuf.Reset()
+			valBuf.Reset()
 			break
 		}
 
-		if curToken == SPACE || curToken == TAB {
-			strBuf.WriteRune(curToken)
-			continue
-		}
+		switch curToken {
 
-		if curToken == DOUBLEQUOTE {
-			strBuf.WriteRune(curToken)
+		case SPACE, TAB:
+			if keyMode {
+				keyBuf.WriteRune(curToken)
+				continue
+			}
+			if !keyMode {
+				valBuf.WriteRune(curToken)
+				continue
+			}
+
+		case DOUBLEQUOTE:
+			if keyMode {
+				keyBuf.WriteRune(curToken)
+				continue
+			}
+			if !keyMode {
+				valBuf.WriteRune(curToken)
+				continue
+			}
+			
 			if doubleQuoteCnt == 2 && peekToken == COLON {
-				key = strBuf.String()
-				strBuf.Reset()
-				doubleQuoteCnt = 0
+				key = keyBuf.String()
+				keyBuf.Reset()
+				keyMode = false
 				continue
 			}
 			doubleQuoteCnt += 1
-			continue
-		}
 
-		if curToken == lnTOKEN {
+		case lnTOKEN:
 			lineCount += 1
-			strBuf.WriteRune(curToken)
-			value = strBuf.String()
+
+			valBuf.WriteRune(curToken)
+			value = valBuf.String()
 
 			if _, ok := initMap[lineCount]; !ok {
 				initMap[lineCount] = make(map[string]any, 0)
 			}
 			initMap[lineCount][key] = value
-			strBuf.Reset()
-			continue
-			}
+			keyBuf.Reset()
+			valBuf.Reset()
+			keyMode = true
 		
-		if curToken == COMMA && doubleQuoteCnt < 2 {
-			continue
-		}
+		case COLON:
+			if doubleQuoteCnt == 2 {
+				doubleQuoteCnt = 0
+				continue
+			}
 
-		// どのトークンにも当てはまらない場合
-		strBuf.WriteRune(curToken)
+		default:
+			if keyMode {
+				keyBuf.WriteRune(curToken)
+				continue
+			}
+			if !keyMode {
+				valBuf.WriteRune(curToken)
+			}
+		}
 	}
 	assembledMap = initMap
 	return assembledMap
