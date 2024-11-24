@@ -116,7 +116,7 @@ jobs:
           filter_mode: nofilter
 
           #このファイルパスにgolangciの設定ymlファイルをおく
-          golangci_lint_flags: "--config=.golangci.toml"
+          golangci_lint_flags: "--config=./.golangci.toml"
 
           # Github Status へのレポートレベルの指定
           level: warning
