@@ -171,14 +171,11 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 		COMMA = ','
 	)
 
-	r := []rune(str)
-	var runifiedStr []rune = make([]rune, len(r))
-	runifiedStr = r
-
 	var (
 		curToken rune
 		peekToken rune
-		strLength int = len(runifiedStr)
+ r []rune = []rune(str)
+		strLength int = len(r)
 		doubleQuoteCnt int = 0
 		lineCount int = 0
 		keyMode bool = true
@@ -197,6 +194,10 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 	var valBufMemoryNumber float64 = float64(strLength) * 0.8
 	valBuf.Grow(int(valBufMemoryNumber))
 
+	var runifiedStr []rune = make([]rune, strLength)
+	runifiedStr = r
+
+
 	for idx := range runifiedStr {
 		curToken = runifiedStr[idx]
 
@@ -214,6 +215,7 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 		}
 
 		// 最後のトークンの時
+// string(curToken)をkeyに変えて試してみる
 		if idx + 1 == strLength {
 			lineCount += 1
 			if _, ok := initMap[lineCount]; !ok {
