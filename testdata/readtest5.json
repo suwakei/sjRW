@@ -1,0 +1,13 @@
+{
+    "add": "git add .",
+    "commit": "git commit -m \"first commit\"",
+    "push": "git push origin main",
+    "status": [
+        "git status",
+        "git status && git log"
+    ],
+    "reset": {
+        "soft": "git reset --soft HEAD^",
+        "hard": "git reset --hard ^HEAD"
+    }
+}
