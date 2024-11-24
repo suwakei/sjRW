@@ -46,8 +46,7 @@ func (sj *SjWriter) WriteFromStr(str, filepathToWrite string) {
 	}
 	mapFromDiff, _ := internal.DiffReturn("from", from, "to", to)
 
-
-	result := internal.GetEditLineMap(str, mapFromDiff)
+	result := internal.GetEditLineMap[string](str, mapFromDiff)
 
 	resultkey := internal.GetKey(result)
 	sort.Ints(resultkey)
