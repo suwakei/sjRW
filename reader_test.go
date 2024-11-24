@@ -176,9 +176,9 @@ func TestReadAsByteFrom(t *testing.T) {
 
 func TestReadAsMapFrom(t *testing.T) {
   t.Parallel()
-  var jsonPath3 string = "./testdata/readtest3.json"
-	var sj3 SjReader
-  m, _ := sj3.ReadAsMapFrom(jsonPath3)
+  var jsonPath5 string = "./testdata/readtest5.json"
+	var sj5 SjReader
+  m, _ := sj5.ReadAsMapFrom(jsonPath5)
   fmt.Println(m)
 }
 
