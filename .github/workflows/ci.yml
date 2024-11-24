@@ -1,4 +1,4 @@
-name: build-test-SJRW
+name: build-test-lint-SJRW
 
 on:
   push:
@@ -116,7 +116,7 @@ jobs:
           filter_mode: nofilter
 
           #このファイルパスにgolangciの設定ymlファイルをおく
-          golangci_lint_flags: "--config=./.golangci.toml"
+          golangci_lint_flags: "--config=.github/workflows/.golangci.toml"
 
           # Github Status へのレポートレベルの指定
           level: warning
