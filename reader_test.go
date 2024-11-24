@@ -52,132 +52,134 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 
 
 func TestReadAsStr(t *testing.T) {
+  t.Parallel()
 	var jsonPath1 string = "./testdata/readtest.json"
 	var sj1 SjReader
 	input1, _ := sj1.ReadAsStrFrom(jsonPath1)
-  uses1 := filepath.Base(jsonPath1)
+  path1 := filepath.Base(jsonPath1)
 
 	var jsonPath2 string = "./testdata/readtest2.json"
 	var sj2 SjReader
 	input2, _ := sj2.ReadAsStrFrom(jsonPath2)
-  uses2 := filepath.Base(jsonPath2)
+  path2 := filepath.Base(jsonPath2)
 
 	var jsonPath3 string = "./testdata/readtest3.json"
 	var sj3 SjReader
 	input3, _ := sj3.ReadAsStrFrom(jsonPath3)
-  uses3 := filepath.Base(jsonPath3)
+  path3 := filepath.Base(jsonPath3)
 
   var jsonPath4 string = "./testdata/readtest4.json"
 	var sj4 SjReader
 	input4, _ := sj4.ReadAsStrFrom(jsonPath4)
-  uses4 := filepath.Base(jsonPath4)
+  path4 := filepath.Base(jsonPath4)
 
-	testCases := []struct{
+	tests := map[string]struct{
 		input string
 		expected string
-    uses string
 	}{
-		{
+		path1: {
 			input1,
 			expected1,
-      uses1,
 		},
-		{
+
+		path2: {
 			input2,
 			expected2,
-      uses2,
 		},
-		{
+
+		path3: {
 			input3,
 			expected3,
-      uses3,
 		},
-    {
+
+    path4: {
       input4,
       expected4,
-      uses4,
     },
 	}
 
-	for _, tc := range testCases {
-		testReadAsStrFrom(t, tc.input, tc.expected, tc.uses)
-	}
-}
+	for tname, tt := range tests {
+    tt := tt
+    t.Run("testReadAsStrFrom", func(t *testing.T) {
+      t.Parallel()
+      if tt.input != tt.expected {
+        bInput := []byte(tt.input)
+        bExpected := []byte(tt.expected)
 
-func testReadAsStrFrom(t *testing.T, ReadAsStrResult, ReadAsStrExpected, uses string) bool {
-	if ReadAsStrResult != ReadAsStrExpected {
-		bResult := []byte(ReadAsStrResult)
-		bExpected := []byte(ReadAsStrExpected)
-
-		dif := internal.Diff(uses, bResult, "ReadAsStrExpected", bExpected)
-		fmt.Println(string(dif))
-		t.Errorf("these values are not same")
-		return false
+        diff := internal.Diff(tname, bInput, "ReadAsStrExpected", bExpected)
+        fmt.Println(string(diff))
+        t.Errorf("these values are not same")
+      }
+    })
 	}
-	return true
 }
 
 
 func TestReadAsByteFrom(t *testing.T) {
+  t.Parallel()
   var jsonPath1 string = "./testdata/readtest.json"
 	var sj1 SjReader
 	input1, _ := sj1.ReadAsByteFrom(jsonPath1)
-  uses1 := filepath.Base(jsonPath1)
+  path1 := filepath.Base(jsonPath1)
 
 	var jsonPath2 string = "./testdata/readtest2.json"
 	var sj2 SjReader
 	input2, _ := sj2.ReadAsByteFrom(jsonPath2)
-  uses2 := filepath.Base(jsonPath2)
+  path2 := filepath.Base(jsonPath2)
 
 	var jsonPath3 string = "./testdata/readtest3.json"
 	var sj3 SjReader
 	input3, _ := sj3.ReadAsByteFrom(jsonPath3)
-  uses3 := filepath.Base(jsonPath3)
+  path3 := filepath.Base(jsonPath3)
 
   var jsonPath4 string = "./testdata/readtest4.json"
 	var sj4 SjReader
 	input4, _ := sj4.ReadAsByteFrom(jsonPath4)
-  uses4 := filepath.Base(jsonPath4)
+  path4 := filepath.Base(jsonPath4)
 
-  testCases := []struct{
+  tests := map[string]struct{
 		input []byte
 		expected []byte
-    uses string
 	}{
-		{
+
+		path1: {
 			input1,
 			[]byte(expected1),
-      uses1,
 		},
-		{
+
+		path2: {
 			input2,
 			[]byte(expected2),
-      uses2,
 		},
-		{
+		path3: {
 			input3,
 			[]byte(expected3),
-      uses3,
 		},
-    {
+    path4: {
       input4,
       []byte(expected4),
-      uses4,
     },
 	}
-  for _, tc := range testCases {
-    testReadAsbyteFrom(t, tc.input, tc.expected, tc.uses)
+  for tname, tt := range tests {
+    tt := tt
+    t.Run("testReadAsStrFrom", func(t *testing.T) {
+      t.Parallel()
+      if string(tt.input) == string(tt.expected) {
+        diff := internal.Diff(tname, tt.input, "ReadAsStrExpected", tt.expected)
+        fmt.Println(string(diff))
+        t.Errorf("these values are not same")
+      }
+    })
   }
 }
 
-func testReadAsbyteFrom(t *testing.T, ReadAsByteResult, ReadAsByteExpected []byte, uses string) bool {
-	if string(ReadAsByteResult) == string(ReadAsByteExpected) {
-		diff := internal.Diff(uses, ReadAsByteResult, "ReadAsByteExpected", ReadAsByteExpected)
-		fmt.Println(diff)
-		t.Errorf("these values are not same")
-		return false
-	}
-	return true
+
+func TestReadAsMapFrom(t *testing.T) {
+  t.Parallel()
+  var jsonPath3 string = "./testdata/readtest3.json"
+	var sj3 SjReader
+  m, _ := sj3.ReadAsMapFrom(jsonPath3)
+  fmt.Println(m)
 }
 
 
