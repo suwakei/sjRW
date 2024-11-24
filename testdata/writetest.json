@@ -1,5 +1,5 @@
 {
-    "add": [
+    "add":[
         "git add .",
         "git add README.md",
         "git add .gitignore",
