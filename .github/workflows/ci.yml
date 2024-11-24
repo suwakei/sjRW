@@ -3,7 +3,7 @@ name: build-test-SJRW
 on:
   push:
     branches: [ main ]
-    paths: ['**/*.go', '**/**/*/yml'] # goファイル, ymlファイル変更時のみ
+    paths: ['**/*.go', '.github/workflows/*.yml'] # goファイル, ymlファイル変更時のみ
   workflow_dispatch:
 
 defaults:
