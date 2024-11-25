@@ -109,7 +109,7 @@ jobs:
           go_version: ${{matrix.go-versions}}
 
           # reviewdog の動作モードの指定
-          reporter: github-pr-review
+          reporter: github-check
 
           github_token: ${{github.token}}
 
