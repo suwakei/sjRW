@@ -13,7 +13,8 @@ import (
 	//"strconv"
 	"strings"
 )
-
+// mapのキーの型はstringとは限らないからcomparable型にする
+aa
 
 type SjReader struct {
 }
