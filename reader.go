@@ -216,7 +216,7 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 
 		// 最後のトークンの時
 // string(curToken)をkeyに変えて試してみる
-		if idx + 1 == strLength {
+		if (idx + 1 == strLength) && (curToken == rBrace || curToken == rBracket){
 			lineCount += 1
 			if _, ok := initMap[lineCount]; !ok {
 				initMap[lineCount] = make(map[string]any, 0)
