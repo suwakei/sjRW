@@ -3,7 +3,7 @@ name: build-test-lint-SJRW
 on:
   push:
     branches: [ main ]
-    paths: ['**/*.go', '.github/workflows/*.yml'] # goファイル, ymlファイル変更時のみ
+    paths: ['**/*.go', '.github/workflows/*.yml', '**/*.toml'] # goファイル, ymlファイル変更時のみ
   workflow_dispatch:
 
 defaults:
