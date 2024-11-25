@@ -3,11 +3,14 @@ package sjrw
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	//"strconv"
 	"strings"
 )
 
@@ -240,12 +243,12 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 			sliceMode = false
 		}
 
+
 		switch curToken {
 
 		case SPACE, TAB:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
-				continue
 			}
 			if !keyMode {
 				valBuf.WriteRune(curToken)
@@ -272,14 +275,20 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 			}
 
 			if !keyMode {
+				fmt.Println("!K", idx)
 				if doubleQuoteCnt == 0 {
 					sliceMode = true
 					sliceModeCount = 0
-					var tempSlice[]any = make([]any, strLength / 8)
-					var dc int = 0
-					var tempRune rune
-
+					var (
+						tempSlice[]any = make([]any, strLength / 8)
+						dc int = 0
+						lineCountBuf int = lineCount
+						num int
+						tempRune rune
+					)
+					
 					for i := idx + 1; i < strLength; i++ {
+						fmt.Println("s", i)
 						sliceModeCount += 1
 						tempRune = rune(runifiedStr[i])
 						switch tempRune {
@@ -290,7 +299,7 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 						case COMMA:
 							s := sliceBuf.String()
 							if dc < 2 {
-								num, _ := strconv.Atoi(s)
+								num, _ = strconv.Atoi(s)
 								tempSlice = append(tempSlice, num)
 								dc = 0
 								continue
@@ -301,7 +310,7 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 						case lnTOKEN:
 							s := sliceBuf.String()
 							if dc < 2 {
-								num, _ := strconv.Atoi(s)
+								num, _ = strconv.Atoi(s)
 								tempSlice = append(tempSlice, num)
 								dc = 0
 								continue
@@ -311,17 +320,17 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 							lineCount += 1
 
 						case RBRACKET:
-							if dc < 0 {// ここのlinecountは間違い
-								initMap[lineCount][key] = tempSlice
+							if dc < 0 {
+								initMap[lineCountBuf][key] = tempSlice
 								break
 							}
 							sliceBuf.WriteRune(tempRune)
 
 						default:
 							sliceBuf.WriteRune(tempRune)
-					}
 				}
-				valBuf.WriteRune(curToken)
+				}
+				fmt.Println(tempSlice)
 			}
 		}
 
