@@ -1,11 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"path/filepath"
+	"github.com/suwakei/sjrw"
 )
 
 func main() {
 
-	fmt.Println(filepath.Ext("../testdata/readtest4.json"))
+sj sjrw.SjReader
+
+// dlvでステップ実行するためエントリポイントで実行
+m, _ := sj.ReadAsMapFrom("../testdata/readtest.json")
+	fmt.Println(m)
+
 }
