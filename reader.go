@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -174,25 +175,31 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 	var (
 		curToken rune
 		peekToken rune
- r []rune = []rune(str)
+        r []rune = []rune(str)
 		strLength int = len(r)
 		doubleQuoteCnt int = 0
+		sliceModeCount int = 0
 		lineCount int = 0
 		keyMode bool = true
+		sliceMode bool = false
 		firstLoop bool = true
 		key string
 		value string
 
 		keyBuf strings.Builder
 		valBuf strings.Builder
+		sliceBuf strings.Builder
 	)
 
-	// メモリの事前割り当て
-	var keyBufMemoryNumber = float64(strLength) * 0.2
+	// preallocation of memory
+	var keyBufMemoryNumber float32 = float32(strLength) * 0.2
 	keyBuf.Grow(int(keyBufMemoryNumber))
 
-	var valBufMemoryNumber float64 = float64(strLength) * 0.8
+	var valBufMemoryNumber float32 = float32(strLength) * 0.7
 	valBuf.Grow(int(valBufMemoryNumber))
+
+	var sliceBufMemoryNumber float32 = float32(strLength) * 0.1
+	sliceBuf.Grow(int(sliceBufMemoryNumber))
 
 	var runifiedStr []rune = make([]rune, strLength)
 	runifiedStr = r
@@ -215,7 +222,6 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 		}
 
 		// 最後のトークンの時
-// string(curToken)をkeyに変えて試してみる
 		if (idx + 1 == strLength) && (curToken == RBRACE || curToken == RBRACKET){
 			lineCount += 1
 			if _, ok := initMap[lineCount]; !ok {
@@ -227,6 +233,13 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 			break
 		}
 
+		if sliceMode {
+			if idx <= idx + sliceModeCount {
+				continue
+			}
+			sliceMode = false
+		}
+
 		switch curToken {
 
 		case SPACE, TAB:
@@ -236,26 +249,81 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 			}
 			if !keyMode {
 				valBuf.WriteRune(curToken)
-				continue
 			}
 
 		case DOUBLEQUOTE:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
-				continue
+				doubleQuoteCnt += 1
 			}
 			if !keyMode {
 				valBuf.WriteRune(curToken)
-				continue
 			}
 			
 			if doubleQuoteCnt == 2 && peekToken == COLON {
 				key = keyBuf.String()
-				keyBuf.Reset()
 				keyMode = false
 				continue
 			}
-			doubleQuoteCnt += 1
+
+		case LBRACKET:
+			if keyMode {
+				keyBuf.WriteRune(curToken)
+			}
+
+			if !keyMode {
+				if doubleQuoteCnt == 0 {
+					sliceMode = true
+					sliceModeCount = 0
+					var tempSlice[]any = make([]any, strLength / 8)
+					var dc int = 0
+					var tempRune rune
+
+					for i := idx + 1; i < strLength; i++ {
+						sliceModeCount += 1
+						tempRune = rune(runifiedStr[i])
+						switch tempRune {
+						case DOUBLEQUOTE:
+							dc += 1
+							sliceBuf.WriteRune(tempRune)
+
+						case COMMA:
+							s := sliceBuf.String()
+							if dc < 2 {
+								num, _ := strconv.Atoi(s)
+								tempSlice = append(tempSlice, num)
+								dc = 0
+								continue
+							}
+							dc = 0
+							tempSlice = append(tempSlice, s)
+
+						case lnTOKEN:
+							s := sliceBuf.String()
+							if dc < 2 {
+								num, _ := strconv.Atoi(s)
+								tempSlice = append(tempSlice, num)
+								dc = 0
+								continue
+							}
+							dc = 0
+							tempSlice = append(tempSlice, s)
+							lineCount += 1
+
+						case RBRACKET:
+							if dc < 0 {// ここのlinecountは間違い
+								initMap[lineCount][key] = tempSlice
+								break
+							}
+							sliceBuf.WriteRune(tempRune)
+
+						default:
+							sliceBuf.WriteRune(tempRune)
+					}
+				}
+				valBuf.WriteRune(curToken)
+			}
+		}
 
 		case lnTOKEN:
 			lineCount += 1
@@ -266,6 +334,7 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 			if _, ok := initMap[lineCount]; !ok {
 				initMap[lineCount] = make(map[string]any, 0)
 			}
+
 			initMap[lineCount][key] = value
 			keyBuf.Reset()
 			valBuf.Reset()
@@ -274,13 +343,11 @@ func assembleMap(str string) (assembledMap map[int]map[string]any) {
 		case COLON:
 			if doubleQuoteCnt == 2 {
 				doubleQuoteCnt = 0
-				continue
 			}
 
 		default:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
-				continue
 			}
 			if !keyMode {
 				valBuf.WriteRune(curToken)
