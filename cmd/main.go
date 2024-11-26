@@ -6,10 +6,10 @@ import (
 
 func main() {
 
-sj sjrw.SjReader
+	var sj sjrw.SjReader
 
-// dlvでステップ実行するためエントリポイントで実行
-m, _ := sj.ReadAsMapFrom("../testdata/readtest.json")
-	fmt.Println(m)
+	// dlvでステップ実行するためエントリポイントで実行
+	m, _ := sj.ReadAsMapFrom("../testdata/readtest.json")
+	_ = m
 
 }
