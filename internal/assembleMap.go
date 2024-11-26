@@ -5,6 +5,8 @@ import (
 	"strconv"
 
 )
+// キーやバリューに対応した空白を格納しておく場所を作ってもいい
+
 
 func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 	var initMap map[int]map[any]any = make(map[int]map[any]any, 0)
@@ -130,8 +132,9 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 						tempSlice[]any = make([]any, strLength / 8)
 						dc int = 0
 						lineCountBuf int = lineCount
-						num int
 						tempRune rune
+						peekTempRune rune
+						s string // sliceBufのstringを格納する
 					)
 					
 					for i := idx + 1; i < strLength; i++ {
@@ -140,28 +143,37 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 						switch tempRune {
 						case DOUBLEQUOTE:
 							dc += 1
+							// \"が二個以上カウントされないようにする
+							if peekTempRune = rune(runifiedStr[i + 1]);peekTempRune != COMMA && dc == 1{
+								dc -= 1
+							}
 							sliceBuf.WriteRune(tempRune)
 
 						case COMMA:
-							s := sliceBuf.String()
-							if dc < 2 {
-								num, _ = strconv.Atoi(s)
-								tempSlice = append(tempSlice, num)
+							s = sliceBuf.String()
+							if num, err := strconv.Atoi(s); dc < 2 && err == nil {
 								dc = 0
+								sliceBuf.Reset()
+								tempSlice = append(tempSlice, num)
 								continue
 							}
 							dc = 0
+							sliceBuf.Reset()
 							tempSlice = append(tempSlice, s)
 
 						case lnTOKEN:
-							s := sliceBuf.String()
-							if dc < 2 {
-								num, _ = strconv.Atoi(s)
-								tempSlice = append(tempSlice, num)
+							sliceBuf.WriteRune(tempRune)
+							s = sliceBuf.String()
+							// slicebufが数値かどうか判定
+							if num, err := strconv.Atoi(s); dc < 2 && err == nil {
 								dc = 0
+								sliceBuf.Reset()
+								tempSlice = append(tempSlice, num)
+								lineCount += 1
 								continue
 							}
 							dc = 0
+							sliceBuf.Reset()
 							tempSlice = append(tempSlice, s)
 							lineCount += 1
 
