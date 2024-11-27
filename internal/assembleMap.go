@@ -33,6 +33,7 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 		doubleQuoteCnt int = 0
 		sliceModeCount int = 0
 		lineCount int = 0
+		tempCount int = 0
 		keyMode bool = true
 		sliceMode bool = false
 		firstLoop bool = true
@@ -61,7 +62,12 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 	for idx := range runifiedStr {
 		L:
 		if sliceMode {
-			if idx <= idx + sliceModeCount {
+			if firstLoop {
+				tempCount = idx + sliceModeCount
+				firstLoop = false
+			}
+
+			if idx <= tempCount {// これが終わった後もなぜかkeyにstatusがいる
 				continue
 			}
 			sliceMode = false
@@ -180,6 +186,9 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 						case RBRACKET:
 							if dc == 0 {
 								initMap[lineCountBuf][key] = tempSlice
+								keyBuf.Reset()
+								valBuf.Reset()
+								firstLoop = true
 								lineCount += 1
 								goto L
 							}
