@@ -54,11 +54,19 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 	var sliceBufMemoryNumber float32 = float32(strLength) * 0.1
 	sliceBuf.Grow(int(sliceBufMemoryNumber))
 
-	var runifiedStr []rune = make([]rune, strLength)
+	var runifiedStr []rune = make([]rune, 0, strLength)
 	runifiedStr = r
 
 
 	for idx := range runifiedStr {
+		L:
+		if sliceMode {
+			if idx <= idx + sliceModeCount {
+				continue
+			}
+			sliceMode = false
+		}
+
 		curToken = runifiedStr[idx]
 
 		// index out of lengthを防ぐため
@@ -84,13 +92,6 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 			keyBuf.Reset()
 			valBuf.Reset()
 			break
-		}
-
-		if sliceMode {
-			if idx <= idx + sliceModeCount {
-				continue
-			}
-			sliceMode = false
 		}
 
 
@@ -129,7 +130,7 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 					sliceMode = true
 					sliceModeCount = 0
 					var (
-						tempSlice[]any = make([]any, strLength / 8)
+						tempSlice[]any = make([]any, 0, strLength / 10)
 						dc int = 0
 						lineCountBuf int = lineCount
 						tempRune rune
@@ -143,8 +144,8 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 						switch tempRune {
 						case DOUBLEQUOTE:
 							dc += 1
-							// \"が二個以上カウントされないようにする
-							if peekTempRune = rune(runifiedStr[i + 1]);peekTempRune != COMMA && dc == 1{
+							// "が二個以上カウントされないようにする
+							if peekTempRune = rune(runifiedStr[i + 1]);peekTempRune != COMMA && dc == 2{
 								dc -= 1
 							}
 							sliceBuf.WriteRune(tempRune)
@@ -173,14 +174,20 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 								continue
 							}
 							dc = 0
-							sliceBuf.Reset()
 							tempSlice = append(tempSlice, s)
 							lineCount += 1
 
 						case RBRACKET:
-							if dc < 0 {
+							if dc == 0 {
 								initMap[lineCountBuf][key] = tempSlice
-								break
+								lineCount += 1
+								goto L
+							}
+							sliceBuf.WriteRune(tempRune)
+
+						case SPACE, TAB:
+							if dc != 1 {
+								continue
 							}
 							sliceBuf.WriteRune(tempRune)
 
