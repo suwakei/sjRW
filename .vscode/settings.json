@@ -1,4 +1,11 @@
 {
-    "editor.cursorSmoothCaretAnimation": "on"
-    
+    "editor.cursorSmoothCaretAnimation": "on",
+    "editor.dragAndDrop": false,
+    "editor.guides.bracketPairs": true,
+    "editor.renderLineHighlight": "all",
+    "editor.smoothScrolling": true,
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.cursorStyle": "line",
+    "terminal.integrated.smoothScrolling": true,
+    "workbench.list.smoothScrolling": true
 }
