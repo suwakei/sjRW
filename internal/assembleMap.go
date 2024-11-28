@@ -8,8 +8,8 @@ import (
 // キーやバリューに対応した空白を格納しておく場所を作ってもいい
 
 
-func AssembleMap(str string) (assembledMap map[int]map[any]any) {
-	var initMap map[int]map[any]any = make(map[int]map[any]any, 0)
+func AssembleMap(str string) (assembledMap map[int]map[string]any) {
+	var initMap map[int]map[string]any = make(map[int]map[string]any, 0)
 
 	const (
 		SPACE = ' '
@@ -92,7 +92,7 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 		if (idx + 1 == strLength) && (curToken == RBRACE || curToken == RBRACKET){
 			lineCount += 1
 			if _, ok := initMap[lineCount]; !ok {
-				initMap[lineCount] = make(map[any]any, 0)
+				initMap[lineCount] = make(map[string]any, 0)
 			}
 			initMap[lineCount][string(curToken)] = ""
 			keyBuf.Reset()
@@ -105,8 +105,21 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 
 		case SPACE, TAB:
 			if keyMode {
-				keyBuf.WriteRune(curToken)
+				continue
 			}
+
+			if !keyMode {
+				valBuf.WriteRune(curToken)
+			}
+
+		case COLON:
+			if keyMode {
+				if doubleQuoteCnt == 2 {
+					doubleQuoteCnt = 0
+					keyMode = false
+				}
+			}
+
 			if !keyMode {
 				valBuf.WriteRune(curToken)
 			}
@@ -115,16 +128,39 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 				doubleQuoteCnt += 1
+				if doubleQuoteCnt == 2 && peekToken == COLON {
+					doubleQuoteCnt = 0
+					key = strings.TrimSpace(keyBuf.String())
+					keyMode = false
+					continue
+				}
 			}
+
 			if !keyMode {
+				doubleQuoteCnt += 1
 				valBuf.WriteRune(curToken)
+				if doubleQuoteCnt == 2 && peekToken != COMMA {
+					doubleQuoteCnt -= 1
+					continue
+				}
+				if doubleQuoteCnt == 2 && peekToken == COMMA {
+					doubleQuoteCnt = 0
+				}
 			}
-			
-			if doubleQuoteCnt == 2 && peekToken == COLON {
-				key = keyBuf.String()
-				keyMode = false
-				continue
+
+		case COMMA:
+			if keyMode {
+				keyBuf.WriteRune(curToken)
 			}
+
+			if !keyMode {
+				if doubleQuoteCnt == 0 && peekToken == lnTOKEN{
+					continue
+				}
+				if doubleQuoteCnt != 0 {
+					valBuf.WriteRune(curToken)
+				}
+		}
 
 		case LBRACKET:
 			if keyMode {
@@ -141,7 +177,7 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 						lineCountBuf int = lineCount
 						tempRune rune
 						peekTempRune rune
-						s string // sliceBufのstringを格納する
+						ss string // sliceBufのstringを格納する
 					)
 					
 					for i := idx + 1; i < strLength; i++ {
@@ -157,8 +193,8 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 							sliceBuf.WriteRune(tempRune)
 
 						case COMMA:
-							s = sliceBuf.String()
-							if num, err := strconv.Atoi(s); dc < 2 && err == nil {
+							ss = sliceBuf.String()
+							if num, err := strconv.Atoi(ss); dc < 2 && err == nil {
 								dc = 0
 								sliceBuf.Reset()
 								tempSlice = append(tempSlice, num)
@@ -166,13 +202,13 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 							}
 							dc = 0
 							sliceBuf.Reset()
-							tempSlice = append(tempSlice, s)
+							tempSlice = append(tempSlice, ss)
 
 						case lnTOKEN:
 							sliceBuf.WriteRune(tempRune)
-							s = sliceBuf.String()
+							ss = sliceBuf.String()
 							// slicebufが数値かどうか判定
-							if num, err := strconv.Atoi(s); dc < 2 && err == nil {
+							if num, err := strconv.Atoi(ss); dc < 2 && err == nil {
 								dc = 0
 								sliceBuf.Reset()
 								tempSlice = append(tempSlice, num)
@@ -180,7 +216,7 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 								continue
 							}
 							dc = 0
-							tempSlice = append(tempSlice, s)
+							tempSlice = append(tempSlice, ss)
 							lineCount += 1
 
 						case RBRACKET:
@@ -211,21 +247,16 @@ func AssembleMap(str string) (assembledMap map[int]map[any]any) {
 			lineCount += 1
 
 			valBuf.WriteRune(curToken)
-			value = valBuf.String()
+			value = strings.TrimSpace(valBuf.String())
 
 			if _, ok := initMap[lineCount]; !ok {
-				initMap[lineCount] = make(map[any]any, 0)
+				initMap[lineCount] = make(map[string]any, 0)
 			}
 
 			initMap[lineCount][key] = value
 			keyBuf.Reset()
 			valBuf.Reset()
 			keyMode = true
-		
-		case COLON:
-			if doubleQuoteCnt == 2 {
-				doubleQuoteCnt = 0
-			}
 
 		default:
 			if keyMode {
