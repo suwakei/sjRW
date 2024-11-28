@@ -9,5 +9,30 @@
     "reset": {
         "soft": "git reset --soft HEAD^",
         "hard": "git reset --hard ^HEAD"
+    },
+    "1": 1,
+    "true": true,
+    "false": false,
+    "2345": 2345,
+    "numArray": [
+        3456,
+        2345,
+        678
+    ],
+    "boolArray": [
+        true,
+        false,
+        false,
+        true
+    ],
+    "numDict": {
+        "numArrayInDict": [
+            234,
+            456
+        ]
+    },
+    "boolDict": {
+        "true": true,
+        "false": false
     }
 }
