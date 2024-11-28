@@ -104,7 +104,7 @@ func (sj *SjReader) ReadAsByteFrom(readFilePath string) (contentAsByte []byte, e
 
 
 // 本当に一行ずつ取得とかではなくて配列またはオブジェクトがキーの中にあったらそれをすべて参照できるようにする
-func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map[any]any, err error) {
+func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map[string]any, err error) {
 	var (
 		jsonByte []byte = make([]byte, 0)
 	)
