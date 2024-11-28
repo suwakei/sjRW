@@ -1,6 +1,6 @@
 {
     "add": "git add .",
-    "commit\":": "git commit -m \"first commit\"",
+    "commit\":": "git comm,it -m \"first commit\"",
     "push": "git push origin m,ain",
     "sta,tus": [
         "git status",
