@@ -27,7 +27,7 @@ func (sj *SjReader) ReadAsStrFrom(readFilePath string) (contentAsStr string, err
 		return "", errors.New("read file is not json file")
 	}
 
-	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0666)
+	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0o666)
 
 	if err != nil {
 		log.Fatalf("could not open file \"%s\"", readFilePath)
@@ -71,7 +71,7 @@ func (sj *SjReader) ReadAsByteFrom(readFilePath string) (contentAsByte []byte, e
 		return []byte(""), errors.New("read file is not json file")
 	}
 
-	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0666)
+	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0o666)
 
 	if err != nil {
 		log.Fatalf("could not open file \"%s\"", readFilePath)
@@ -117,7 +117,7 @@ func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map
 		return nil, errors.New("read file is not json file")
 	}
 
-	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0666)
+	f, err := os.OpenFile(readFilePath, os.O_RDONLY, 0o666)
 
 	if err != nil {
 		log.Fatalf("could not open file \"%s\"", readFilePath)
