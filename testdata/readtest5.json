@@ -1,8 +1,8 @@
 {
     "add": "git add .",
-    "commit": "git commit -m \"first commit\"",
-    "push": "git push origin main",
-    "status": [
+    "commit\":": "git commit -m \"first commit\"",
+    "push": "git push origin m,ain",
+    "sta,tus": [
         "git status",
         "git status && git log"
     ],
