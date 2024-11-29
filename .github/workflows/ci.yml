@@ -16,7 +16,6 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
-# actionsコミットネームを通知の方にかく
 jobs:
   build:
     strategy:
@@ -42,7 +41,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         if: ${{ failure() }}
         env:
-          SLACK_TITLE: sjrw-build / Failure
+          SLACK_TITLE: sjrw commit name "${{github.event.head_commit.message}}"
           SLACK_COLOR: danger
           SLACK_MESSAGE: sjrw build failed!!!
 
@@ -75,7 +74,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         if: ${{ failure() }}
         env:
-            SLACK_TITLE: sjrw-test / Failure
+            SLACK_TITLE: sjrw commit name "${{github.event.head_commit.message}}"
             SLACK_COLOR: danger
             SLACK_MESSAGE: sjrw test failed!!!
 
@@ -126,6 +125,6 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         if: ${{ failure() }}
         env:
-          SLACK_TITLE: sjrw-lint / Failure
+          SLACK_TITLE: sjrw commit name "${{github.event.head_commit.message}}"
           SLACK_COLOR: danger
           SLACK_MESSAGE: sjrw lint failed!!!

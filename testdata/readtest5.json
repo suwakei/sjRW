@@ -28,7 +28,11 @@
     "numDict": {
         "numArrayInDict": [
             234,
-            456
+            456,
+            [
+                567,
+                985
+            ]
         ]
     },
     "boolDict": {
