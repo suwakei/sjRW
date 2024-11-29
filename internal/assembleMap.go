@@ -46,6 +46,9 @@ func AssembleMap(str string) (assembledMap map[int]map[string]any) {
 	)
 
 	// preallocation of memory
+
+var initMap map[int]map[string]any = make(map[int]map[string]any, strLength)
+
 	var keyBufMemoryNumber float32 = float32(strLength) * 0.2
 	keyBuf.Grow(int(keyBufMemoryNumber))
 
