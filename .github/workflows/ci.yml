@@ -16,7 +16,7 @@ env:
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
-# go-versionsに書かれているバージョンでビルドとテストとリント失敗したらスラックに通知
+# actionsコミットネームを通知の方にかく
 jobs:
   build:
     strategy:
