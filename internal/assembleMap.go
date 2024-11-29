@@ -9,7 +9,6 @@ import (
 
 
 func AssembleMap(str string) (assembledMap map[int]map[string]any) {
-	var initMap map[int]map[string]any = make(map[int]map[string]any, 0)
 
 	const (
 		SPACE = ' '
@@ -28,7 +27,7 @@ func AssembleMap(str string) (assembledMap map[int]map[string]any) {
 	var (
 		curToken rune
 		peekToken rune
-        r []rune = []rune(str)
+ r []rune = []rune(str)
 		strLength int = len(r)
 		doubleQuoteCnt int = 0
 		sliceModeCount int = 0
@@ -39,6 +38,7 @@ func AssembleMap(str string) (assembledMap map[int]map[string]any) {
 		firstLoop bool = true
 		key string
 		value string
+ strCurToken string
 
 		keyBuf strings.Builder
 		valBuf strings.Builder
@@ -47,7 +47,7 @@ func AssembleMap(str string) (assembledMap map[int]map[string]any) {
 
 	// preallocation of memory
 
-var initMap map[int]map[string]any = make(map[int]map[string]any, strLength)
+var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20)
 
 	var keyBufMemoryNumber float32 = float32(strLength) * 0.2
 	keyBuf.Grow(int(keyBufMemoryNumber))
@@ -70,7 +70,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength)
 				firstLoop = false
 			}
 
-			if idx <= tempCount {// これが終わった後もなぜかkeyにstatusがいる
+			if idx <= tempCount {
 				continue
 			}
 			sliceMode = false
@@ -94,10 +94,11 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength)
 		// 最後のトークンの時
 		if (idx + 1 == strLength) && (curToken == RBRACE || curToken == RBRACKET){
 			lineCount += 1
+ strCurToken = string(curToken)
 			if _, ok := initMap[lineCount]; !ok {
-				initMap[lineCount] = make(map[string]any, 0)
+				initMap[lineCount] = make(map[string]any, len(strCurToken))
 			}
-			initMap[lineCount][string(curToken)] = ""
+			initMap[lineCount][strCurtoken] = ""
 			keyBuf.Reset()
 			valBuf.Reset()
 			break
@@ -175,7 +176,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength)
 					sliceMode = true
 					sliceModeCount = 0
 					var (
-						tempSlice[]any = make([]any, 0, strLength / 10)
+						tempSlice[]any = make([]any, 0, strLength / 10) //メモリ割り当ての数をいいかんじにする
 						dc int = 0
 						lineCountBuf int = lineCount
 						tempRune rune
@@ -253,7 +254,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength)
 			value = strings.TrimSpace(valBuf.String())
 
 			if _, ok := initMap[lineCount]; !ok {
-				initMap[lineCount] = make(map[string]any, 0)
+				initMap[lineCount] = make(map[string]any, len(value))
 			}
 
 			initMap[lineCount][key] = value
