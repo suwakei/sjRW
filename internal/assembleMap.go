@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 )
-// キーやバリューに対応した空白を格納しておく場所を作ってもいい
 
 
 func AssembleMap(str string) (assembledMap map[int]map[string]any) {
@@ -104,7 +103,8 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 			break
 		}
 
-
+// ポインタも意識してかく
+// caseのところを関数にきりだしてみる
 		switch curToken {
 
 		case SPACE, TAB:
@@ -183,7 +183,9 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 						peekTempRune rune
 						ss string // sliceBufのstringを格納する
 					)
-					
+					// tempsliceのcapをslicemodeのなかのcommaの数で決める
+// slicemodeのcaseも関数を検討
+
 					for i := idx + 1; i < strLength; i++ {
 						sliceModeCount += 1
 						tempRune = rune(runifiedStr[i])
