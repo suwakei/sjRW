@@ -3,12 +3,10 @@ package internal
 import (
 	"strings"
 	"strconv"
-
 )
 
-
+// AssembleMap returns map created by input str
 func AssembleMap(str string) (assembledMap map[int]map[string]any) {
-
 	const (
 		SPACE = ' '
 		TAB = '\t'
@@ -24,29 +22,27 @@ func AssembleMap(str string) (assembledMap map[int]map[string]any) {
 	)
 
 	var (
-		curToken rune
-		peekToken rune
- r []rune = []rune(str)
-		strLength int = len(r)
-		doubleQuoteCnt int = 0
-		sliceModeCount int = 0
-		lineCount int = 0
-		tempCount int = 0
-		keyMode bool = true
-		sliceMode bool = false
-		firstLoop bool = true
-		key string
-		value string
- strCurToken string
+		curToken rune // The token of target
+		peekToken rune // The token for confirmation of next character
 
-		keyBuf strings.Builder
-		valBuf strings.Builder
-		sliceBuf strings.Builder
+		r []rune = []rune(str) // Input str transrated into rune slice
+		strLength int = len(r) // The length of input rune slice
+
+		doubleQuoteCnt int = 0 // Counter for number of ".
+		lineCount int = 0 // Counter for current number of line.
+		tempCount int = 0 // Match with idx later when exiting sliceMode.
+		keyMode bool = true // If true, mode which read json key. if false read json value.
+		sliceMode bool = false // If true, which read array of json value.
+		firstLoop bool = true // First loop flag.
+
+		keyBuf strings.Builder // When in "keyMode" is true, buf for storing key token.
+		valBuf strings.Builder // When in "keyMode" is false, buf for storing value token.
+		key string // The variable for concatnated tokens stored in "keyBuf". 
+		value string// The variable for concatnated tokens stored in "valBuf".
 	)
 
 	// preallocation of memory
-
-var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20)
+	var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20)
 
 	var keyBufMemoryNumber float32 = float32(strLength) * 0.2
 	keyBuf.Grow(int(keyBufMemoryNumber))
@@ -54,21 +50,12 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 	var valBufMemoryNumber float32 = float32(strLength) * 0.7
 	valBuf.Grow(int(valBufMemoryNumber))
 
-	var sliceBufMemoryNumber float32 = float32(strLength) * 0.1
-	sliceBuf.Grow(int(sliceBufMemoryNumber))
-
 	var runifiedStr []rune = make([]rune, 0, strLength)
 	runifiedStr = r
 
 
 	for idx := range runifiedStr {
-		L:
 		if sliceMode {
-			if firstLoop {
-				tempCount = idx + sliceModeCount
-				firstLoop = false
-			}
-
 			if idx <= tempCount {
 				continue
 			}
@@ -77,7 +64,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 
 		curToken = runifiedStr[idx]
 
-		// index out of lengthを防ぐため
+		// For preventatin of "index out of range" error
 		if idx + 1 < strLength {
 		peekToken = runifiedStr[idx + 1]
 		}
@@ -90,24 +77,22 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 			continue
 		}
 
-		// 最後のトークンの時
+		// When the token is last
 		if (idx + 1 == strLength) && (curToken == RBRACE || curToken == RBRACKET){
 			lineCount += 1
- strCurToken = string(curToken)
+			strCurToken := string(curToken)
 			if _, ok := initMap[lineCount]; !ok {
 				initMap[lineCount] = make(map[string]any, len(strCurToken))
 			}
-			initMap[lineCount][strCurtoken] = ""
+			initMap[lineCount][strCurToken] = ""
 			keyBuf.Reset()
 			valBuf.Reset()
 			break
 		}
 
 // ポインタも意識してかく
-// caseのところを関数にきりだしてみる
 		switch curToken {
-
-		case SPACE, TAB:
+		case SPACE, TAB: // "space" "\t"
 			if keyMode {
 				continue
 			}
@@ -116,7 +101,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 				valBuf.WriteRune(curToken)
 			}
 
-		case COLON:
+		case COLON: // ":"
 			if keyMode {
 				if doubleQuoteCnt == 2 {
 					doubleQuoteCnt = 0
@@ -128,7 +113,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 				valBuf.WriteRune(curToken)
 			}
 
-		case DOUBLEQUOTE:
+		case DOUBLEQUOTE: // "
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 				doubleQuoteCnt += 1
@@ -152,7 +137,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 				}
 			}
 
-		case COMMA:
+		case COMMA: // ","
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 			}
@@ -166,7 +151,7 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 				}
 		}
 
-		case LBRACKET:
+		case LBRACKET: // "["
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 			}
@@ -174,97 +159,47 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 			if !keyMode {
 				if doubleQuoteCnt == 0 {
 					sliceMode = true
-					sliceModeCount = 0
-					var (
-						tempSlice[]any = make([]any, 0, strLength / 10) //メモリ割り当ての数をいいかんじにする
-						dc int = 0
-						lineCountBuf int = lineCount
-						tempRune rune
-						peekTempRune rune
-						ss string // sliceBufのstringを格納する
-					)
-					// tempsliceのcapをslicemodeのなかのcommaの数で決める
-// slicemodeのcaseも関数を検討
-
-					for i := idx + 1; i < strLength; i++ {
-						sliceModeCount += 1
-						tempRune = rune(runifiedStr[i])
-						switch tempRune {
-						case DOUBLEQUOTE:
-							dc += 1
-							// "が二個以上カウントされないようにする
-							if peekTempRune = rune(runifiedStr[i + 1]);peekTempRune != COMMA && dc == 2{
-								dc -= 1
-							}
-							sliceBuf.WriteRune(tempRune)
-
-						case COMMA:
-							ss = sliceBuf.String()
-							if num, err := strconv.Atoi(ss); dc < 2 && err == nil {
-								dc = 0
-								sliceBuf.Reset()
-								tempSlice = append(tempSlice, num)
-								continue
-							}
-							dc = 0
-							sliceBuf.Reset()
-							tempSlice = append(tempSlice, ss)
-
-						case lnTOKEN:
-							sliceBuf.WriteRune(tempRune)
-							ss = sliceBuf.String()
-							// slicebufが数値かどうか判定
-							if num, err := strconv.Atoi(ss); dc < 2 && err == nil {
-								dc = 0
-								sliceBuf.Reset()
-								tempSlice = append(tempSlice, num)
-								lineCount += 1
-								continue
-							}
-							dc = 0
-							tempSlice = append(tempSlice, ss)
-							lineCount += 1
-
-						case RBRACKET:
-							if dc == 0 {
-								initMap[lineCountBuf][key] = tempSlice
-								keyBuf.Reset()
-								valBuf.Reset()
-								firstLoop = true
-								lineCount += 1
-								goto L
-							}
-							sliceBuf.WriteRune(tempRune)
-
-						case SPACE, TAB:
-							if dc != 1 {
-								continue
-							}
-							sliceBuf.WriteRune(tempRune)
-
-						default:
-							sliceBuf.WriteRune(tempRune)
+					internalLineCount, sliceModeIdx, returnedSlice := returnSliceOrMapAndCount(idx, runifiedStr)
+					initMap[lineCount][key] = returnedSlice
+					keyBuf.Reset()
+					valBuf.Reset()
+					lineCount += internalLineCount
+					tempCount = idx + sliceModeIdx
 				}
+			}
+
+		case RBRACE, RBRACKET: // "}" "]"
+			if keyMode {
+				keyBuf.WriteRune(curToken)
+			}
+
+			if !keyMode {
+				valBuf.WriteRune(curToken)
+			}
+
+		case lnTOKEN: // "\n"
+			if keyMode {
+				keyBuf.WriteRune(curToken)
+			}
+			if !keyMode {
+				valBuf.WriteRune(curToken)
+
+				if doubleQuoteCnt == 0 {
+				lineCount += 1
+				value = strings.TrimSpace(valBuf.String())
+
+				if _, ok := initMap[lineCount]; !ok {
+					initMap[lineCount] = make(map[string]any, len(value))
 				}
+
+				initMap[lineCount][key] = value
+				keyBuf.Reset()
+				valBuf.Reset()
+				keyMode = true
 			}
 		}
 
-		case lnTOKEN:
-			lineCount += 1
-
-			valBuf.WriteRune(curToken)
-			value = strings.TrimSpace(valBuf.String())
-
-			if _, ok := initMap[lineCount]; !ok {
-				initMap[lineCount] = make(map[string]any, len(value))
-			}
-
-			initMap[lineCount][key] = value
-			keyBuf.Reset()
-			valBuf.Reset()
-			keyMode = true
-
-		default:
+		default: // undefined token
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 			}
@@ -275,4 +210,131 @@ var initMap map[int]map[string]any = make(map[int]map[string]any, strLength / 20
 	}
 	assembledMap = initMap
 	return assembledMap
+	}
+
+
+
+func commaNum(r []rune, curIdx int) int {
+	var (
+		commaCount int = 0 // Counter for number of commas
+		lBracketCount int = 0 // Counter for number of left brackets
+		rBracketCount int = 0 // Counter for number of right brackets
+	)
+
+	for i := curIdx;; i++ {
+		if r[i] == '[' {
+			lBracketCount += 1
+		}
+		if r[i] == ',' {
+			commaCount += 1
+		}
+		if r[i] == ']' {
+			rBracketCount += 1
+			if lBracketCount == rBracketCount {
+				break
+			}
+		}
+	}
+	return commaCount + 1
+}
+
+// returnSliceOrMapAndCount returns three return value.
+// "internalLineCount" is lineCount which counted inside this func.
+// "sliceModeIdx" is idx which counted inside this func.
+// "tempSlice" is slice created inside this func, this slice used for assigning initMap
+func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
+		interLineCount,
+		sliceModeIdx int,
+		tempSlice []any,
+		) {
+
+			const (
+				SPACE = ' '
+				TAB = '\t'
+				lnTOKEN = '\n'
+				DOUBLEQUOTE = '"'
+				COLON = ':'
+		
+				LBRACE = '{'
+				RBRACE = '}'
+				LBRACKET = '['
+				RBRACKET = ']'
+				COMMA = ','
+			)
+
+	var (
+		commanum = commaNum(runifiedStr, curIdx)// number of commas, uses for allocating memory of "tempSlice"
+		strLength = len(runifiedStr)// The length of input rune slice
+		dc int = 0 // This variable is same as variable "doubleQuoteCount" in the function "AssembleMap"
+		tempRune rune // This variable works just like the variable "curToken" in the function "AssembleMap"
+		peekTempRune rune // This variable works just like the variable "peekToken" in the function "AssembleMap"
+		sliceBuf strings.Builder // When in "sliceMode" is true, buf for storing slice token.
+		ss string // The variable for concatnated tokens stored in "sliceBuf".
+	)
+
+	sliceModeIdx = 0
+
+	// preallocate memory
+	var sliceBufMemoryNumber float32 = float32(strLength) * 0.1
+	sliceBuf.Grow(int(sliceBufMemoryNumber))
+	tempSlice = make([]any, 0, commanum)
+
+	for i := curIdx + 1; i < strLength; i++ {
+		sliceModeIdx += 1
+		tempRune = rune(runifiedStr[i])
+		switch tempRune {
+		case DOUBLEQUOTE:
+			sliceBuf.WriteRune(tempRune)
+			dc += 1
+
+			if peekTempRune = rune(runifiedStr[i + 1]); peekTempRune != COMMA && dc == 2{
+				dc -= 1
+			}
+
+		case COMMA:
+			ss = sliceBuf.String()
+
+			if num, err := strconv.Atoi(ss); dc < 2 && err == nil {
+				dc = 0
+				sliceBuf.Reset()
+				tempSlice = append(tempSlice, num)
+				continue
+			}
+			dc = 0
+			sliceBuf.Reset()
+			tempSlice = append(tempSlice, ss)
+
+		case lnTOKEN:
+			sliceBuf.WriteRune(tempRune)
+
+			if num, err := strconv.Atoi(ss); dc < 2 && err == nil {
+				dc = 0
+				sliceBuf.Reset()
+				tempSlice = append(tempSlice, num)
+				interLineCount += 1
+				continue
+			}
+			dc = 0
+			interLineCount += 1
+
+		case RBRACKET:
+			// When the token is last
+			if peekTempRune = rune(runifiedStr[i + 1]); peekTempRune == COMMA && dc == 0{
+				return interLineCount, sliceModeIdx, tempSlice
+			}
+			if dc != 0 {
+				sliceBuf.WriteRune(tempRune)
+			}
+
+		case SPACE, TAB:
+			if dc < 1 {
+				continue
+			}
+			sliceBuf.WriteRune(tempRune)
+
+		default:
+			sliceBuf.WriteRune(tempRune)
+		}
+	}
+	return 0, 0, nil
 }
