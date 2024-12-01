@@ -1,7 +1,7 @@
 {
     "add": "git add .",
     "commit\":": "git comm,it -m \"first commit\"",
-    "push": "git pus\nh origin m,ain",
+    "p ush": "git pus\nh origi\n n m,ain",
     "sta,tus": [
         "git status",
         "git status && git log"
