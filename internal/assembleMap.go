@@ -372,12 +372,19 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 			}
 
 			if dc == 0 {
-				ss= sliceBuf.String())
+				ss = sliceBuf.String()
 				sliceBuf.Reset()
+  // whether 
 				if num, err := strconv.Atoi(ss); err == nil {
 					tempSlice = append(tempSlice, num)
 					continue
 				}
+
+  if tr := strings.TrimSpace(ss); tr == ("true"|"false") {
+    b := strconv.ParseBool(tr)
+    tempSlice = append(tempSlice, b)
+    continue
+}
 				tempSlice = append(tempSlice, ss)
 				continue
 			}
@@ -398,6 +405,18 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 			if dc == 0 {
 				interLineCount += 1
 				ss= sliceBuf.String()
+  sliceBuf.Reset()
+  // whether 
+				if num, err := strconv.Atoi(ss); err == nil {
+					tempSlice = append(tempSlice, num)
+					continue
+				}
+
+  if tr := strings.TrimSpace(ss); tr == ("true"|"false") {
+    b := strconv.ParseBool(tr)
+    tempSlice = append(tempSlice, b)
+    continue
+}
 				tempSlice = append(tempSlice, ss)
 				return interLineCount, sliceModeIdx, tempSlice
 			}
