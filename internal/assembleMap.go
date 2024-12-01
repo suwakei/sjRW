@@ -151,7 +151,7 @@ func AssembleMap(str string) (assembledMap map[int]map[string]any) {
 				continue
 			}
 
-		case BACKSLASH:
+		case BACKSLASH: // "\"
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 				if doubleQuoteCnt > 0 && peekToken == DOUBLEQUOTE {
@@ -248,8 +248,7 @@ func AssembleMap(str string) (assembledMap map[int]map[string]any) {
 
 				if doubleQuoteCnt == 0 {
 					lineCount += 1
-					trimed := strings.TrimSpace(valBuf.String())
-					value = strings.ReplaceAll(trimed, "\n", "")
+					value = valBuf.String()
 
 					if _, ok := initMap[lineCount]; !ok {
 						initMap[lineCount] = make(map[string]any, 1)
@@ -373,8 +372,7 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 			}
 
 			if dc == 0 {
-				trimed := strings.TrimSpace(sliceBuf.String())
-				ss = strings.ReplaceAll(trimed, "\n", "")
+				ss= sliceBuf.String())
 				sliceBuf.Reset()
 				if num, err := strconv.Atoi(ss); err == nil {
 					tempSlice = append(tempSlice, num)
@@ -399,8 +397,7 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 			// When the token is last
 			if dc == 0 {
 				interLineCount += 1
-				trimed := strings.TrimSpace(sliceBuf.String())
-				ss = strings.ReplaceAll(trimed, "\n", "")
+				ss= sliceBuf.String()
 				tempSlice = append(tempSlice, ss)
 				return interLineCount, sliceModeIdx, tempSlice
 			}
