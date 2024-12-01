@@ -1,10 +1,10 @@
 {
-    "add": "git add .",
-    "commit\":": "git comm,it -m \"first commit\"",
-    "p ush": "git pus\nh origi\n n m,ain",
+    "a\"\"d: d: \":  "   : " git ad\nd \". "   ,    
+    "commit\":": "git co[mm,it -m \"fir{st commit\"",
+    "p ush": "git pus\nh origi\n n m\",ain",
     "sta,tus": [
-        "git status",
-        "git status && git log"
+        "git s\ntat\"us"  ,
+        "git status && git log"     
     ],
     "reset": {
         "soft": "git reset --soft HEAD^",
