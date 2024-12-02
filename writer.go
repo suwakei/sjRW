@@ -17,7 +17,7 @@ type SjWriter struct {
 // TODO: 必ずそれぞれの関数でベンチマークもとる
 
 // WriteFromStr writes str to filepathToWrite
-func (SjWriter) WriteFromStr(str, filepathToWrite string) {
+func (SjWriter) WriteFromStr(str string, filepathToWrite io.Writer) {
 	from := []byte(str)
 	var to []byte
 
@@ -62,7 +62,11 @@ func (SjWriter) WriteFromStr(str, filepathToWrite string) {
 
 
 
-func (SjWriter) WriteFromByte(byteSlice []byte, filePath string) {
+func (SjWriter) WriteFromByte(byteSlice []byte, filePath io.Writer) {
+}
+
+
+func (SjWriter) WriteFromMap(writemap map[string]any, filePath io.Writer) {
 }
 
 
