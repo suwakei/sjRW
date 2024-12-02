@@ -26,7 +26,7 @@ func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 		curToken rune // The token of target
 		peekToken rune // The token for confirmation of next character
 
-		r []rune = []rune(str) // Input str transrated into rune slice
+		r []rune = input // Input str transrated into rune slice
 		strLength int = len(r) // The length of input rune slice
 
 		doubleQuoteCnt int = 0 // Counter for number of ".
@@ -374,16 +374,16 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 			if dc == 0 {
 				ss = sliceBuf.String()
 				sliceBuf.Reset()
-  // whether 
+  				// whether 
 				if num, err := strconv.Atoi(ss); err == nil {
 					tempSlice = append(tempSlice, num)
 					continue
 				}
 
-  if tr := strings.TrimSpace(ss); tr == ("true"|"false") {
-    b := strconv.ParseBool(tr)
-    tempSlice = append(tempSlice, b)
-    continue
+				if tr := strings.TrimSpace(ss); tr == "true"|| tr == "false" {
+					b, _ := strconv.ParseBool(tr)
+					tempSlice = append(tempSlice, b)
+					continue
 }
 				tempSlice = append(tempSlice, ss)
 				continue
@@ -405,18 +405,18 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 			if dc == 0 {
 				interLineCount += 1
 				ss= sliceBuf.String()
-  sliceBuf.Reset()
-  // whether 
+				sliceBuf.Reset()
+  				// whether 
 				if num, err := strconv.Atoi(ss); err == nil {
 					tempSlice = append(tempSlice, num)
 					continue
 				}
 
-  if tr := strings.TrimSpace(ss); tr == ("true"|"false") {
-    b := strconv.ParseBool(tr)
-    tempSlice = append(tempSlice, b)
-    continue
-}
+				if tr := strings.TrimSpace(ss); tr == "true" || tr == "false" {
+					b, _ := strconv.ParseBool(tr)
+					tempSlice = append(tempSlice, b)
+					continue
+				}
 				tempSlice = append(tempSlice, ss)
 				return interLineCount, sliceModeIdx, tempSlice
 			}
