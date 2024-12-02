@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"io"
 	"log"
+ "bytes"
 	"strings"
 
 	"github.com/suwakei/sjrw/internal"
@@ -54,7 +55,7 @@ func (SjReader) ReadAsByteFrom(readFile io.Reader) (contentAsByte []byte, err er
 			log.Fatal("could not read content")
 		}
 	}
-	contentAsByte = jsonByte
+	contentAsByte = bytes.TrimSpace(jsonByte)
 	return contentAsByte, err
 }
 
