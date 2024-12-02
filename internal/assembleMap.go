@@ -6,7 +6,7 @@ import (
 )
 
 // AssembleMap returns map created by input str
-func AssembleMap(str string) (assembledMap map[int]map[string]any) {
+func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 	const (
 		SPACE = ' '
 		TAB = '\t'
