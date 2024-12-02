@@ -4,6 +4,6 @@
 
 SJRW stands for "Simple Json Reader and Writer"
 
-This library supqorts "json" and "jsonc" file
+This library supports "json" and "jsonc" file
 
 ## usage
