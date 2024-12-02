@@ -6,7 +6,7 @@ import (
 )
 
 // AssembleMap returns map created by input []rune
-func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
+func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 	const (
 		SPACE = ' '
 		TAB = '\t'
@@ -26,7 +26,7 @@ func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 		curToken rune // The token of target
 		peekToken rune // The token for confirmation of next character
 
-		strLength int = len(input) // The length of input rune slice
+		strLength int = len(inputRune) // The length of input rune slice
 
 		doubleQuoteCnt int = 0 // Counter for number of ".
 		lineCount int = 0 // Counter for current number of line.
@@ -50,11 +50,8 @@ func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 	var valBufMemoryNumber float32 = float32(strLength) * 0.5
 	valBuf.Grow(int(valBufMemoryNumber))
 
-	var runifiedStr []rune = make([]rune, 0, strLength)
-	runifiedStr = input
 
-
-	for idx := range runifiedStr {
+	for idx := range inputRune {
 		if sliceMode {
 			if idx <= tempCount {
 				continue
@@ -62,11 +59,11 @@ func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 			sliceMode = false
 		}
 
-		curToken = runifiedStr[idx]
+		curToken = inputRune[idx]
 
 		// For preventatin of "index out of range" error
 		if idx + 1 < strLength {
-		peekToken = runifiedStr[idx + 1]
+		peekToken = inputRune[idx + 1]
 		}
 
 		if firstLoop {
