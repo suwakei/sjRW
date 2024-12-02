@@ -5,9 +5,7 @@ import (
 	"strconv"
 )
 
-// AssembleMap returns map created by input []rune
-func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
-	const (
+const (
 		SPACE = ' '
 		TAB = '\t'
 		lnTOKEN = '\n'
@@ -21,6 +19,10 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 		COMMA = ','
 		BACKSLASH = '\\'
 	)
+
+
+// AssembleMap returns map created by input []rune
+func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 
 	var (
 		curToken rune // The token of target
@@ -308,21 +310,6 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 		sliceModeIdx int,
 		tempSlice []any,
 		) {
-
-			const (
-				SPACE = ' '
-				TAB = '\t'
-				lnTOKEN = '\n'
-				DOUBLEQUOTE = '"'
-				COLON = ':'
-		
-				LBRACE = '{'
-				RBRACE = '}'
-				LBRACKET = '['
-				RBRACKET = ']'
-				COMMA = ','
-				BACKSLASH = '\\'
-			)
 
 	var (
 		commanum = commaNum(runifiedStr, curIdx)// number of commas, uses for allocating memory of "tempSlice"
