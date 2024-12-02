@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+ "unicode/utf8"
 	"path/filepath"
 	"strings"
 	"github.com/suwakei/sjrw/internal"
@@ -146,6 +147,7 @@ func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map
 		}
 	}
 
+// stringにしないでbyte型からutf8.EncodeRune使ってruneにする
 	trimedString := strings.TrimSpace(string(jsonByte))
 
 	contentAsMap = internal.AssembleMap(trimedString)
