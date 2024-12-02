@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// AssembleMap returns map created by input str
+// AssembleMap returns map created by input []rune
 func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 	const (
 		SPACE = ' '
@@ -26,7 +26,7 @@ func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 		curToken rune // The token of target
 		peekToken rune // The token for confirmation of next character
 
-		r []rune = input // Input str transrated into rune slice
+		r []rune = input // "Input" stored rune slice
 		strLength int = len(r) // The length of input rune slice
 
 		doubleQuoteCnt int = 0 // Counter for number of ".

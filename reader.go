@@ -2,7 +2,6 @@ package sjrw
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"log"
 	"strings"
@@ -82,7 +81,6 @@ func (SjReader) ReadAsMapFrom(readFile io.Reader) (contentAsMap map[int]map[stri
 			log.Fatal("could not read content")
 		}
 	}
-	fmt.Println(len(jsonRune))
 
 	contentAsMap = internal.AssembleMap(jsonRune)
 
