@@ -18,7 +18,7 @@ type SjReader struct {
 
 
 //ReadAsStr returns json content as string
-func (sj *SjReader) ReadAsStrFrom(readFilePath string) (contentAsStr string, err error) {
+func (SjReader) ReadAsStrFrom(readFilePath string) (contentAsStr string, err error) {
 	var jsonByte []byte = make([]byte, 0)
 
 	if _, err := os.Stat(readFilePath); err != nil {
@@ -62,7 +62,7 @@ func (sj *SjReader) ReadAsStrFrom(readFilePath string) (contentAsStr string, err
 }
 
 
-func (sj *SjReader) ReadAsByteFrom(readFilePath string) (contentAsByte []byte, err error) {
+func (SjReader) ReadAsByteFrom(readFilePath string) (contentAsByte []byte, err error) {
 	var jsonByte []byte = make([]byte, 0)
 
 	if _, err := os.Stat(readFilePath); err != nil {
@@ -106,7 +106,7 @@ func (sj *SjReader) ReadAsByteFrom(readFilePath string) (contentAsByte []byte, e
 
 
 // 本当に一行ずつ取得とかではなくて配列またはオブジェクトがキーの中にあったらそれをすべて参照できるようにする
-func (sj *SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map[string]any, err error) {
+func (SjReader) ReadAsMapFrom(readFilePath string) (contentAsMap map[int]map[string]any, err error) {
 	var (
 		jsonByte []byte = make([]byte, 0)
 	)
