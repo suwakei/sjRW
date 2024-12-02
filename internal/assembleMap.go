@@ -194,7 +194,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 			if !keyMode {
 				if doubleQuoteCnt == 0 {
 					sliceMode = true
-					internalLineCount, sliceModeIdx, returnedSlice := returnSliceOrMapAndCount(idx, runifiedStr)
+					internalLineCount, sliceModeIdx, returnedSlice := returnSliceOrMapAndCount(idx, inputRune)
 
 					if _, ok := initMap[lineCount]; !ok {
 						initMap[lineCount] = make(map[string]any, 1)
