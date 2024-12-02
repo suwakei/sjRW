@@ -26,8 +26,7 @@ func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 		curToken rune // The token of target
 		peekToken rune // The token for confirmation of next character
 
-		r []rune = input // "Input" stored rune slice
-		strLength int = len(r) // The length of input rune slice
+		strLength int = len(input) // The length of input rune slice
 
 		doubleQuoteCnt int = 0 // Counter for number of ".
 		lineCount int = 0 // Counter for current number of line.
@@ -52,7 +51,7 @@ func AssembleMap(input []rune) (assembledMap map[int]map[string]any) {
 	valBuf.Grow(int(valBufMemoryNumber))
 
 	var runifiedStr []rune = make([]rune, 0, strLength)
-	runifiedStr = r
+	runifiedStr = input
 
 
 	for idx := range runifiedStr {
