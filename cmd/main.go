@@ -12,8 +12,12 @@ func main() {
 	var sj sjrw.SjReader
 
 	// カレントディレクトリを変える
-	jsonPath5 := "../testdata/readtest5.json"
-	f5, _ := os.OpenFile(jsonPath5, os.O_RDONLY, 0o666)
+	jsonPath5 := "./testdata/readtest5.json"
+	f5, oerr := os.OpenFile(jsonPath5, os.O_RDONLY, 0o666)
+
+	if oerr != nil {
+		log.Fatal(oerr)
+	}
 
 
 	defer func() {
