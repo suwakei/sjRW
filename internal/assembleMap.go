@@ -305,15 +305,15 @@ func commaNum(r []rune, curIdx int) int {
 // "internalLineCount" is lineCount which counted inside this func.
 // "sliceModeIdx" is idx which counted inside this func.
 // "tempSlice" is slice created inside this func, this slice is used to be assigned to initMap
-func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
+func returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
 		interLineCount,
 		sliceModeIdx int,
 		tempSlice []any,
 		) {
 
 	var (
-		commanum = commaNum(runifiedStr, curIdx)// number of commas, uses for allocating memory of "tempSlice"
-		strLength = len(runifiedStr)// The length of input rune slice
+		commanum = commaNum(inputRune, curIdx)// number of commas, uses for allocating memory of "tempSlice"
+		strLength = len(inputRune)// The length of input rune slice
 		dc int = 0 // This variable is same as variable "doubleQuoteCount" in the function "AssembleMap"
 		tempRune rune // This variable works just like the variable "curToken" in the function "AssembleMap"
 		peekTempRune rune // This variable works just like the variable "peekToken" in the function "AssembleMap"
@@ -330,7 +330,7 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 
 	for i := curIdx + 1; i < strLength; i++ {
 		sliceModeIdx += 1
-		tempRune = rune(runifiedStr[i])
+		tempRune = rune(inputRune[i])
 		switch tempRune {
 
 		case DOUBLEQUOTE:
@@ -343,7 +343,7 @@ func returnSliceOrMapAndCount(curIdx int, runifiedStr []rune) (
 
 		case BACKSLASH:
 			sliceBuf.WriteRune(tempRune)
-			if peekTempRune = rune(runifiedStr[i + 1]); dc > 0 && peekTempRune == DOUBLEQUOTE{
+			if peekTempRune = rune(inputRune[i + 1]); dc > 0 && peekTempRune == DOUBLEQUOTE{
 				dc -= 1
 				continue
 			}
