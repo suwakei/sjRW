@@ -4,10 +4,10 @@
     "p ush": "git pus\nh origi\n n m\",ain",
     "sta,tus": [
         "git s\ntat\"us"  ,
-        "git status && git log"     
+        "git sta\rtus && git log"     
     ],
     "reset": {
-        "soft": "git reset --soft HEAD^",
+        "soft": "git re\rset --soft HEAD^",
         "hard": "git reset --hard ^HEAD"
     },
     "1": 1,
