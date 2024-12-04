@@ -206,10 +206,10 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 					internalLineCount, sliceModeIdx, returnedSlice := returnSliceOrMapAndCount(idx, inputRune)
 
 					if _, ok := initMap[lineCount]; !ok {
-						initMap[lineCount] = make(map[string]any, 1)
+						initMap[lineCount + 1] = make(map[string]any, 1)
 					}
 
-					initMap[lineCount][key] = returnedSlice
+					initMap[lineCount + 1][key] = returnedSlice
 					keyBuf.Reset()
 					valBuf.Reset()
 					lineCount += internalLineCount
