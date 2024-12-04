@@ -12,9 +12,10 @@ package sjrw
 
 
 // func TestWriteFromStr(t *testing.T) {
+   t.Helper()
 // 	var sj SjWriter
-// 	str := `
-// 	{
+// 	str := 
+   `{
 // 	"add": [
 // 	    "git add .",
 // 	    "git add README.md",
@@ -76,8 +77,7 @@ package sjrw
 // 	],
 // 	"greeting": "Hello, Noemi Hays! You have 9 unread messages.",
 // 	"favoriteFruit": "strawberry"
-// 	}
-// 	`
+// 	}	`
 // 	sj.WriteFromStr(str, "C:/Users/ns072/OneDrive/ドキュメント/Github/sjrw/testdata/writetest2.json")
 // }
 
