@@ -3,24 +3,28 @@ package sjrw
 import (
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
 	"testing"
-  "os"
 
-	"github.com/suwakei/sjrw/internal"
+	//"github.com/suwakei/sjrw/internal"
 )
 
+const (
+	acceptExt string = ".json"
+	acceptExt2 string = ".json2"
+)
 
 func BenchmarkReadAsStrfrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
 	var sj SjReader
 
-  if _, err := os.Stat(jsonPath); err != nil {
+	if _, err := os.Stat(jsonPath); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath)
 	}
 
-	if filepath.Ext(jsonPath) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f, err := os.OpenFile(jsonPath, os.O_RDONLY, 0o666)
@@ -39,24 +43,23 @@ func BenchmarkReadAsStrfrom(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < 100; i++ {
-	_, err := sj.ReadAsStrFrom(f)
-	if err != nil {
-		log.Fatal(err)
+		_, err := sj.ReadAsStrFrom(f)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
-}
-
 
 func BenchmarkReadAsBytefrom(b *testing.B) {
 	var jsonPath string = "./testdata/readtest.json"
 	var sj SjReader
 
-  if _, err := os.Stat(jsonPath); err != nil {
+	if _, err := os.Stat(jsonPath); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath)
 	}
 
-	if filepath.Ext(jsonPath) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f, err := os.OpenFile(jsonPath, os.O_RDONLY, 0o666)
@@ -75,16 +78,21 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 	b.ResetTimer()
 
 	for i := 0; i < 100; i++ {
-	_, err := sj.ReadAsByteFrom(f)
-	if err != nil {
-		log.Fatal(err)
+		_, err := sj.ReadAsByteFrom(f)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
-}
 }
 
 // func BenchmarkReadAsMapfrom(b *testing.B) {
 // 	var jsonPath string = "./testdata/readtest4.json"
 // 	var sj SjReader
+
+// if ext := filepath.Ext(jsonPath); ext != acceptExt && ext != acceptExt2 {
+// 	log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
+// }
+
 // 	b.ResetTimer()
 
 // 	for i := 0; i < 100; i++ {
@@ -95,17 +103,16 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 // }
 // }
 
-
 func TestReadAsStr(t *testing.T) {
-  t.Parallel()
+	t.Parallel()
 	var jsonPath1 string = "./testdata/readtest.json"
 	var sj1 SjReader
-  if _, err := os.Stat(jsonPath1); err != nil {
+	if _, err := os.Stat(jsonPath1); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath1)
 	}
 
-	if filepath.Ext(jsonPath1) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath1); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f1, err := os.OpenFile(jsonPath1, os.O_RDONLY, 0o666)
@@ -122,17 +129,17 @@ func TestReadAsStr(t *testing.T) {
 	}()
 
 	input1, _ := sj1.ReadAsStrFrom(f1)
-  path1 := filepath.Base(jsonPath1)
+	path1 := filepath.Base(jsonPath1)
 
 	var jsonPath2 string = "./testdata/readtest2.json"
 	var sj2 SjReader
 
-  if _, err := os.Stat(jsonPath2); err != nil {
+	if _, err := os.Stat(jsonPath2); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath2)
 	}
 
-	if filepath.Ext(jsonPath2) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath2); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f2, err := os.OpenFile(jsonPath2, os.O_RDONLY, 0o666)
@@ -149,17 +156,17 @@ func TestReadAsStr(t *testing.T) {
 	}()
 
 	input2, _ := sj2.ReadAsStrFrom(f2)
-  path2 := filepath.Base(jsonPath2)
+	path2 := filepath.Base(jsonPath2)
 
 	var jsonPath3 string = "./testdata/readtest3.json"
 	var sj3 SjReader
 
-  if _, err := os.Stat(jsonPath3); err != nil {
+	if _, err := os.Stat(jsonPath3); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath3)
 	}
 
-	if filepath.Ext(jsonPath3) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath3); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f3, err := os.OpenFile(jsonPath3, os.O_RDONLY, 0o666)
@@ -176,17 +183,17 @@ func TestReadAsStr(t *testing.T) {
 	}()
 
 	input3, _ := sj3.ReadAsStrFrom(f3)
-  path3 := filepath.Base(jsonPath3)
+	path3 := filepath.Base(jsonPath3)
 
-  var jsonPath4 string = "./testdata/readtest4.json"
+	var jsonPath4 string = "./testdata/readtest4.json"
 	var sj4 SjReader
 
-  if _, err := os.Stat(jsonPath4); err != nil {
+	if _, err := os.Stat(jsonPath4); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath4)
 	}
 
-	if filepath.Ext(jsonPath4) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath4); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f4, err := os.OpenFile(jsonPath4, os.O_RDONLY, 0o666)
@@ -203,10 +210,10 @@ func TestReadAsStr(t *testing.T) {
 	}()
 
 	input4, _ := sj4.ReadAsStrFrom(f4)
-  path4 := filepath.Base(jsonPath4)
+	path4 := filepath.Base(jsonPath4)
 
-	tests := map[string]struct{
-		input string
+	tests := map[string]struct {
+		input    string
 		expected string
 	}{
 		path1: {
@@ -224,40 +231,39 @@ func TestReadAsStr(t *testing.T) {
 			expected3,
 		},
 
-    path4: {
-      input4,
-      expected4,
-    },
+		path4: {
+			input4,
+			expected4,
+		},
 	}
 
-	for tname, tt := range tests {
-    tt := tt
-    t.Run("testReadAsStrFrom", func(t *testing.T) {
-      t.Parallel()
-      if tt.input != tt.expected {
-        bInput := []byte(tt.input)
-        bExpected := []byte(tt.expected)
+	for _, tt := range tests {
+		tt := tt
+		t.Run("testReadAsStrFrom", func(t *testing.T) {
+			t.Parallel()
+			if tt.input != tt.expected {
+				//bInput := []byte(tt.input)
+				//bExpected := []byte(tt.expected)
 
-        diff := internal.Diff(tname, bInput, "ReadAsStrExpected", bExpected)
-        fmt.Println(string(diff))
-        t.Errorf("these values are not same")
-      }
-    })
+				//diff := internal.Diff(tname, bInput, "ReadAsStrExpected", bExpected)
+				//fmt.Println(string(diff))
+				t.Errorf("these values are not same")
+			}
+		})
 	}
 }
 
-
 func TestReadAsByteFrom(t *testing.T) {
-  t.Parallel()
-  var jsonPath1 string = "./testdata/readtest.json"
+	t.Parallel()
+	var jsonPath1 string = "./testdata/readtest.json"
 	var sj1 SjReader
 
-  if _, err := os.Stat(jsonPath1); err != nil {
+	if _, err := os.Stat(jsonPath1); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath1)
 	}
 
-	if filepath.Ext(jsonPath1) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath1); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f1, err := os.OpenFile(jsonPath1, os.O_RDONLY, 0o666)
@@ -274,17 +280,17 @@ func TestReadAsByteFrom(t *testing.T) {
 	}()
 
 	input1, _ := sj1.ReadAsByteFrom(f1)
-  path1 := filepath.Base(jsonPath1)
+	path1 := filepath.Base(jsonPath1)
 
 	var jsonPath2 string = "./testdata/readtest2.json"
 	var sj2 SjReader
 
-  if _, err := os.Stat(jsonPath2); err != nil {
+	if _, err := os.Stat(jsonPath2); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath2)
 	}
 
-	if filepath.Ext(jsonPath2) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath2); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f2, err := os.OpenFile(jsonPath2, os.O_RDONLY, 0o666)
@@ -301,17 +307,17 @@ func TestReadAsByteFrom(t *testing.T) {
 	}()
 
 	input2, _ := sj2.ReadAsByteFrom(f2)
-  path2 := filepath.Base(jsonPath2)
+	path2 := filepath.Base(jsonPath2)
 
 	var jsonPath3 string = "./testdata/readtest3.json"
 	var sj3 SjReader
 
-  if _, err := os.Stat(jsonPath3); err != nil {
+	if _, err := os.Stat(jsonPath3); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath3)
 	}
 
-	if filepath.Ext(jsonPath3) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath3); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f3, err := os.OpenFile(jsonPath3, os.O_RDONLY, 0o666)
@@ -328,17 +334,17 @@ func TestReadAsByteFrom(t *testing.T) {
 	}()
 
 	input3, _ := sj3.ReadAsByteFrom(f3)
-  path3 := filepath.Base(jsonPath3)
+	path3 := filepath.Base(jsonPath3)
 
-  var jsonPath4 string = "./testdata/readtest4.json"
+	var jsonPath4 string = "./testdata/readtest4.json"
 	var sj4 SjReader
 
-  if _, err := os.Stat(jsonPath4); err != nil {
+	if _, err := os.Stat(jsonPath4); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath4)
 	}
 
-	if filepath.Ext(jsonPath4) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath4); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f4, err := os.OpenFile(jsonPath4, os.O_RDONLY, 0o666)
@@ -355,10 +361,10 @@ func TestReadAsByteFrom(t *testing.T) {
 	}()
 
 	input4, _ := sj4.ReadAsByteFrom(f4)
-  path4 := filepath.Base(jsonPath4)
+	path4 := filepath.Base(jsonPath4)
 
-  tests := map[string]struct{
-		input []byte
+	tests := map[string]struct {
+		input    []byte
 		expected []byte
 	}{
 
@@ -375,36 +381,36 @@ func TestReadAsByteFrom(t *testing.T) {
 			input3,
 			[]byte(expected3),
 		},
-    path4: {
-      input4,
-      []byte(expected4),
-    },
+		path4: {
+			input4,
+			[]byte(expected4),
+		},
 	}
-  for tname, tt := range tests {
-    tt := tt
-    t.Run("testReadAsStrFrom", func(t *testing.T) {
-      t.Parallel()
-      if string(tt.input) == string(tt.expected) {
-        diff := internal.Diff(tname, tt.input, "ReadAsStrExpected", tt.expected)
-        fmt.Println(string(diff))
-        t.Errorf("these values are not same")
-      }
-    })
-  }
+	for _, tt := range tests {
+		
+		tt := tt
+		t.Run("testReadAsStrFrom", func(t *testing.T) {
+			t.Parallel()
+			if string(tt.input) != string(tt.expected) {
+				// diff := internal.Diff(tname, tt.input, "ReadAsStrExpected", tt.expected)
+				// fmt.Println(string(diff))
+				t.Errorf("these values are not same")
+			}
+		})
+	}
 }
 
-
 func TestReadAsMapFrom(t *testing.T) {
-  t.Parallel()
-  var jsonPath5 string = "./testdata/readtest5.json"
+	t.Parallel()
+	var jsonPath5 string = "./testdata/readtest5.json"
 	var sj5 SjReader
 
-  if _, err := os.Stat(jsonPath5); err != nil {
+	if _, err := os.Stat(jsonPath5); err != nil {
 		log.Fatalf("this path is not exist \"%s\"", jsonPath5)
 	}
 
-	if filepath.Ext(jsonPath5) != ".json" {
-		log.Fatal("read file is not json file")
+	if ext := filepath.Ext(jsonPath5); ext != acceptExt && ext != acceptExt2 {
+		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
 	f5, err := os.OpenFile(jsonPath5, os.O_RDONLY, 0o666)
@@ -420,11 +426,9 @@ func TestReadAsMapFrom(t *testing.T) {
 		}
 	}()
 
-  m, _ := sj5.ReadAsMapFrom(f5)
-  fmt.Println(m)
+	m, _ := sj5.ReadAsMapFrom(f5)
+	fmt.Println(m)
 }
-
-
 
 const expected1 string = 
 `[
@@ -702,10 +706,7 @@ const expected1 string =
     }
   ]`
 
-
-
-const expected2 string = 
-`[
+const expected2 string = `[
   {
     "_id": "672d31b26f1316908fa81a41",
     "index": 0,
@@ -980,17 +981,14 @@ const expected2 string =
   }
 ]`
 
-const expected3 string = 
-`{
+const expected3 string = `{
     "add": "git add .",
     "commit": "git commit -m \"first commit\"",
     "push": "git push origin main",
     "status": "git status"
 }`
 
-
-const expected4 string = 
-`{
+const expected4 string = `{
       "_id": "672d31b26f1316908fa81a41",
       "index": 0,
       "guid": "126bf441-05a3-4b3e-9868-43827b2054c4",
