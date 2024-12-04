@@ -104,6 +104,7 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 // }
 
 func TestReadAsStr(t *testing.T) {
+t.Helper()
 	t.Parallel()
 	var jsonPath1 string = "./testdata/readtest.json"
 	var sj1 SjReader
@@ -254,6 +255,7 @@ func TestReadAsStr(t *testing.T) {
 }
 
 func TestReadAsByteFrom(t *testing.T) {
+t.Helper()
 	t.Parallel()
 	var jsonPath1 string = "./testdata/readtest.json"
 	var sj1 SjReader
@@ -401,6 +403,7 @@ func TestReadAsByteFrom(t *testing.T) {
 }
 
 func TestReadAsMapFrom(t *testing.T) {
+t.Helper()
 	t.Parallel()
 	var jsonPath5 string = "./testdata/readtest5.json"
 	var sj5 SjReader
