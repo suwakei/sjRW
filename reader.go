@@ -62,7 +62,7 @@ func (SjReader) ReadAsByteFrom(readFile io.Reader) (contentAsByte []byte, err er
 }
 
 
-func (SjReader) ReadAsMapFrom(readFile io.Reader) (contentAsMap map[int]map[string]any, err error) {
+func (SjReader) ReadAsMapFrom(readFile io.Reader) (contentAsMap map[uint]map[string]any, err error) {
 	var jsonRune []rune = make([]rune, 0, 800)
 
 	if readFile != nil {
