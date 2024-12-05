@@ -12,10 +12,10 @@ package sjrw
 
 
 // func TestWriteFromStr(t *testing.T) {
-   t.Helper()
+//   t.Helper()
 // 	var sj SjWriter
 // 	str := 
-   `{
+//   `{
 // 	"add": [
 // 	    "git add .",
 // 	    "git add README.md",
