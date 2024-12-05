@@ -22,31 +22,40 @@ const (
 		BACKSLASH = '\\'
 	)
 
+	type SA struct {
+		valStr string
+		valArrAny []any
+	}
 
 // AssembleMap returns map created by input []rune
-func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
+func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 	var (
 		curToken rune // The target token
 		peekToken rune // The token for confirmation of next character
 
-		runeLength int = len(inputRune) // The length of input rune slice
+		runeLength uint = uint(len(inputRune)) // The length of input rune slice
 
-		doubleQuoteCnt int = 0 // Counter for number of ".
-		lineCount int = 0 // Counter for current number of line.
-		tempCount int = 0 // Match with idx later when exiting sliceMode.
+		doubleQuoteCnt uint8 = 0 // Counter for number of ".
+		lineCount uint = 0 // Counter for current number of line.
+		tempCount uint = 0 // Match with idx later when exiting sliceMode.
 		keyMode bool = true // If true, mode which read json key. if false read json value.
 		sliceMode bool = false // If true, which read array of json value.
 		firstLoop bool = true // First loop flag.
 
 		keyBuf strings.Builder // When in "keyMode" is true, buf for storing key token.
 		valBuf strings.Builder // When in "keyMode" is false, buf for storing value token.
-		key string // The variable for concatenated tokens stored in "keyBuf". 
-		value string// The variable for concatenated tokens stored in "valBuf".
+		key string // The variable is for concatenated tokens stored in "keyBuf". 
+		value SA // The variable is for concatenated tokens stored in "valBuf".
+		rv RV
+		ilc uint // The variable is for storing "returnedValue.internalLineCount"
 	)
 
+	// initalize
+	value.valArrAny = nil
+
 	// preallocation of memory
-	var initMap map[int]map[string]any = make(map[int]map[string]any, lnNum(inputRune))
+	var initMap map[uint]map[string]any = make(map[uint]map[string]any, lnNum(inputRune))
 
 	var keyBufMemoryNumber float32 = float32(runeLength) * 0.2
 	keyBuf.Grow(int(keyBufMemoryNumber))
@@ -57,7 +66,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 
 	for idx := range inputRune {
 		if sliceMode {
-			if idx <= tempCount {
+			if uint(idx) <= tempCount {
 				continue
 			}
 			sliceMode = false
@@ -66,11 +75,11 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 		curToken = inputRune[idx]
 
 		// For preventation of "index out of range" error
-		if idx + 1 < runeLength {
+		if uint(idx) + 1 < runeLength {
 		peekToken = inputRune[idx + 1]
 		}
 
-		/* Delete when finised debug */
+		/* Delete when debug finised */
 		a := string(curToken)
 		b := string(peekToken)
 		fmt.Println(a)
@@ -85,7 +94,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 		}
 
 		// When the token is last
-		if (idx + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
+		if (uint(idx) + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
 			lineCount += 1
 			strCurToken := string(curToken)
 			if _, ok := initMap[lineCount]; !ok {
@@ -203,17 +212,12 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 			if !keyMode {
 				if doubleQuoteCnt == 0 {
 					sliceMode = true
-					internalLineCount, sliceModeIdx, returnedSlice := returnSliceOrMapAndCount(idx, inputRune)
-
-					if _, ok := initMap[lineCount]; !ok {
-						initMap[lineCount + 1] = make(map[string]any, 1)
-					}
-
-					initMap[lineCount + 1][key] = returnedSlice
+					returnedValue := rv.returnSliceOrMapAndCount(uint(idx), inputRune)
+					value.valArrAny = returnedValue.rs
+					ilc = returnedValue.internalLineCount
 					keyBuf.Reset()
 					valBuf.Reset()
-					lineCount += internalLineCount
-					tempCount = idx + sliceModeIdx
+					tempCount = uint(idx) + returnedValue.sliceModeIdx
 					continue
 				}
 
@@ -258,13 +262,19 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 
 					if peekToken != lnTOKEN {
 						lineCount += 1
-						value = valBuf.String()
+						value.valStr = valBuf.String()
 
 					if _, ok := initMap[lineCount]; !ok {
 						initMap[lineCount] = make(map[string]any, 1)
-					}
+						if value.valArrAny != nil {
+							initMap[lineCount][key] = value.valArrAny
+							lineCount += ilc
+							value.valArrAny = nil
 
-					initMap[lineCount][key] = value
+						} else if value.valArrAny == nil {
+							initMap[lineCount][key] = value.valStr
+						}
+					}
 					keyBuf.Reset()
 					valBuf.Reset()
 					keyMode = true
@@ -289,13 +299,19 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 
 				if doubleQuoteCnt == 0 {
 					lineCount += 1
-					value = valBuf.String()
+					value.valStr = valBuf.String()
 
 					if _, ok := initMap[lineCount]; !ok {
 						initMap[lineCount] = make(map[string]any, 1)
-					}
+						if value.valArrAny != nil {
+							initMap[lineCount][key] = value.valArrAny
+							lineCount += ilc
+							value.valArrAny = nil
 
-					initMap[lineCount][key] = value
+						} else if value.valArrAny == nil {
+							initMap[lineCount][key] = value.valStr
+						}
+					}
 					keyBuf.Reset()
 					valBuf.Reset()
 					keyMode = true
@@ -320,41 +336,33 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 
 
 type RV struct {
-    interLineCount int
-    sliceModeIdx int
-    rs []any
+    internalLineCount uint // "internalLineCount" is lineCount that counted inside this method.
+    sliceModeIdx uint // "sliceModeIdx" is idx that counted inside this method.
+    rs []any // "rs" stands for returnSlice is slice created inside this method, this slice is used to be assigned to initMap
 }
 
-
 // returnSliceOrMapAndCount returns three return value.
-// "internalLineCount" is lineCount which counted inside this func.
-// "sliceModeIdx" is idx which counted inside this func.
-// "tempSlice" is slice created inside this func, this slice is used to be assigned to initMap
-func (rv RV) returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
-		interLineCount,
-		sliceModeIdx int,
-		tempSlice []any,
-		) {
+func (rv RV) returnSliceOrMapAndCount(curIdx uint, inputRune []rune) RV {
 
 	var (
 		commanum = commaNum(inputRune, curIdx)// the number of commas, uses for allocating memory of "tempSlice"
-		runeLength = len(inputRune)// The length of input rune slice
-		dc int = 0 // This variable is same as variable "doubleQuoteCount" in the function "AssembleMap"
+		runeLength uint = uint(len(inputRune))// The length of input rune slice
+		dc uint8 = 0 // This variable is same as variable "doubleQuoteCount" in the function "AssembleMap"
 		tempRune rune // This variable works just like the variable "curToken" in the function "AssembleMap"
 		peekTempRune rune // This variable works just like the variable "peekToken" in the function "AssembleMap"
 		sliceBuf strings.Builder // When in "sliceMode" is true, buf for storing slice token.
 		ss string // The variable for concatnated tokens stored in "sliceBuf".
 	)
 
-	sliceModeIdx = 0
+	rv.sliceModeIdx = 0
 
 	// preallocate memory
 	var sliceBufMemoryNumber float32 = float32(runeLength) * 0.1
 	sliceBuf.Grow(int(sliceBufMemoryNumber))
-	tempSlice = make([]any, 0, commanum)
+	rv.rs = make([]any, 0, commanum)
 
-	for i := curIdx + 1; i < runeLength; i++ {
-		sliceModeIdx += 1
+	for i := uint(curIdx) + 1; i < runeLength; i++ {
+		rv.sliceModeIdx += 1
 		tempRune = rune(inputRune[i])
 		switch tempRune {
 
@@ -384,17 +392,17 @@ func (rv RV) returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
 				sliceBuf.Reset()
   				// determine whether "ss" is int or not 
 				if num, err := strconv.Atoi(ss); err == nil {
-					tempSlice = append(tempSlice, num)
+					rv.rs = append(rv.rs, num)
 					continue
 				}
 
 				// determine whether "ss" is bool or not
 				if tr := strings.TrimSpace(ss); tr == "true"|| tr == "false" {
 					b, _ := strconv.ParseBool(tr)
-					tempSlice = append(tempSlice, b)
+					rv.rs = append(rv.rs, b)
 					continue
 }
-				tempSlice = append(tempSlice, ss)
+				rv.rs = append(rv.rs, ss)
 				continue
 			}
 
@@ -410,7 +418,7 @@ func (rv RV) returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
 				}
 
 				if peekTempRune = rune(inputRune[i + 1]); peekTempRune != lnTOKEN {
-					interLineCount += 1
+					rv.internalLineCount += 1
 					continue
 				}
 			}
@@ -422,29 +430,33 @@ func (rv RV) returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
 			}
 
 			if dc == 0 {
-			interLineCount += 1
+			rv.internalLineCount += 1
 			continue
 			}
 
 		case RBRACKET:
 			// When the token is last
 			if dc == 0 {
-				interLineCount += 1
+				rv.internalLineCount += 1
 				ss= sliceBuf.String()
 				sliceBuf.Reset()
 
 				if num, err := strconv.Atoi(ss); err == nil {
-					tempSlice = append(tempSlice, num)
+					rv.rs = append(rv.rs, num)
 					continue
 				}
 
 				if tr := strings.TrimSpace(ss); tr == "true" || tr == "false" {
 					b, _ := strconv.ParseBool(tr)
-					tempSlice = append(tempSlice, b)
+					rv.rs = append(rv.rs, b)
 					continue
 				}
-				tempSlice = append(tempSlice, ss)
-				return interLineCount, sliceModeIdx, tempSlice
+				rv.rs = append(rv.rs, ss)
+				return RV{
+					internalLineCount: rv.internalLineCount,
+					sliceModeIdx: rv.sliceModeIdx,
+					rs: rv.rs,
+				}
 			}
 
 			if dc > 0 {
@@ -462,14 +474,14 @@ func (rv RV) returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
 			sliceBuf.WriteRune(tempRune)
 		}
 	}
-	return 0, 0, nil
+	return RV{}
 }
 
-func commaNum(r []rune, curIdx int) int {
+func commaNum(r []rune, curIdx uint) uint {
 	var (
-		commaCount int = 0 // Counter for number of commas
-		lBracketCount int = 0 // Counter for number of left brackets
-		rBracketCount int = 0 // Counter for number of right brackets
+		commaCount uint = 0 // Counter for number of commas
+		lBracketCount uint = 0 // Counter for number of left brackets
+		rBracketCount uint = 0 // Counter for number of right brackets
 	)
 
 	for i := curIdx;; i++ {
@@ -491,8 +503,8 @@ func commaNum(r []rune, curIdx int) int {
 
 // "lnNum" returns the number of "\n" or "\r" from "r".
 // this return value used for initializing memory of "initMap" 
-func lnNum(r []rune) int {
-	var lnCount int = 0
+func lnNum(r []rune) uint {
+	var lnCount uint = 0
 	for _, n := range r {
 		if n == lnTOKEN || n == lrTOKEN {
 			lnCount += 1
