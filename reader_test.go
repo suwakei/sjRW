@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	//"github.com/suwakei/sjrw/internal"
+  "github.com/suwakei/sjrw/internal"
 )
 
 const (
@@ -388,14 +388,14 @@ func TestReadAsByteFrom(t *testing.T) {
 			[]byte(expected4),
 		},
 	}
-	for _, tt := range tests {
+	for tname, tt := range tests {
 		
 		tt := tt
 		t.Run("testReadAsStrFrom", func(t *testing.T) {
 			t.Parallel()
 			if string(tt.input) != string(tt.expected) {
-				// diff := internal.Diff(tname, tt.input, "ReadAsStrExpected", tt.expected)
-				// fmt.Println(string(diff))
+				diff := internal.Diff(tname, tt.input, "ReadAsStrExpected", tt.expected)
+				fmt.Println(string(diff))
 				t.Errorf("these values are not same")
 			}
 		})
@@ -709,7 +709,8 @@ const expected1 string =
     }
   ]`
 
-const expected2 string = `[
+const expected2 string = 
+`[
   {
     "_id": "672d31b26f1316908fa81a41",
     "index": 0,
@@ -984,14 +985,16 @@ const expected2 string = `[
   }
 ]`
 
-const expected3 string = `{
+const expected3 string = 
+`{
     "add": "git add .",
     "commit": "git commit -m \"first commit\"",
     "push": "git push origin main",
     "status": "git status"
 }`
 
-const expected4 string = `{
+const expected4 string = 
+`{
       "_id": "672d31b26f1316908fa81a41",
       "index": 0,
       "guid": "126bf441-05a3-4b3e-9868-43827b2054c4",
