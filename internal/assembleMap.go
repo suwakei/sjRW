@@ -319,11 +319,18 @@ func AssembleMap(inputRune []rune) (assembledMap map[int]map[string]any) {
 	}
 
 
+type RV struct {
+    interLineCount int
+    sliceModeIdx int
+    rs []any
+}
+
+
 // returnSliceOrMapAndCount returns three return value.
 // "internalLineCount" is lineCount which counted inside this func.
 // "sliceModeIdx" is idx which counted inside this func.
 // "tempSlice" is slice created inside this func, this slice is used to be assigned to initMap
-func returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
+func (rv RV) returnSliceOrMapAndCount(curIdx int, inputRune []rune) (
 		interLineCount,
 		sliceModeIdx int,
 		tempSlice []any,
