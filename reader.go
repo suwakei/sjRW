@@ -36,7 +36,7 @@ func (SjReader) ReadAsStrFrom(readFile io.Reader) (contentAsStr string, err erro
 		}
 	}
 	trimedByte = bytes.TrimSpace(jsonByte)
-    contentAsStr = unsafe.String(unsafe.SliceData(b.buf), len(b.buf))
+    contentAsStr = unsafe.String(unsafe.SliceData(trimedByte), len(trimedByte))
 	return contentAsStr, err
 }
 
