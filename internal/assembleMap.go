@@ -7,6 +7,7 @@ import (
 )
 
 rune型するのではなく直接数値をかきこんでみる
+特性のBuilder型をつくる
 const (
 	SPACE = ' '
 	TAB = '\t'
