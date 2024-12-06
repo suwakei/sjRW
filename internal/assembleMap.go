@@ -27,6 +27,7 @@ const (
 		valArrAny []any
 	}
 
+string builderを解析し中身を取り出して　bytes bufferにししてみたりする
 // AssembleMap returns map created by input []rune
 func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
