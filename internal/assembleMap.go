@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+rune型するのではなく直接数値をかきこんでみる
 const (
 	SPACE = ' '
 	TAB = '\t'
