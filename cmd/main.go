@@ -9,6 +9,35 @@ import (
 
 func main() {
 
+rune型するのではなく直接数値をかきこんでみる
+const (
+        SPACE = ' '
+        TAB = '\t'
+        lnTOKEN = '\n'
+        lrTOKEN = '\r'
+        DOUBLEQUOTE = '"'
+        COLON = ':'
+        LBRACE = '{'
+        RBRACE = '}'
+        LBRACKET = '['
+        RBRACKET = ']'
+        COMMA = ','
+        BACKSLASH = '\\'
+        )rune型するのではなく直接数値をかきこんでみる
+const (
+        SPACE = ' '
+        TAB = '\t'
+        lnTOKEN = '\n'
+        lrTOKEN = '\r'
+        DOUBLEQUOTE = '"'
+        COLON = ':'
+        LBRACE = '{'
+        RBRACE = '}'
+        LBRACKET = '['
+        RBRACKET = ']'
+        COMMA = ','
+        BACKSLASH = '\\'
+        )
 	var sj sjrw.SjReader
 
 	// カレントディレクトリを変える
