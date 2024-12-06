@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"io"
 	"log"
-	"strings"
+	"unsafe"
 
 	"github.com/suwakei/sjrw/internal"
 )
@@ -35,8 +35,7 @@ func (SjReader) ReadAsStrFrom(readFile io.Reader) (contentAsStr string, err erro
 
 		}
 	}
-	trimedByte = bytes.TrimSpace(jsonByte)
-    contentAsStr = unsafe.String(unsafe.SliceData(trimedByte), len(trimedByte))
+    contentAsStr = unsafe.String(unsafe.SliceData(bytes.TrimSpace(jsonByte)), len(bytes.TrimSpace(jsonByte)))
 	return contentAsStr, err
 }
 
