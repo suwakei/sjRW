@@ -8,22 +8,6 @@ import (
 )
 
 func main() {
-const (
-        SPACE = ' '
-        TAB = '\t'
-        lnTOKEN = '\n'
-        lrTOKEN = '\r'
-        DOUBLEQUOTE = '"'
-        COLON = ':'
-        LBRACE = '{'
-        RBRACE = '}'
-        LBRACKET = '['
-        RBRACKET = ']'
-        COMMA = ','
-        BACKSLASH = '\\'
-        )
-
-s = string(TAB)
 	var sj sjrw.SjReader
 
 	// カレントディレクトリを変える
