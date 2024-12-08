@@ -8,6 +8,7 @@ import (
 	"testing"
 
   "github.com/suwakei/sjrw/internal"
+  "github.com/suwakei/sjrw/testdata"
 )
 
 const (
@@ -219,7 +220,7 @@ func TestReadAsStr(t *testing.T) {
 	}{
 		path1: {
 			input1,
-			expected1,
+			testdata.Expected1,
 		},
 
 		path2: {
