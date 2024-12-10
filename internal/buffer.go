@@ -2,6 +2,7 @@ package internal
 
 import (
 	"unsafe"
+	//"log"
 	//"internal/bytealg"
 )
 
@@ -16,7 +17,7 @@ func (b *Buffer) curBufToString(r rune) string {
 
 // func (b *Buffer) grow(n int) {
 // 	if n < 0 {
-// 		panic("neganive number is invalid")
+// 		log.Fatal("neganive number is invalid")
 // 	}
 // 	if cap(b.buf)-len(b.buf) < n {
 // 		var tempBuf []byte = bytealg.MakeNoZero(2*cap(b.buf) + n)[:len(b.buf)]
