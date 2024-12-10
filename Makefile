@@ -16,10 +16,13 @@ b:
 go test -bench=. -benchmem
 
 bp:
-go test -bench=. -benchmem -cpuprofile=*.prof
+go test -bench=. -benchmem -cpuprofile cpu.prof
 
 bm:
-go test -bench=. -benchmem -memprofile=*.prof
+go test -bench=. -benchmem -memprofile mem.prof
+
+bpm:
+go test -bench=. -benchmem -memprofile mem.prof -cpuprofile cpu.prof
 
 tm:
 go test -run TestReadAsMapFrom
