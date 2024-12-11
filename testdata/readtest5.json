@@ -37,6 +37,18 @@
     },
     "boolDict": {
         "true": true,
-        "false": false
+        "false": {
+            "fasefa;se": "ok",
+            "falsedict": {
+                "farr":[
+                    "okok",
+                    "okokok",
+                    [
+                        "nono",
+                        "no"
+                    ]
+                ]
+            }
+        }
     }
 }
