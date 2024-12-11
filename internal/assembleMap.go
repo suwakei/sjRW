@@ -97,7 +97,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		// When the token is last
 		if (uint(idx) + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
-			lineCount += 1
+			lineCount++
 			strCurToken := string(curToken)
 			if _, ok := assembledMap[lineCount]; !ok {
 				assembledMap[lineCount] = make(map[string]any, 1)
@@ -149,7 +149,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		case DOUBLEQUOTE: // "
 			if keyMode {
-				doubleQuoteCnt += 1
+				doubleQuoteCnt++
 				keyBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 2 {
 					doubleQuoteCnt = 0
@@ -159,7 +159,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			}
 
 			if !keyMode {
-				doubleQuoteCnt += 1
+				doubleQuoteCnt++
 				valBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 2 {
 					doubleQuoteCnt = 0
@@ -171,7 +171,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 1 && peekToken == DOUBLEQUOTE {
-					doubleQuoteCnt -= 1
+					doubleQuoteCnt--
 					continue
 				}
 			}
@@ -179,7 +179,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			if !keyMode {
 				valBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 1 && peekToken == DOUBLEQUOTE {
-					doubleQuoteCnt -= 1
+					doubleQuoteCnt--
 					continue
 			}
 		}
@@ -188,7 +188,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			if keyMode {
 				if doubleQuoteCnt > 0 {
 					keyBuf.WriteRune(curToken)
-					continue // o
+					continue
 				}
 				continue
 			}
@@ -275,7 +275,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 					}
 
 					if peekToken != lnTOKEN {
-						lineCount += 1
+						lineCount++
 						value.valStr = valBuf.String()
 
 					if _, ok := assembledMap[lineCount]; !ok {
@@ -312,7 +312,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 				}
 
 				if doubleQuoteCnt == 0 {
-					lineCount += 1
+					lineCount++
 					value.valStr = valBuf.String()
 
 					if _, ok := assembledMap[lineCount]; !ok {
@@ -377,13 +377,13 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 	rv.rs = make([]any, 0, commanum)
 
 	for i := uint(curIdx) + 1; i < curRuneLength; i++ {
-		rv.ModeIdx += 1
+		rv.ModeIdx++
 		tempRune = rune(inputRune[i])
 		switch tempRune {
 
 		case DOUBLEQUOTE:
 			sliceBuf.WriteRune(tempRune)
-			dc += 1
+			dc++
 			if dc == 2{
 				dc = 0
 				continue
@@ -392,7 +392,7 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 		case BACKSLASH:
 			sliceBuf.WriteRune(tempRune)
 			if peekTempRune = rune(inputRune[i + 1]); dc == 1 && peekTempRune == DOUBLEQUOTE{
-				dc -= 1
+				dc--
 				continue
 			}
 
@@ -433,7 +433,7 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 				}
 
 				if peekTempRune = rune(inputRune[i + 1]); peekTempRune != lnTOKEN {
-					rv.internalLineCount += 1
+					rv.internalLineCount++
 					continue
 				}
 			}
@@ -445,14 +445,14 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 			}
 
 			if dc == 0 {
-			rv.internalLineCount += 1
+			rv.internalLineCount++
 			continue
 			}
 
 		case RBRACKET:
 			// When the token is last
 			if dc == 0 {
-				rv.internalLineCount += 1
+				rv.internalLineCount++
 				ss= sliceBuf.String()
 				sliceBuf.Reset()
 
@@ -561,7 +561,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 
 		// When the token is last
 		if (uint(curIdx) + 1 == curRuneLength) && (curToken == RBRACE || curToken == RBRACKET){
-			lineCount += 1
+			lineCount++
 			strCurToken := string(curToken)
 			if _, ok := initMap[lineCount]; !ok {
 				initMap[lineCount] = make(map[string]any, 1)
@@ -617,7 +617,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 
 		case DOUBLEQUOTE: // "
 			if keyMode {
-				doubleQuoteCnt += 1
+				doubleQuoteCnt++
 				keyBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 2 {
 					doubleQuoteCnt = 0
@@ -627,7 +627,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 			}
 
 			if !keyMode {
-				doubleQuoteCnt += 1
+				doubleQuoteCnt++
 				valBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 2 {
 					doubleQuoteCnt = 0
@@ -639,7 +639,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 			if keyMode {
 				keyBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 1 && peekToken == DOUBLEQUOTE {
-					doubleQuoteCnt -= 1
+					doubleQuoteCnt--
 					continue
 				}
 			}
@@ -647,7 +647,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 			if !keyMode {
 				valBuf.WriteRune(curToken)
 				if doubleQuoteCnt == 1 && peekToken == DOUBLEQUOTE {
-					doubleQuoteCnt -= 1
+					doubleQuoteCnt--
 					continue
 			}
 		}
@@ -753,7 +753,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 					}
 
 					if peekToken != lnTOKEN {
-						lineCount += 1
+						lineCount++
 						value.valStr = valBuf.String()
 
 						if _, ok := initMap[lineCount]; !ok {
@@ -785,7 +785,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 
 			if !keyMode {
 				if doubleQuoteCnt == 0 {
-					lineCount += 1
+					lineCount++
 					value.valStr = valBuf.String()
 
 					if _, ok := initMap[lineCount]; !ok {
@@ -848,19 +848,19 @@ func commaNum(r []rune, curIdx uint) uint {
 
 	for i := curIdx;; i++ {
 		if r[i] == DOUBLEQUOTE {
-			dc += 1
+			dc++
 		}
 
 		if dc == 0 && r[i] == LBRACKET {
-			lBracketCount += 1
+			lBracketCount++
 		}
 
 		if dc == 0 && r[i] == COMMA {
-			commaCount += 1
+			commaCount++
 		}
 
 		if dc == 0 && r[i] == RBRACKET {
-			rBracketCount += 1
+			rBracketCount++
 			if lBracketCount == rBracketCount {
 				break
 			}
@@ -875,7 +875,7 @@ func lnNum(r []rune) uint {
 	var lnCount uint = 0
 	for _, n := range r {
 		if n == lnTOKEN || n == lrTOKEN {
-			lnCount += 1
+			lnCount++
 		}
 	}
 	return lnCount
@@ -891,19 +891,19 @@ func getTokenNumSliceRange(r []rune, curIdx uint) uint {
 
 	for i := curIdx;; i++ {
 		if r[i] == DOUBLEQUOTE {
-			dc += 1
+			dc++
 		}
 
 		if dc == 0 && r[i] == LBRACKET {
-			lBracketCount += 1
+			lBracketCount++
 		}
 
 		if dc == 0 && r[i] == COMMA {
-			tokenNum += 1
+			tokenNum++
 		}
 
 		if dc == 0 && r[i] == RBRACKET {
-			rBracketCount += 1
+			rBracketCount++
 			if lBracketCount == rBracketCount {
 				return tokenNum
 			}
@@ -922,19 +922,19 @@ func getTokenNumMapRange(r []rune, curIdx uint) uint {
 
 	for i := curIdx;; i++ {
 		if r[i] == DOUBLEQUOTE {
-			dc += 1
+			dc++
 		}
 
 		if dc == 0 && r[i] == LBRACKET {
-			lBraceCount += 1
+			lBraceCount++
 		}
 
 		if dc == 0 && r[i] == COMMA {
-			tokenNum += 1
+			tokenNum++
 		}
 
 		if dc == 0 && r[i] == RBRACKET {
-			rBraceCount += 1
+			rBraceCount++
 			if lBraceCount == rBraceCount {
 				return tokenNum
 			}
