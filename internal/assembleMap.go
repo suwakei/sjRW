@@ -27,7 +27,7 @@ type SA struct {スライスやマップがあるときは構造体はポイン�
 	valArrAny []any
 	valMap map[string]any
 }
-
+あと構造体の初期化関数つくるfunc NEW~
 type RV struct {
     internalLineCount uint // "internalLineCount" is lineCount that counted inside this method.
     modeIdx uint // "modeIdx" is idx that counted inside retuen~ method.
