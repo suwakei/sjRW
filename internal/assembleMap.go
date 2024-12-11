@@ -55,8 +55,8 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		keyBuf strings.Builder // When in "keyMode" is true, buf for accumulating key token.
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
 		key string // The variable is for concatenated tokens stored in "keyBuf". 
-		value SA // The variable is for concatenated tokens stored in "valBuf".
-		rv RV // The struct for return value.
+		value *SA = new(SA) // The variable is for concatenated tokens stored in "valBuf".
+		rv *RV = new(RV) // The struct for return value.
 		ilc uint // The variable is for storing "returnedValue.internalLineCount".
 	)
 
