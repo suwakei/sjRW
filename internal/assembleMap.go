@@ -28,42 +28,50 @@ type SA struct {
 	valMap map[string]any
 }
 
+type RV struct {
+    internalLineCount uint // "internalLineCount" is lineCount that counted inside this method.
+    modeIdx uint // "modeIdx" is idx that counted inside retuen~ method.
+    rs []any // "rs" stands for returnSlice is created inside return method, this slice is used to be assigned to initMap.
+	rm map[string]any // "rm" stands for returnMap is created inside return~ method, this slice is used to be assigned to initMap.
+}
+
 // AssembleMap returns map created by input []rune
 func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	var (
-		curToken rune // The target token
-		peekToken rune // The token for confirmation of next character
+		curToken rune // The target token.
+		peekToken rune // The token for confirmation of next character.
 
-		runeLength uint = uint(len(inputRune)) // The length of input rune slice
+		runeLength uint = uint(len(inputRune)) // The length of input rune slice.
 
-		doubleQuoteCnt uint8 = 0 // Counter for number of ".
+		doubleQuoteCnt uint8 = 0 // Counter for the number of ".
 		lineCount uint = 0 // Counter for current number of line.
 		tempCount uint = 0 // Match with idx later when exiting sliceMode.
 		
-		sliceMode bool = false // If true, which read array of json value.
+		sliceMode bool = false // If true, read array of json value.
+		mapMode bool = false // If true, read map of json value.
 		firstLoop bool = true // First loop flag.
-		keyMode bool = true
+		keyMode bool = true //  If true, read jsonKey.
 
 		keyBuf strings.Builder // When in "keyMode" is true, buf for accumulating key token.
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
 		key string // The variable is for concatenated tokens stored in "keyBuf". 
 		value SA // The variable is for concatenated tokens stored in "valBuf".
-		rv RV
-		ilc uint // The variable is for storing "returnedValue.internalLineCount"
+		rv RV // The struct for return value.
+		ilc uint // The variable is for storing "returnedValue.internalLineCount".
 	)
 
-	// initalize
+	// initalize.
 	value.valArrAny = nil
-	value.valMap = nil // FIXME
+	value.valMap = nil
 
-	// preallocation of memory
-	var keyBufMemoryNumber float32 = float32(runeLength) * 0.2
+	// preallocation of memory.
+	var keyBufMemoryNumber float32 = float32(runeLength) * 0.1
 	keyBuf.Grow(int(keyBufMemoryNumber))
 
-	var valBufMemoryNumber float32 = float32(runeLength) * 0.5
+	var valBufMemoryNumber float32 = float32(runeLength) * 0.1
 	valBuf.Grow(int(valBufMemoryNumber))
 
-	assembledMap = make(map[uint]map[string]any, commaNum(inputRune, 1))
+	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
 
 
 	for idx := range inputRune {
@@ -74,14 +82,21 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			sliceMode = false
 		}
 
+		if mapMode {
+			if uint(idx) <= tempCount {
+				continue
+			}
+			mapMode = false
+		}
+
 		curToken = inputRune[idx]
 
-		// For preventation of "index out of range" error
+		// For preventation of "index out of range" error.
 		if uint(idx) + 1 < runeLength {
 		peekToken = inputRune[idx + 1]
 		}
 
-		/* Delete when debug finised */
+		/* Delete when debug finished */
 		a := string(curToken)
 		b := string(peekToken)
 		fmt.Println(a)
@@ -95,7 +110,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			continue
 		}
 
-		// When the token is last
+		// When the token is last.
 		if (uint(idx) + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
 			lineCount++
 			strCurToken := string(curToken)
@@ -108,7 +123,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			break
 		}
 
-// ポインタも意識してかく
+
 		switch curToken {
 
 		case SPACE, TAB: // "space" "\t"
@@ -219,7 +234,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 					ilc = rv.internalLineCount
 					keyBuf.Reset()
 					valBuf.Reset()
-					tempCount = uint(idx) + rv.ModeIdx
+					tempCount = uint(idx) + rv.modeIdx
 					continue
 				}
 
@@ -237,7 +252,20 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			}
 
 			if !keyMode {
-				// slicemodeのように今いるこのcase達をmapmodeにする
+				if doubleQuoteCnt == 0 {
+					mapMode = true
+					rv = returnMapAndCount(uint(idx), inputRune)
+					value.valMap = rv.rm
+					ilc = rv.internalLineCount
+					keyBuf.Reset()
+					valBuf.Reset()
+					tempCount = uint(idx) + rv.modeIdx
+					continue
+				}
+
+				if doubleQuoteCnt > 0 {
+					valBuf.WriteRune(curToken)
+				}
 			}
 
 		case RBRACE, RBRACKET: // "}" "]"
@@ -280,13 +308,20 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 					if _, ok := assembledMap[lineCount]; !ok {
 						assembledMap[lineCount] = make(map[string]any, 1)
+						if value.valArrAny == nil && value.valMap == nil {
+							assembledMap[lineCount][key] = value.valStr
+						}
+
 						if value.valArrAny != nil {
 							assembledMap[lineCount][key] = value.valArrAny
 							lineCount += ilc
 							value.valArrAny = nil
+						}
 
-						} else if value.valArrAny == nil {
-							assembledMap[lineCount][key] = value.valStr
+						if value.valMap != nil {
+							assembledMap[lineCount][key] = value.valMap
+							lineCount += ilc
+							value.valMap = nil
 						}
 					}
 					keyBuf.Reset()
@@ -317,13 +352,20 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 					if _, ok := assembledMap[lineCount]; !ok {
 						assembledMap[lineCount] = make(map[string]any, 1)
+						if value.valArrAny == nil && value.valMap == nil {
+							assembledMap[lineCount][key] = value.valStr
+						}
+
 						if value.valArrAny != nil {
 							assembledMap[lineCount][key] = value.valArrAny
 							lineCount += ilc
 							value.valArrAny = nil
+						}
 
-						} else if value.valArrAny == nil {
-							assembledMap[lineCount][key] = value.valStr
+						if value.valMap != nil {
+							assembledMap[lineCount][key] = value.valMap
+							lineCount += ilc
+							value.valMap = nil
 						}
 					}
 					keyBuf.Reset()
@@ -348,16 +390,8 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	}
 
 
-type RV struct {
-    internalLineCount uint // "internalLineCount" is lineCount that counted inside this method.
-    ModeIdx uint // "ModeIdx" is idx that counted inside this method.
-    rs []any // "rs" stands for returnSlice is created inside return method, this slice is used to be assigned to initMap
-	rm map[string]any // "rm" stands for returnMap is created inside return method, this slice is used to be assigned to initMap
-}
-
 // returnSliceOrMapAndCount returns three return value.
 func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
-
 	var (
 		commanum = commaNum(inputRune, curIdx)// the number of commas, uses for allocating memory of "tempSlice"
 		curRuneLength uint = uint(len(inputRune[curIdx:]))// The length of input rune slice
@@ -369,7 +403,7 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 		rv RV
 	)
 
-	rv.ModeIdx = 0
+	rv.modeIdx = 0
 
 	// preallocate memory
 	var sliceBufMemoryNumber float32 = float32(curRuneLength) * 0.1
@@ -377,7 +411,7 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 	rv.rs = make([]any, 0, commanum)
 
 	for i := uint(curIdx) + 1; i < curRuneLength; i++ {
-		rv.ModeIdx++
+		rv.modeIdx++
 		tempRune = rune(inputRune[i])
 		switch tempRune {
 
@@ -469,7 +503,7 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 				rv.rs = append(rv.rs, ss)
 				return RV{
 					internalLineCount: rv.internalLineCount,
-					ModeIdx: rv.ModeIdx,
+					modeIdx: rv.modeIdx,
 					rs: rv.rs,
 				}
 			}
@@ -494,10 +528,10 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 
 func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 	var (
-		curToken rune // The target token
-		peekToken rune // The token for confirmation of next character
+		curToken rune // The target token.
+		peekToken rune // The token for confirmation of next character.
 
-		curRuneLength uint = uint(len(inputRune[curIdx:])) // The length of input rune slice
+		curRuneLength uint = uint(len(inputRune[curIdx:])) // The length of input rune slice.
 
 		doubleQuoteCnt uint8 = 0 // Counter for number of ".
 		lineCount uint = 0 // Counter for current number of line.
@@ -511,7 +545,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
 		key string // The variable is for concatenated tokens stored in "keyBuf". 
 		value SA // The variable is for concatenated tokens stored in "valBuf".
-		rv RV
+		rv RV // The struct for return value.
 		ilc uint // The variable is for storing "returnedValue.internalLineCount"
 	)
 
@@ -522,10 +556,10 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 	// preallocation of memory
 	var initMap map[uint]map[string]any = make(map[uint]map[string]any, commaNum(inputRune, curIdx))
 
-	var keyBufMemoryNumber float32 = float32(getTokenNumMapRange(inputRune, curIdx)) * 0.3
+	var keyBufMemoryNumber float32 = float32(commaNum(inputRune, curIdx)) * 0.3
 	keyBuf.Grow(int(keyBufMemoryNumber))
 
-	var valBufMemoryNumber float32 = float32(getTokenNumMapRange(inputRune, curIdx)) * 0.7
+	var valBufMemoryNumber float32 = float32(commaNum(inputRune, curIdx)) * 0.3
 	valBuf.Grow(int(valBufMemoryNumber))
 
 
@@ -571,12 +605,11 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 			valBuf.Reset()
 			return RV{
 				internalLineCount: rv.internalLineCount,
-				ModeIdx: rv.ModeIdx,
+				modeIdx: rv.modeIdx,
 				rm: rv.rm,
 			}
 		}
 
-// ポインタも意識してかく
 		switch curToken {
 
 		case SPACE, TAB: // "space" "\t"
@@ -687,7 +720,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 					ilc = rv.internalLineCount
 					keyBuf.Reset()
 					valBuf.Reset()
-					tempCount = uint(curIdx) + rv.ModeIdx
+					tempCount = uint(curIdx) + rv.modeIdx
 					continue
 				}
 
@@ -705,7 +738,6 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 			}
 
 			if !keyMode {
-				// slicemodeのように今いるこのcase達をmapmodeにする
 				if doubleQuoteCnt == 0 {
 					mapMode = true
 					rv = returnMapAndCount(uint(curIdx), inputRune)
@@ -713,7 +745,7 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 					ilc = rv.internalLineCount
 					keyBuf.Reset()
 					valBuf.Reset()
-					tempCount = uint(curIdx) + rv.ModeIdx
+					tempCount = uint(curIdx) + rv.modeIdx
 					continue
 				}
 			}
@@ -758,13 +790,20 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 
 						if _, ok := initMap[lineCount]; !ok {
 							initMap[lineCount] = make(map[string]any, 1)
+							if value.valArrAny == nil && value.valMap == nil {
+								initMap[lineCount][key] = value.valStr
+							}
+
 							if value.valArrAny != nil {
 								initMap[lineCount][key] = value.valArrAny
 								lineCount += ilc
 								value.valArrAny = nil
+							}
 
-							} else if value.valArrAny == nil {
-								initMap[lineCount][key] = value.valStr
+							if value.valMap != nil {
+								initMap[lineCount][key] = value.valMap
+								lineCount += ilc
+								value.valMap = nil
 							}
 						}
 					keyBuf.Reset()
@@ -840,28 +879,48 @@ func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 
 func commaNum(r []rune, curIdx uint) uint {
 	var (
-		dc uint8 = 0
-		commaCount uint = 0 // Counter for number of commas
-		lBracketCount uint = 0 // Counter for number of left brackets
-		rBracketCount uint = 0 // Counter for number of right brackets
+		dc uint8 = 0 // dc stands for doubleQuoteCount
+		commaCount uint = 0 // Counter for the number of commas
+		lBracketCount uint = 0 // Counter for the number of left brackets
+		rBracketCount uint = 0 // Counter for the number of right brackets
+		lBraceCount uint = 0 // Counter for the number of left braces
+		rBraceCount uint = 0 // Counter for the number of right braces
 	)
 
 	for i := curIdx;; i++ {
-		if r[i] == DOUBLEQUOTE {
-			dc++
+		if r[i] == BACKSLASH && r[i + 1] == DOUBLEQUOTE {
+			dc--
 		}
 
-		if dc == 0 && r[i] == LBRACKET {
-			lBracketCount++
+		if r[i] == DOUBLEQUOTE {
+			dc++
+			if dc == 2 {
+				dc = 0
+			}
 		}
 
 		if dc == 0 && r[i] == COMMA {
 			commaCount++
 		}
 
+		if dc == 0 && r[i] == LBRACKET {
+			lBracketCount++
+		}
+
 		if dc == 0 && r[i] == RBRACKET {
 			rBracketCount++
 			if lBracketCount == rBracketCount {
+				break
+			}
+		}
+
+		if dc == 0 && r[i] == LBRACE {
+			lBraceCount++
+		}
+
+		if dc == 0 && r[i] == RBRACE {
+			rBraceCount++
+			if lBraceCount == rBraceCount {
 				break
 			}
 		}
@@ -873,71 +932,18 @@ func commaNum(r []rune, curIdx uint) uint {
 // this return value used for initializing memory of "initMap" 
 func lnNum(r []rune) uint {
 	var lnCount uint = 0
+	var dc uint8 = 0
 	for _, n := range r {
-		if n == lnTOKEN || n == lrTOKEN {
+		if n == DOUBLEQUOTE {
+			dc++
+			if dc == 2 {
+				dc = 0
+			}
+		}
+
+		if n == lrTOKEN && dc == 0{
 			lnCount++
 		}
 	}
 	return lnCount
-}
-
-func getTokenNumSliceRange(r []rune, curIdx uint) uint {
-	var (
-		dc uint8 = 0
-		tokenNum uint = 0
-		lBracketCount uint = 0 // Counter for number of left brackets
-		rBracketCount uint = 0 // Counter for number of right brackets
-	)
-
-	for i := curIdx;; i++ {
-		if r[i] == DOUBLEQUOTE {
-			dc++
-		}
-
-		if dc == 0 && r[i] == LBRACKET {
-			lBracketCount++
-		}
-
-		if dc == 0 && r[i] == COMMA {
-			tokenNum++
-		}
-
-		if dc == 0 && r[i] == RBRACKET {
-			rBracketCount++
-			if lBracketCount == rBracketCount {
-				return tokenNum
-			}
-		}
-	}
-}
-
-
-func getTokenNumMapRange(r []rune, curIdx uint) uint {
-	var (
-		dc uint8 = 0
-		tokenNum uint = 0
-		lBraceCount uint = 0 // Counter for number of left brace
-		rBraceCount uint = 0 // Counter for number of right brace
-	)
-
-	for i := curIdx;; i++ {
-		if r[i] == DOUBLEQUOTE {
-			dc++
-		}
-
-		if dc == 0 && r[i] == LBRACKET {
-			lBraceCount++
-		}
-
-		if dc == 0 && r[i] == COMMA {
-			tokenNum++
-		}
-
-		if dc == 0 && r[i] == RBRACKET {
-			rBraceCount++
-			if lBraceCount == rBraceCount {
-				return tokenNum
-			}
-		}
-	}
 }

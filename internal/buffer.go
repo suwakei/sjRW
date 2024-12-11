@@ -2,15 +2,14 @@ package internal
 
 import (
 	"unsafe"
-	//"log"
-	//"internal/bytealg"
 )
 
 type Buffer struct {
+	address *Buffer
 	buf []byte
 }
 
-func (b *Buffer) curBufToString(r rune) string {
+func (b *Buffer) curBufToString() string {
 	return unsafe.String(unsafe.SliceData(b.buf), len(b.buf))
 	
 }
@@ -40,5 +39,6 @@ func (b *Buffer) accumuRune(r rune) error {
 }
 
 func (b *Buffer) bufReset() {
+	b.address = nil
 	b.buf = nil
 }
