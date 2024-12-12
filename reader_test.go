@@ -43,7 +43,7 @@ func BenchmarkReadAsStrfrom(b *testing.B) {
 
 	b.ResetTimer()
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < b.N; i++ {
 		_, err := sj.ReadAsStrFrom(f)
 		if err != nil {
 			log.Fatal(err)
@@ -78,7 +78,7 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 
 	b.ResetTimer()
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < b.N; i++ {
 		_, err := sj.ReadAsByteFrom(f)
 		if err != nil {
 			log.Fatal(err)
@@ -96,7 +96,7 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 
 // 	b.ResetTimer()
 
-// 	for i := 0; i < 100; i++ {
+// 	for i := 0; i < b.N; i++ {
 // 	_, err := sj.ReadAsMapFrom(jsonPath)
 // 	if err != nil {
 // 		log.Fatal(err)
