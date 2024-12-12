@@ -22,12 +22,12 @@ const (
 	BACKSLASH = '\\'
 	)
 
-type SA struct {
+type SA struct {スライスやマップがあるときは構造体はポインタにする
 	valStr string
 	valArrAny []any
 	valMap map[string]any
 }
-
+あと構造体の初期化関数つくるfunc NEW~
 type RV struct {
     internalLineCount uint // "internalLineCount" is lineCount that counted inside this method.
     modeIdx uint // "modeIdx" is idx that counted inside retuen~ method.
@@ -55,14 +55,10 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		keyBuf strings.Builder // When in "keyMode" is true, buf for accumulating key token.
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
 		key string // The variable is for concatenated tokens stored in "keyBuf". 
-		value SA // The variable is for concatenated tokens stored in "valBuf".
-		rv RV // The struct for return value.
+		value *SA = new(SA) // The variable is for concatenated tokens stored in "valBuf".
+		rv *RV = new(RV) // The struct for return value.
 		ilc uint // The variable is for storing "returnedValue.internalLineCount".
 	)
-
-	// initalize.
-	value.valArrAny = nil
-	value.valMap = nil
 
 	// preallocation of memory.
 	var keyBufMemoryNumber float32 = float32(runeLength) * 0.1
@@ -73,9 +69,9 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
 
-
-	for idx := range inputRune {
-		if sliceMode {
+idx := 0
+	for ;; i++{
+ 	if sliceMode {
 			if uint(idx) <= tempCount {
 				continue
 			}
@@ -126,7 +122,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		switch curToken {
 
-		case SPACE, TAB: // "space" "\t"
+		case SPACE, TAB, COMMA: // "space" "\t" ","
 			if keyMode {
 				if doubleQuoteCnt > 0 {
 					keyBuf.WriteRune(curToken)
@@ -197,25 +193,6 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 					doubleQuoteCnt--
 					continue
 			}
-		}
-
-		case COMMA: // ","
-			if keyMode {
-				if doubleQuoteCnt > 0 {
-					keyBuf.WriteRune(curToken)
-					continue
-				}
-				continue
-			}
-
-			if !keyMode {
-				if doubleQuoteCnt == 0 {
-					continue
-				}
-				if doubleQuoteCnt > 0 {
-					valBuf.WriteRune(curToken)
-					continue
-				}
 		}
 
 		case LBRACKET: // "["
