@@ -525,7 +525,7 @@ func returnSliceAndCount(curIdx uint, inputRune []rune) RV {
 	}
 	return RV{}
 }
-
+returnMapAndCountでinf recursionが起きてるっぽい
 func returnMapAndCount(curIdx uint, inputRune []rune) RV{
 	var (
 		curToken rune // The target token.
