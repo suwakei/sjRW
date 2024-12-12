@@ -126,7 +126,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		switch curToken {
 
-		case SPACE, TAB: // "space" "\t"
+		case SPACE, TAB, COMMA: // "space" "\t" ","
 			if keyMode {
 				if doubleQuoteCnt > 0 {
 					keyBuf.WriteRune(curToken)
@@ -197,25 +197,6 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 					doubleQuoteCnt--
 					continue
 			}
-		}
-
-		case COMMA: // ","
-			if keyMode {
-				if doubleQuoteCnt > 0 {
-					keyBuf.WriteRune(curToken)
-					continue
-				}
-				continue
-			}
-
-			if !keyMode {
-				if doubleQuoteCnt == 0 {
-					continue
-				}
-				if doubleQuoteCnt > 0 {
-					valBuf.WriteRune(curToken)
-					continue
-				}
 		}
 
 		case LBRACKET: // "["
