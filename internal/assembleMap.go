@@ -69,9 +69,9 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
 
-
-	for idx := range inputRune {
-		if sliceMode {
+idx := 0
+	for ;; i++{
+ 	if sliceMode {
 			if uint(idx) <= tempCount {
 				continue
 			}
