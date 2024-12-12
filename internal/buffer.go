@@ -9,7 +9,7 @@ type Buffer struct {
 	buf []byte
 }
 
-func (b *Buffer) curBufToString() string {
+func (b *Buffer) bufToString() string {
 	return unsafe.String(unsafe.SliceData(b.buf), len(b.buf))
 	
 }
