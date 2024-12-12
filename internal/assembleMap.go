@@ -60,10 +60,6 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		ilc uint // The variable is for storing "returnedValue.internalLineCount".
 	)
 
-	// initalize.
-	value.valArrAny = nil
-	value.valMap = nil
-
 	// preallocation of memory.
 	var keyBufMemoryNumber float32 = float32(runeLength) * 0.1
 	keyBuf.Grow(int(keyBufMemoryNumber))
