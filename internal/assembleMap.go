@@ -28,12 +28,6 @@ type SA struct {
 	valMap map[string]any
 }
 
-
-type RV struct {
-    rs []any // "rs" stands for returnSlice is created inside return method, this slice is used to be assigned to initMap.
-	rm map[string]any // "rm" stands for returnMap is created inside return~ method, this slice is used to be assigned to initMap.
-}
-
 // AssembleMap returns map created by input []rune
 func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	var (
@@ -54,7 +48,10 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
 		key string // The variable is for concatenated tokens stored in "keyBuf". 
 		value *SA = new(SA) // The variable is for concatenated tokens stored in "valBuf".
-		rv *RV = new(RV) // The struct for return value.
+		returnedSlice []any
+		returnedMap map[string]any
+		returnedKey string
+		returnedValue any
 	)
 
 	// preallocation of memory.
@@ -71,11 +68,12 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		curToken = inputRune[idx]
 
 		if firstLoop {
-			keyBuf.WriteRune(curToken)
-			key = keyBuf.String()
-			value.valStr = ""
+			if _, ok := assembledMap[idx]; !ok {
+				assembledMap[idx] = make(map[string]any, 1)
+			}
+
+			assembledMap[idx][string(curToken)] = ""
 			firstLoop = false
-			keyMode = false
 			idx++
 			continue
 		}
@@ -97,16 +95,43 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		// last loop.
 		if (idx + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
 			*commonLineCount++
-			strCurToken := string(curToken)
 			if _, ok := assembledMap[*commonLineCount]; !ok {
 				assembledMap[*commonLineCount] = make(map[string]any, 1)
 			}
 
-			assembledMap[*commonLineCount][strCurToken] = ""
+			assembledMap[*commonLineCount][string(curToken)] = ""
 			keyBuf.Reset()
 			valBuf.Reset()
 			break
 		}
+
+		if keyMode {
+			*commonIdx = idx
+			returnedKey = returnKey(commonIdx, inputRune)
+			idx = *commonIdx
+			keyMode = false
+		}
+
+		if !keyMode && curToken == LBRACKET {
+			keyMode = true
+
+		} else if !keyMode && curToken == LBRACE {
+			*commonIdx = idx
+			returnedSlice = returnArr(commonIdx, commonLineCount, inputRune)
+			idx = *commonIdx
+			keyMode = true
+
+		} else if !keyMode && !isIgnores(curToken) {
+			*commonIdx = idx
+			returnedValue = returnValue(commonIdx, inputRune)
+			idx = *commonIdx
+			keyMode = true
+
+		}else if !keyMode && isIgnores(curToken) {
+			continue
+		}
+
+
 
 
 		switch curToken {
@@ -182,8 +207,8 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			if !keyMode {
 				if dc == 0 {
 					*commonIdx = idx
-					rv = returnArr(commonIdx, commonLineCount, inputRune)
-					value.valArrAny = rv.rs
+					rs = returnArr(commonIdx, commonLineCount, inputRune)
+					value.valArrAny = rs
 					keyBuf.Reset()
 					valBuf.Reset()
 					idx = *commonIdx
@@ -204,8 +229,8 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			if !keyMode {
 				if dc == 0 {
 					*commonIdx = idx
-					rv = returnObj(commonIdx, commonLineCount, inputRune)
-					value.valMap = rv.rm
+					rm = returnObj(commonIdx, commonLineCount, inputRune)
+					value.valMap = rm
 					keyBuf.Reset()
 					valBuf.Reset()
 					idx = *commonIdx
@@ -400,4 +425,18 @@ func lnNum(r []rune) uint {
 		}
 	}
 	return lnCount
+}
+
+
+func isIgnores(curToken rune) bool {
+	if curToken == SPACE {
+		return true
+	}
+	if curToken == TAB {
+		return true
+	}
+	if curToken == COMMA {
+		return true
+	}
+	return false
 }

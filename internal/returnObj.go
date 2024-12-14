@@ -6,8 +6,8 @@ import (
 )
 
 //returnObjでinf recursionが起きてるっぽい.
-// returnObj returns *RV
-func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
+// returnObj returns map[string]any
+func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) map[string]any {
 	var (
 		curToken rune // The target token.
 		peekToken rune // The token for confirmation of next character.
@@ -24,14 +24,15 @@ func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
 		key string // The variable is for concatenated tokens stored in "keyBuf". 
 		value *SA = new(SA) // The variable is for concatenated tokens stored in "valBuf".
-		rv *RV = new(RV) // The struct for return value.
+		rs []any
+		rm map[string]any
 	)
 // Store *commonIdx and *commonLineCount to avoid calling type *uint again and again
 	internalIdx = *commonIdx
 	internalLineCount = *commonLineCount
 
 	// preallocation of memory
-	var initMap map[uint]map[string]any = make(map[uint]map[string]any, commaNum(internalIdx, inputRune))
+	rm = make(map[string]any, commaNum(internalIdx, inputRune))
 
 	var keyBufMemoryNumber float32 = float32(commaNum(internalIdx, inputRune)) * 0.3
 	keyBuf.Grow(int(keyBufMemoryNumber))
@@ -61,18 +62,15 @@ func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
 		if (internalIdx + 1 == curRuneLength) && (curToken == RBRACE || curToken == RBRACKET){
 			internalLineCount++
 			strCurToken := string(curToken)
-			if _, ok := initMap[internalLineCount]; !ok {
-				initMap[internalLineCount] = make(map[string]any, 1)
+			if _, ok := rm[internalLineCount]; !ok {
+				rm[internalLineCount] = make(map[string]any, 1)
 			}
-			initMap[internalLineCount][strCurToken] = ""
+			rm[internalLineCount][strCurToken] = ""
 			keyBuf.Reset()
 			valBuf.Reset()
 			*commonIdx = internalIdx
 			*commonLineCount = internalLineCount
-			return &RV{
-				rm: rv.rm,
-			}
-		}
+			return rm
 
 		switch curToken {
 
@@ -150,8 +148,8 @@ func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
 
 			if !keyMode {
 				if dc == 0 {
-					rv = returnArr(&internalIdx, &internalLineCount, inputRune)
-					value.valArrAny = rv.rs
+					rs = returnArr(&internalIdx, &internalLineCount, inputRune)
+					value.valArrAny = rs
 					keyBuf.Reset()
 					valBuf.Reset()
 				}
@@ -170,8 +168,8 @@ func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
 
 			if !keyMode {
 				if dc == 0 {
-					rv = returnObj(&internalIdx, &internalLineCount, inputRune)
-					value.valMap = rv.rm
+					rm = returnObj(&internalIdx, &internalLineCount, inputRune)
+					value.valMap = rm
 					keyBuf.Reset()
 					valBuf.Reset()
 				}
@@ -211,31 +209,33 @@ func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
 						internalLineCount++
 						value.valStr = valBuf.String()
 
-						if _, ok := initMap[internalLineCount]; !ok {
-							initMap[internalLineCount] = make(map[string]any, 1)
+						if _, ok := rm[internalLineCount]; !ok {
+							rm[internalLineCount] = make(map[string]any, 1)
 							if value.valArrAny == nil && value.valMap == nil {
+
 								// determine whether "value.valStr" is int or not 
 								if num, err := strconv.Atoi(value.valStr); err == nil {
-									initMap[internalLineCount][key] = num
+									rm[internalLineCount][key] = num
 									continue
 								}
+
 								// determine whether "value.valStr" is bool or not
 								if tr := strings.TrimSpace(value.valStr); tr == "true"|| tr == "false" {
 									b, _ := strconv.ParseBool(tr)
-									initMap[internalLineCount][key] = b
+									rm[internalLineCount][key] = b
 									continue
 								}
 
-								initMap[internalLineCount][key] = value.valStr
+								rm[internalLineCount][key] = value.valStr
 							}
 
 							if value.valArrAny != nil {
-								initMap[internalLineCount][key] = value.valArrAny
+								rm[internalLineCount][key] = value.valArrAny
 								value.valArrAny = nil
 							}
 
 							if value.valMap != nil {
-								initMap[internalLineCount][key] = value.valMap
+								rm[internalLineCount][key] = value.valMap
 								value.valMap = nil
 							}
 						}
@@ -262,32 +262,34 @@ func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
 					internalLineCount++
 					value.valStr = valBuf.String()
 
-					if _, ok := initMap[internalLineCount]; !ok {
-						initMap[internalLineCount] = make(map[string]any, 1)
+					if _, ok := rm[internalLineCount]; !ok {
+						rm[internalLineCount] = make(map[string]any, 1)
 
 						if value.valArrAny == nil && value.valMap == nil{
+
 							// determine whether "value.valStr" is int or not 
 							if num, err := strconv.Atoi(value.valStr); err == nil {
-								initMap[internalLineCount][key] = num
+								rm[internalLineCount][key] = num
 								continue
 							}
+
 							// determine whether "value.valStr" is bool or not
 							if tr := strings.TrimSpace(value.valStr); tr == "true"|| tr == "false" {
 								b, _ := strconv.ParseBool(tr)
-								initMap[internalLineCount][key] = b
+								rm[internalLineCount][key] = b
 								continue
 							}
 
-							initMap[internalLineCount][key] = value.valStr
+							rm[internalLineCount][key] = value.valStr
 						}
 
 						if value.valArrAny != nil {
-							initMap[internalLineCount][key] = value.valArrAny
+							rm[internalLineCount][key] = value.valArrAny
 							value.valArrAny = nil
 						}
 
 						if value.valMap != nil {
-							initMap[internalLineCount][key] = value.valArrAny
+							rm[internalLineCount][key] = value.valArrAny
 							value.valMap = nil
 						}
 					keyBuf.Reset()
@@ -306,5 +308,10 @@ func returnObj(commonIdx, commonLineCount *uint, inputRune []rune) *RV{
 			}
 		}
 	}
-	return &RV{}
+	return rm
+}
+}
+
+func searchBlockTerminal() {
+	
 }

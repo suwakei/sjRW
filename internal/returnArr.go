@@ -6,7 +6,7 @@ import (
 )
 
 // returnSliceOrMapAndCount returns *RV.
-func returnArr(commonIdx, commonLineCount *uint, inputRune []rune) *RV {
+func returnArr(commonIdx, commonLineCount *uint, inputRune []rune) []any {
 	var (
 		commanum = commaNum(*commonIdx, inputRune)// the number of commas, uses for allocating memory of "tempSlice"
 		curRuneLength uint = uint(len(inputRune[*commonIdx:]))// The length of input rune slice
@@ -14,19 +14,17 @@ func returnArr(commonIdx, commonLineCount *uint, inputRune []rune) *RV {
 		sliceRune rune // This variable works just like the variable "curToken" in the function "AssembleMap"
 		peekSliceRune rune // This variable works just like the variable "peekToken" in the function "AssembleMap"
 		sliceBuf strings.Builder // When in "sliceMode" is true, buf for storing slice token.
-		internalIdx uint
-		internalLineCount uint
+		internalIdx uint = *commonIdx // Store *commonIdx and *commonLineCount to avoid calling type *uint again and again
+		internalLineCount uint = *commonLineCount // Store *commonIdx and *commonLineCount to avoid calling type *uint again and again
 		ss string // The variable for concatnated tokens stored in "sliceBuf".
-		rv *RV = new(RV)
+		rs []any
+		rm map[string]any
 	)
-	// Store *commonIdx and *commonLineCount to avoid calling type *uint again and again
-	internalIdx = *commonIdx
-	internalLineCount = *commonLineCount
+
 
 	// preallocate memory
-	var sliceBufMemoryNumber float32 = float32(curRuneLength) * 0.1
-	sliceBuf.Grow(int(sliceBufMemoryNumber))
-	rv.rs = make([]any, 0, commanum)
+	_, buf := searchArrTerminusAndElemNum(internalIdx, inputRune)
+	sliceBuf.Grow(int(buf))
 
 	for ; internalIdx < curRuneLength; internalIdx++ {
 		sliceRune = rune(inputRune[internalIdx])
@@ -61,17 +59,17 @@ func returnArr(commonIdx, commonLineCount *uint, inputRune []rune) *RV {
 				sliceBuf.Reset()
   				// determine whether "ss" is int or not 
 				if num, err := strconv.Atoi(ss); err == nil {
-					rv.rs = append(rv.rs, num)
+					rs = append(rs, num)
 					continue
 				}
 
 				// determine whether "ss" is bool or not
 				if tr := strings.TrimSpace(ss); tr == "true"|| tr == "false" {
 					b, _ := strconv.ParseBool(tr)
-					rv.rs = append(rv.rs, b)
+					rs = append(rs, b)
 					continue
 				}
-				rv.rs = append(rv.rs, ss)
+				rs = append(rs, ss)
 			}
 
 		case lrTOKEN:
@@ -106,22 +104,20 @@ func returnArr(commonIdx, commonLineCount *uint, inputRune []rune) *RV {
 				sliceBuf.Reset()
 
 				if num, err := strconv.Atoi(ss); err == nil {
-					rv.rs = append(rv.rs, num)
+					rs = append(rs, num)
 					continue
 				}
 
 				if tr := strings.TrimSpace(ss); tr == "true" || tr == "false" {
 					b, _ := strconv.ParseBool(tr)
-					rv.rs = append(rv.rs, b)
+					rs = append(rs, b)
 					continue
 				}
-				rv.rs = append(rv.rs, ss)
+				rs = append(rs, ss)
 
 				*commonIdx = internalIdx
 				*commonLineCount = internalLineCount
-				return &RV{
-					rs: rv.rs,
-				}
+				return rs
 			}
 
 			if dc > 0 {
@@ -133,5 +129,78 @@ func returnArr(commonIdx, commonLineCount *uint, inputRune []rune) *RV {
 			sliceBuf.WriteRune(sliceRune)
 		}
 	}
-	return &RV{}
+	return rs
+}
+
+
+func searchArrTerminusAndElemNum(internalIdx uint, inputRune []rune) (uint, uint) {
+	var (
+		dc uint8
+		lb uint8
+		rb uint8
+		curToken rune
+		peekToken rune
+		elemNum uint = 1
+		terminalIdx uint = internalIdx
+	)
+
+	for {
+		curToken = inputRune[terminalIdx]
+		peekToken = inputRune[terminalIdx + 1]
+		switch curToken {
+		case DOUBLEQUOTE:
+			dc++
+			terminalIdx++
+			if dc == 2 {
+				dc = 0
+			}
+
+		case BACKSLASH:
+			if dc > 0 && peekToken == DOUBLEQUOTE {
+				dc--
+				terminalIdx++
+			}
+
+		case LBRACKET:
+			if dc > 0 {
+				terminalIdx++
+				continue
+			}
+			lb++
+			terminalIdx++
+
+		case RBRACKET:
+			if dc > 0 {
+				terminalIdx++
+				continue
+			}
+			rb++
+			if lb == rb {
+				break
+			}
+
+		case lrTOKEN:
+			if dc > 0 {
+				terminalIdx++
+			}
+			if dc == 0 {
+				if peekToken == lnTOKEN {
+					continue
+				}
+				elemNum++
+			}
+
+		case lnTOKEN:
+			if dc > 0 {
+				terminalIdx++
+			}
+			if dc == 0 {
+				elemNum++
+			}
+
+		default:
+			terminalIdx++
+		}
+	}
+	return terminalIdx, elemNum
 }
