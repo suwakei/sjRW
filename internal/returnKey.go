@@ -59,9 +59,9 @@ func searchKeyTerminus(internalIdx uint, inputRune []rune) uint {
 		terminalIdx uint = internalIdx
 	)
 
-	for {
-		curToken = inputRune[terminalIdx]
-		peekToken = inputRune[terminalIdx + 1]
+	for ;; internalIdx++ {
+		curToken = inputRune[internalIdx]
+		peekToken = inputRune[internalIdx + 1]
 		switch curToken {
 		case DOUBLEQUOTE:
 			dc++
