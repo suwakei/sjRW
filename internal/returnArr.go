@@ -22,7 +22,29 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		for {
 			curToken = inputRune[idx]
 			switch curToken {
-				case 
+			case RBRACKET:
+				break
+
+			case SPACE, TAB:
+				idx++
+				continue
+
+			case lrTOKEN:
+				if inputRune[idx + 1] == lnTOKEN {
+					idx++
+					continue
+				} else {
+					idx++
+					lineCount++
+				}
+
+			case lnTOKEN:
+				idx++
+				lineCount++
+
+			default:
+				idx++
+				break
 			}
 		}
 	}
