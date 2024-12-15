@@ -2,7 +2,6 @@ package internal
 
 import (
 	"fmt"
-	"strings"
 )
 
 
@@ -36,18 +35,14 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		runeLength uint = uint(len(inputRune)) // The length of input rune slice.
 
-		dc uint8 = 0 // Counter for the number of ".
-		idx uint = 0
-		commonIdx *uint = new(uint)
-		commonLineCount *uint = new(uint) // Counter for current number of line.
+		idx uint
+		returnedIdx uint
+		lineCount uint // Counter for current number of line.
+		returnedLineCount uint
 
 		firstLoop bool = true // First loop flag.
 		keyMode bool = true //  If true, read jsonKey.
 
-		keyBuf strings.Builder // When in "keyMode" is true, buf for accumulating key token.
-		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
-		key string // The variable is for concatenated tokens stored in "keyBuf". 
-		value *SA = new(SA) // The variable is for concatenated tokens stored in "valBuf".
 		returnedSlice []any
 		returnedMap map[string]any
 		returnedKey string
@@ -55,30 +50,20 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	)
 
 	// preallocation of memory.
-	var keyBufMemoryNumber float32 = float32(runeLength) * 0.1
-	keyBuf.Grow(int(keyBufMemoryNumber))
-
-	var valBufMemoryNumber float32 = float32(runeLength) * 0.1
-	valBuf.Grow(int(valBufMemoryNumber))
-
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
 
 
-	for {
+	for ;; idx++ {
 		curToken = inputRune[idx]
 
 		if firstLoop {
 			if _, ok := assembledMap[idx]; !ok {
 				assembledMap[idx] = make(map[string]any, 1)
 			}
-
 			assembledMap[idx][string(curToken)] = ""
 			firstLoop = false
-			idx++
 			continue
 		}
-
-		idx++
 
 		// This if expression for preventation of "index out of range" error.
 		if idx + 1 < runeLength {
@@ -94,21 +79,18 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		// last loop.
 		if (idx + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
-			*commonLineCount++
-			if _, ok := assembledMap[*commonLineCount]; !ok {
-				assembledMap[*commonLineCount] = make(map[string]any, 1)
+			lineCount++
+			if _, ok := assembledMap[lineCount]; !ok {
+				assembledMap[lineCount] = make(map[string]any, 1)
 			}
 
-			assembledMap[*commonLineCount][string(curToken)] = ""
-			keyBuf.Reset()
-			valBuf.Reset()
+			assembledMap[lineCount][string(curToken)] = ""
 			break
 		}
 
 		if keyMode {
-			*commonIdx = idx
-			returnedKey = returnKey(commonIdx, inputRune)
-			idx = *commonIdx
+			returnedIdx, returnedKey = returnKey(idx, inputRune)
+			idx += returnedIdx
 			keyMode = false
 		}
 
@@ -116,290 +98,20 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			keyMode = true
 
 		} else if !keyMode && curToken == LBRACE {
-			*commonIdx = idx
-			returnedSlice = returnArr(commonIdx, commonLineCount, inputRune)
-			idx = *commonIdx
+			returnedIdx, returnedLineCount, returnedSlice = returnArr(idx, lineCount, inputRune)
+			idx += returnedIdx
+			lineCount += returnedLineCount
 			keyMode = true
 
 		} else if !keyMode && !isIgnores(curToken) {
-			*commonIdx = idx
-			returnedValue = returnValue(commonIdx, inputRune)
-			idx = *commonIdx
+			returnedIdx, returnedValue = returnValue(idx, inputRune)
+			idx += returnedIdx
 			keyMode = true
 
 		}else if !keyMode && isIgnores(curToken) {
 			continue
 		}
-
-
-
-
-		switch curToken {
-
-		case SPACE, TAB, COMMA: // "space" "\t" ",".
-			if keyMode {
-				if dc > 0 {
-					keyBuf.WriteRune(curToken)
-				}
-			}
-
-			if !keyMode {
-				if dc > 0 {
-					valBuf.WriteRune(curToken)
-				}
-			}
-
-		case COLON: // ":".
-			if keyMode {
-				if dc == 0 {
-					key = keyBuf.String()
-					keyMode = false
-					continue
-				}
-				keyBuf.WriteRune(curToken)
-			}
-
-			if !keyMode {
-				if dc > 0 {
-					valBuf.WriteRune(curToken)
-				}
-			}
-
-		case DOUBLEQUOTE: // "
-			if keyMode {
-				dc++
-				keyBuf.WriteRune(curToken)
-				if dc == 2 {
-					dc = 0
-				}
-			}
-
-			if !keyMode {
-				dc++
-				valBuf.WriteRune(curToken)
-				if dc == 2 {
-					dc = 0
-				}
-			}
-
-		case BACKSLASH: // "\"
-			if keyMode {
-				keyBuf.WriteRune(curToken)
-				if dc == 1 && peekToken == DOUBLEQUOTE {
-					dc--
-				}
-			}
-
-			if !keyMode {
-				valBuf.WriteRune(curToken)
-				if dc == 1 && peekToken == DOUBLEQUOTE {
-					dc--
-			}
-		}
-
-		case LBRACKET: // "["
-			if keyMode {
-				if dc > 0 {
-					keyBuf.WriteRune(curToken)
-				}
-			}
-
-			if !keyMode {
-				if dc == 0 {
-					*commonIdx = idx
-					rs = returnArr(commonIdx, commonLineCount, inputRune)
-					value.valArrAny = rs
-					keyBuf.Reset()
-					valBuf.Reset()
-					idx = *commonIdx
-				}
-
-				if dc > 0 {
-					valBuf.WriteRune(curToken)
-				}
-			}
-
-		case LBRACE:
-			if keyMode {
-				if dc > 0 {
-					keyBuf.WriteRune(curToken)
-				}
-			}
-
-			if !keyMode {
-				if dc == 0 {
-					*commonIdx = idx
-					rm = returnObj(commonIdx, commonLineCount, inputRune)
-					value.valMap = rm
-					keyBuf.Reset()
-					valBuf.Reset()
-					idx = *commonIdx
-				}
-
-				if dc > 0 {
-					valBuf.WriteRune(curToken)
-				}
-			}
-
-		case RBRACE, RBRACKET: // "}" "]"
-			if keyMode {
-				if dc > 0 {
-					keyBuf.WriteRune(curToken)
-				}
-			}
-
-			if !keyMode {
-				if dc > 0 {
-					valBuf.WriteRune(curToken)
-				}
-			}
-
-		case lrTOKEN: // "\r"
-			if keyMode {
-				if dc > 0 {
-					keyBuf.WriteRune(curToken)
-				}
-			}
-
-			if !keyMode {
-				if dc > 0 {
-					valBuf.WriteRune(curToken)
-				}
-
-				if dc == 0 {
-					if peekToken == lnTOKEN {
-						continue
-					}
-
-					if peekToken != lnTOKEN {
-						*commonLineCount++
-						value.valStr = valBuf.String()
-
-					if _, ok := assembledMap[*commonLineCount]; !ok {
-						assembledMap[*commonLineCount] = make(map[string]any, 1)
-						if value.valArrAny == nil && value.valMap == nil {
-							assembledMap[*commonLineCount][key] = value.valStr
-						}
-
-						if value.valArrAny != nil {
-							assembledMap[*commonLineCount][key] = value.valArrAny
-							value.valArrAny = nil
-						}
-
-						if value.valMap != nil {
-							assembledMap[*commonLineCount][key] = value.valMap
-							value.valMap = nil
-						}
-					}
-					keyBuf.Reset()
-					valBuf.Reset()
-					keyMode = true
-					}
-				}
-			}
-
-		case lnTOKEN: // "\n"
-			if keyMode {
-				if dc > 0 {
-					keyBuf.WriteRune(curToken)
-					continue
-				}
-			}
-
-			if !keyMode {
-				if dc > 0 {
-					valBuf.WriteRune(curToken)
-					continue
-				}
-
-				if dc == 0 {
-					*commonLineCount++
-					value.valStr = valBuf.String()
-
-					if _, ok := assembledMap[*commonLineCount]; !ok {
-						assembledMap[*commonLineCount] = make(map[string]any, 1)
-						if value.valArrAny == nil && value.valMap == nil {
-							assembledMap[*commonLineCount][key] = value.valStr
-						}
-
-						if value.valArrAny != nil {
-							assembledMap[*commonLineCount][key] = value.valArrAny
-							value.valArrAny = nil
-						}
-
-						if value.valMap != nil {
-							assembledMap[*commonLineCount][key] = value.valMap
-							value.valMap = nil
-						}
-					}
-					keyBuf.Reset()
-					valBuf.Reset()
-					keyMode = true
-			}
-		}
-
-		default: // undefined token
-			if keyMode {
-				keyBuf.WriteRune(curToken)
-			}
-			if !keyMode {
-				valBuf.WriteRune(curToken)
-			}
-		}
 	}
-	return assembledMap
-	}
-
-
-func commaNum(curIdx uint, r []rune) uint {
-	var (
-		dc uint8 = 0 // dc stands for doubleQuoteCount
-		commaCount uint = 0 // Counter for the number of commas
-		lBracketCount uint = 0 // Counter for the number of left brackets
-		rBracketCount uint = 0 // Counter for the number of right brackets
-		lBraceCount uint = 0 // Counter for the number of left braces
-		rBraceCount uint = 0 // Counter for the number of right braces
-	)
-
-	for i := curIdx;; i++ {
-		if r[i] == BACKSLASH && r[i + 1] == DOUBLEQUOTE {
-			dc--
-		}
-
-		if r[i] == DOUBLEQUOTE {
-			dc++
-			if dc == 2 {
-				dc = 0
-			}
-		}
-
-		if dc == 0 && r[i] == COMMA {
-			commaCount++
-		}
-
-		if dc == 0 && r[i] == LBRACKET {
-			lBracketCount++
-		}
-
-		if dc == 0 && r[i] == RBRACKET {
-			rBracketCount++
-			if lBracketCount == rBracketCount {
-				break
-			}
-		}
-
-		if dc == 0 && r[i] == LBRACE {
-			lBraceCount++
-		}
-
-		if dc == 0 && r[i] == RBRACE {
-			rBraceCount++
-			if lBraceCount == rBraceCount {
-				break
-			}
-		}
-	}
-	return commaCount + 1
 }
 
 // "lnNum" returns the number of "\n" or "\r" from "r".

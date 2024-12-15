@@ -4,13 +4,13 @@ import (
 	"strings"
 )
 
-func returnKey(commonIdx *uint, inputRune []rune) (key string){
+func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 	var (
 		dc uint8
 		curToken rune
 		peekToken rune
 		keyBuf strings.Builder
-		internalIdx uint = *commonIdx
+		internalIdx uint = idx
 		keyTerminus int = int(searchKeyTerminus(internalIdx, inputRune))
 	)
 
@@ -46,8 +46,8 @@ func returnKey(commonIdx *uint, inputRune []rune) (key string){
 		}
 	}
 	key = keyBuf.String()
-	*commonIdx = internalIdx
-	return key
+	returnedIdx = internalIdx
+	return returnedIdx, key
 }
 
 

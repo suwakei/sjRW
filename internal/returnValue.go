@@ -5,14 +5,14 @@ import (
 	"strconv"
 )
 
-func returnValue(commonIdx *uint, inputRune []rune) (value any) {
+func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
     var (
 		dc uint8
 		ss string
 		curToken rune
 		peekToken rune
 		valBuf strings.Builder
-		internalIdx uint = *commonIdx
+		internalIdx uint = idx
 		valueTerminus int = int(searchValueTerminus(internalIdx, inputRune))
 	)
 
@@ -24,6 +24,13 @@ func returnValue(commonIdx *uint, inputRune []rune) (value any) {
 		peekToken = inputRune[internalIdx + 1]
 
 		switch curToken {
+		case SPACE, TAB:
+			if dc > 0 {
+				valBuf.WriteRune(curToken)
+				continue
+			}
+			continue
+		
 		case DOUBLEQUOTE:
 			valBuf.WriteRune(curToken)
 			dc++
@@ -37,18 +44,39 @@ func returnValue(commonIdx *uint, inputRune []rune) (value any) {
 				dc--
 			}
 
-		case lrTOKEN:
+		case COMMA:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
 			}
 
 			if dc == 0 {
-				if peekToken == lnTOKEN {
-					continue
-				}
-
 				ss = valBuf.String()
 				value = determineType(ss)
+			}
+
+		case RBRACKET:
+			if dc > 0 {
+				valBuf.WriteRune(curToken)
+			}
+
+			if dc == 0 {
+				ss = valBuf.String()
+				value = determineType(ss)
+			}
+
+		case RBRACE:
+			if dc > 0 {
+				valBuf.WriteRune(curToken)
+			}
+
+			if dc == 0 {
+				ss = valBuf.String()
+				value = determineType(ss)
+			}
+
+		case lrTOKEN:
+			if dc > 0 {
+				valBuf.WriteRune(curToken)
 			}
 
 		case lnTOKEN:
@@ -56,24 +84,12 @@ func returnValue(commonIdx *uint, inputRune []rune) (value any) {
 				valBuf.WriteRune(curToken)
 			}
 
-			if dc == 0 {
-				ss = valBuf.String()
-				value = determineType(ss)
-			}
-
 		default:
 			valBuf.WriteRune(curToken)
-
-			if dc == 0 {
-				if curToken == RBRACE || curToken == RBRACKET {
-					ss = valBuf.String()
-					value = determineType(ss)
-				}
-			}
 		}
 	}
-	*commonIdx = internalIdx
-	return value
+	returnedIdx = internalIdx
+	return returnedIdx, value
 	}
 
 
@@ -102,25 +118,41 @@ func searchValueTerminus(internalIdx uint, inputRune []rune) uint {
 				terminalIdx++
 			}
 
+		case COMMA:
+			if dc > 0 {
+				terminalIdx++
+			}
+
+			if dc == 0 {
+				return terminalIdx
+			}
+
+		case RBRACKET:
+			if dc > 0 {
+				terminalIdx++
+			}
+
+			if dc == 0 {
+				return terminalIdx
+			}
+
+		case RBRACE:
+			if dc > 0 {
+				terminalIdx++
+			}
+
+			if dc == 0 {
+				return terminalIdx
+			}
+
 		case lrTOKEN:
 			if dc > 0 {
 				terminalIdx++
 			}
 
-			if dc == 0 {
-				if peekToken == lnTOKEN {
-					continue
-				}
-				return terminalIdx
-			}
-
 		case lnTOKEN:
 			if dc > 0 {
 				terminalIdx++
-			}
-
-			if dc == 0 {
-				return terminalIdx
 			}
 
 		default:
@@ -131,16 +163,12 @@ func searchValueTerminus(internalIdx uint, inputRune []rune) uint {
 
 
 func determineType(ss string) any {
-	var value any
-
 	if num, err := strconv.Atoi(ss); err == nil {
-		value = num
-		return value
+		return num
 
 	} else if tr := strings.TrimSpace(ss); tr == "true" || tr == "false" {
 		b, _ := strconv.ParseBool(tr)
-		value = b
-		return value
+		return b
 
 	} else {
 		return ss
