@@ -10,7 +10,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		curIdx uint
 		curToken rune
 		returnedValue any
-		_, commanum = commaNum(idx, inputRune)// the number of commas, uses for allocating memory of "tempSlice"
+		arrTerminus, commanum = getArrTerminusAndComma(idx, inputRune)// the number of commas, uses for allocating memory of "tempSlice"
 	)
 	// preallocate memory
 	rs = make([]any, 0, commanum)
@@ -52,7 +52,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 }
 
 
-func commaNum(internalIdx uint, inputRune []rune) (uint, uint) {
+func getArrTerminusAndComma(internalIdx uint, inputRune []rune) (uint, uint) {
 	var (
 		dc uint8 = 0 // dc stands for doubleQuoteCount
 		commaCount uint = 0 // Counter for the number of commas
