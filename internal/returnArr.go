@@ -33,6 +33,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 				if inputRune[idx + 1] == lnTOKEN {
 					idx++
 					continue
+
 				} else {
 					idx++
 					lineCount++
