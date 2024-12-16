@@ -89,17 +89,20 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		if !keyMode && curToken == LBRACKET {
 			keyMode = true
+    continue
 
 		} else if !keyMode && curToken == LBRACE {
 			returnedIdx, returnedLineCount, returnedSlice = returnArr(idx, lineCount, inputRune)
 			idx += returnedIdx
 			lineCount += returnedLineCount
 			keyMode = true
+    continue
 
 		} else if !keyMode && !isIgnores(curToken) {
 			returnedIdx, returnedValue = returnValue(idx, inputRune)
 			idx += returnedIdx
 			keyMode = true
+    continue
 
 		}else if !keyMode && isIgnores(curToken) {
 			continue
