@@ -20,13 +20,6 @@ const (
 	BACKSLASH = '\\'
 	)
 
-
-type SA struct {
-	valStr string
-	valArrAny []any
-	valMap map[string]any
-}
-
 // AssembleMap returns map created by input []rune
 func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	var (
