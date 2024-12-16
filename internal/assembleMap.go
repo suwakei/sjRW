@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+    "strings"
 )
 
 
@@ -35,6 +36,9 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		firstLoop bool = true // First loop flag.
 		keyMode bool = true //  If true, read jsonKey.
+
+        keyBuf strings.Builder
+        valBuf strings.Builder
 
 		returnedSlice []any
 		returnedMap map[string]any
@@ -82,7 +86,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		}
 
 		if keyMode {
-			returnedIdx, returnedKey = returnKey(idx, inputRune)
+			returnedIdx, returnedKey = returnKey(idx, inputRune, keyBuf)
 			idx += returnedIdx
 			keyMode = false
 		}
@@ -99,7 +103,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
     continue
 
 		} else if !keyMode && !isIgnores(curToken) {
-			returnedIdx, returnedValue = returnValue(idx, inputRune)
+			returnedIdx, returnedValue = returnValue(idx, inputRune, valBuf)
 			idx += returnedIdx
 			keyMode = true
     continue
