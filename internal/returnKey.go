@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+interkalIdxをidxにする
 func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 	var (
 		dc uint8
