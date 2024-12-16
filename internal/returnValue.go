@@ -5,13 +5,13 @@ import (
 	"strconv"
 )
 
-func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
+internalidxをidxにする
+func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedIdx uint, value any) {
     var (
 		dc uint8
 		ss string
 		curToken rune
 		peekToken rune
-		valBuf strings.Builder
 		internalIdx uint = idx
 		valueTerminus int = int(searchValueTerminus(internalIdx, inputRune))
 	)
@@ -19,7 +19,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 	// preallocation of memory.
 	valBuf.Grow(valueTerminus)
 
-	for ; internalIdx <= uint(valueTerminus); internalIdx++ {
+	for ;; internalIdx++ {
 		curToken = inputRune[internalIdx]
 		peekToken = inputRune[internalIdx + 1]
 
@@ -62,6 +62,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 			if dc == 0 {
 				ss = valBuf.String()
 				value = determineType(ss)
+   break
 			}
 
 		case RBRACE:
@@ -72,6 +73,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 			if dc == 0 {
 				ss = valBuf.String()
 				value = determineType(ss)
+    break
 			}
 
 		case lrTOKEN:
@@ -88,6 +90,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 			valBuf.WriteRune(curToken)
 		}
 	}
+valBuf.Reset()
 	returnedIdx = internalIdx
 	return returnedIdx, value
 	}
