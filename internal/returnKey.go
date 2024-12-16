@@ -5,12 +5,12 @@ import (
 )
 
 interkalIdxをidxにする
-func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
+それぞれの関数でstrings.Builder型を引数にとる
+func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx uint, key string){
 	var (
 		dc uint8
 		curToken rune
 		peekToken rune
-		keyBuf strings.Builder
 		internalIdx uint = idx
 		keyTerminus int = int(searchKeyTerminus(internalIdx, inputRune))
 	)
@@ -47,6 +47,7 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 		}
 	}
 	key = keyBuf.String()
+ keyBuf.Reset()
 	returnedIdx = internalIdx
 	return returnedIdx, key
 }
