@@ -1,7 +1,7 @@
 package testdata
 
-const Expected1 = 
-`[
+const Expected1 = `
+[
     {
       "_id": "672d31b26f1316908fa81a41",
       "index": 0,

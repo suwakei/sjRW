@@ -1,7 +1,7 @@
 package internal
 
 import (
-
+	"strings"
 )
 
 // returnSliceOrMapAndCount returns *RV.
@@ -10,50 +10,16 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		curIdx uint
 		curToken rune
 		returnedValue any
-		arrTerminus, commanum = getArrTerminusAndComma(idx, inputRune)// the number of commas, uses for allocating memory of "tempSlice"
+		arrTerminus, commanum = getArrTerminusAndCommaNum(idx, inputRune)// the number of commas, uses for allocating memory of "tempSlice"
 	)
 	// preallocate memory
 	rs = make([]any, 0, commanum)
 
-	for {
-		curIdx, returnedValue := returnValue(idx, inputRune)
-		idx += curIdx
-		rs = append(rs, returnedValue)
-		for {
-			curToken = inputRune[idx]
-			switch curToken {
-			case RBRACKET:
-				break
-
-			case SPACE, TAB:
-				idx++
-				continue
-
-			case lrTOKEN:
-				if inputRune[idx + 1] == lnTOKEN {
-					idx++
-					continue
-
-				} else {
-					idx++
-					lineCount++
-				}
-
-			case lnTOKEN:
-				idx++
-				lineCount++
-
-			default:
-				idx++
-				break
-			}
-		}
-	}
-	return returnedIdx, returnedLineCount, rs
+	str := getArrBlock(idx, arrTerminus, inputRune)
 }
 
 
-func getArrTerminusAndComma(internalIdx uint, inputRune []rune) (uint, uint) {
+func getArrTerminusAndCommaNum(internalIdx uint, inputRune []rune) (uint, uint) {
 	var (
 		dc uint8 = 0 // dc stands for doubleQuoteCount
 		commaCount uint = 0 // Counter for the number of commas
@@ -105,4 +71,19 @@ func getArrTerminusAndComma(internalIdx uint, inputRune []rune) (uint, uint) {
 		}
 	internalIdx++
 	}
+}
+
+func getArrBlock(idx uint, arrTerminus uint, inputRune []rune) string {
+	var (
+		curToken rune = inputRune[idx]
+		strBuf strings.Builder
+	)
+
+	for {
+		if idx != arrTerminus {
+			strBuf.WriteRune(curToken)
+			break
+		}
+	}
+	return strBuf.String()
 }
