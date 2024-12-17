@@ -4,23 +4,21 @@ import (
 	"strings"
 )
 
-interkalIdxをidxにする
-それぞれの関数でstrings.Builder型を引数にとる
+
 func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx uint, key string){
 	var (
 		dc uint8
 		curToken rune
 		peekToken rune
-		internalIdx uint = idx
-		keyTerminus int = int(searchKeyTerminus(internalIdx, inputRune))
+		keyTerminus int = int(searchKeyTerminus(idx, inputRune))
 	)
 
 	// preallocation of memory.
 	keyBuf.Grow(keyTerminus)
 
-	for ; internalIdx <= uint(keyTerminus); internalIdx++ {
-		curToken = inputRune[internalIdx]
-		peekToken = inputRune[internalIdx + 1]
+	for ; idx <= uint(keyTerminus); idx++ {
+		curToken = inputRune[idx]
+		peekToken = inputRune[idx + 1]
 
 		switch curToken {
 		case DOUBLEQUOTE:
@@ -48,7 +46,7 @@ func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx 
 	}
 	key = keyBuf.String()
  keyBuf.Reset()
-	returnedIdx = internalIdx
+	returnedIdx = idx
 	return returnedIdx, key
 }
 
