@@ -51,6 +51,7 @@ func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedId
 			if dc == 0 {
 				ss = valBuf.String()
 				value = determineType(ss)
+				valBuf.Reset()
 			}
 
 		case RBRACKET:
@@ -61,7 +62,9 @@ func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedId
 			if dc == 0 {
 				ss = valBuf.String()
 				value = determineType(ss)
-				break
+				valBuf.Reset()
+				returnedIdx = idx
+				return returnedIdx, value
 			}
 
 		case RBRACE:
@@ -72,7 +75,9 @@ func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedId
 			if dc == 0 {
 				ss = valBuf.String()
 				value = determineType(ss)
-				break
+				valBuf.Reset()
+				returnedIdx = idx
+				return returnedIdx, value
 			}
 
 		case lrTOKEN:
@@ -86,13 +91,12 @@ func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedId
 			}
 
 		default:
-			valBuf.WriteRune(curToken)
+			if dc > 0 {
+				valBuf.WriteRune(curToken)
+			}
 		}
 	}
-valBuf.Reset()
-	returnedIdx = idx
-	return returnedIdx, value
-	}
+}
 
 
 func searchValueTerminus(internalIdx uint, inputRune []rune) uint {
@@ -105,57 +109,22 @@ func searchValueTerminus(internalIdx uint, inputRune []rune) uint {
 
 	for ;; internalIdx++{
 		curToken = inputRune[internalIdx]
-		peekToken = inputRune[internalIdx + 1]
 		switch curToken {
 		case DOUBLEQUOTE:
 			dc++
 			terminalIdx++
 			if dc == 2 {
 				dc = 0
+				return terminalIdx
 			}
 
 		case BACKSLASH:
-			if dc > 0 && peekToken == DOUBLEQUOTE {
+			if dc > 0 {
+				if peekToken = inputRune[internalIdx + 1]; peekToken == DOUBLEQUOTE {
 				dc--
-				terminalIdx++
 			}
-
-		case COMMA:
-			if dc > 0 {
-				terminalIdx++
-			}
-
-			if dc == 0 {
-				return terminalIdx
-			}
-
-		case RBRACKET:
-			if dc > 0 {
-				terminalIdx++
-			}
-
-			if dc == 0 {
-				return terminalIdx
-			}
-
-		case RBRACE:
-			if dc > 0 {
-				terminalIdx++
-			}
-
-			if dc == 0 {
-				return terminalIdx
-			}
-
-		case lrTOKEN:
-			if dc > 0 {
-				terminalIdx++
-			}
-
-		case lnTOKEN:
-			if dc > 0 {
-				terminalIdx++
-			}
+			terminalIdx++
+		}
 
 		default:
 			terminalIdx++

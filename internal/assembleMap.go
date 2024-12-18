@@ -1,8 +1,7 @@
 package internal
 
 import (
-	"fmt"
-    "strings"
+	"strings"
 )
 
 
@@ -25,7 +24,6 @@ const (
 func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	var (
 		curToken rune // The target token.
-		peekToken rune // The token for confirmation of next character.
 
 		runeLength uint = uint(len(inputRune)) // The length of input rune slice.
 
@@ -49,7 +47,6 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	// preallocation of memory.
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
 
-
 	for ;; idx++ {
 		curToken = inputRune[idx]
 
@@ -62,18 +59,6 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			continue
 		}
 
-		// This if expression for preventation of "index out of range" error.
-		if idx + 1 < runeLength {
-		peekToken = inputRune[idx + 1]
-		}
-
-		/* Delete when debug finished */
-		a := string(curToken)
-		b := string(peekToken)
-		fmt.Println(a)
-		fmt.Println(b)
-
-
 		// last loop.
 		if (idx + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
 			lineCount++
@@ -85,6 +70,10 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			break
 		}
 
+		if curToken == lnTOKEN {
+			lineCount++
+		}
+
 		if keyMode {
 			returnedIdx, returnedKey = returnKey(idx, inputRune, keyBuf)
 			idx += returnedIdx
@@ -92,26 +81,42 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		}
 
 		if !keyMode && curToken == LBRACKET {
-			keyMode = true
-    continue
-
-		} else if !keyMode && curToken == LBRACE {
 			returnedIdx, returnedLineCount, returnedSlice = returnArr(idx, lineCount, inputRune)
 			idx += returnedIdx
 			lineCount += returnedLineCount
+			if _, ok := assembledMap[lineCount]; !ok {
+				assembledMap[lineCount] = make(map[string]any, 1)
+				assembledMap[lineCount][returnedKey] = returnedSlice
+			}
 			keyMode = true
-    continue
+			continue
+
+		} else if !keyMode && curToken == LBRACE {
+			returnedIdx, returnedLineCount, returnedMap = returnObj(idx, lineCount, inputRune)
+			idx += returnedIdx
+			lineCount += returnedLineCount
+			if _, ok := assembledMap[lineCount]; !ok {
+				assembledMap[lineCount] = make(map[string]any, 1)
+				assembledMap[lineCount][returnedKey] = returnedMap
+			}
+			keyMode = true
+			continue
 
 		} else if !keyMode && !isIgnores(curToken) {
 			returnedIdx, returnedValue = returnValue(idx, inputRune, valBuf)
 			idx += returnedIdx
+			if _, ok := assembledMap[lineCount]; !ok {
+				assembledMap[lineCount] = make(map[string]any, 1)
+				assembledMap[lineCount][returnedKey] = returnedValue
+			}
 			keyMode = true
-    continue
+			continue
 
 		}else if !keyMode && isIgnores(curToken) {
 			continue
 		}
 	}
+	return assembledMap
 }
 
 // "lnNum" returns the number of "\n" or "\r" from "r".

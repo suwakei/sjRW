@@ -16,11 +16,17 @@ func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx 
 	// preallocation of memory.
 	keyBuf.Grow(keyTerminus)
 
-	for ; idx <= uint(keyTerminus); idx++ {
+	for ;; idx++ {
 		curToken = inputRune[idx]
 		peekToken = inputRune[idx + 1]
 
 		switch curToken {
+		case SPACE, TAB:
+			if dc > 0 {
+				keyBuf.WriteRune(curToken)
+			}
+			continue
+
 		case DOUBLEQUOTE:
 			keyBuf.WriteRune(curToken)
 			dc++
@@ -40,14 +46,19 @@ func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx 
 			}
 
 			if dc == 0 {
-				break
+				key = keyBuf.String()
+				keyBuf.Reset()
+				returnedIdx = idx
+				return returnedIdx, key
+			}
+
+		default:
+			if dc > 0 {
+				keyBuf.WriteRune(curToken)
 			}
 		}
 	}
-	key = keyBuf.String()
- keyBuf.Reset()
-	returnedIdx = idx
-	return returnedIdx, key
+	return 0, ""
 }
 
 
