@@ -29,7 +29,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		idx uint
 		returnedIdx uint
-		lineCount uint // Counter for current number of line.
+		lineCount uint = 1 // Counter for current number of line.
 		returnedLineCount uint
 
 		firstLoop bool = true // First loop flag.
@@ -46,15 +46,17 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 	// preallocation of memory.
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
+	keyBuf.Grow(20)
+	keyBuf.Grow(40)
 
 	for ;; idx++ {
 		curToken = inputRune[idx]
 
 		if firstLoop {
-			if _, ok := assembledMap[idx]; !ok {
-				assembledMap[idx] = make(map[string]any, 1)
+			if _, ok := assembledMap[lineCount]; !ok {
+				assembledMap[lineCount] = make(map[string]any, 1)
 			}
-			assembledMap[idx][string(curToken)] = ""
+			assembledMap[lineCount][string(curToken)] = ""
 			firstLoop = false
 			continue
 		}
@@ -70,20 +72,34 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			break
 		}
 
+		if curToken == lrTOKEN {
+			if inputRune[idx + 1] == lnTOKEN {
+				continue
+			}
+			lineCount++
+			continue
+		}
+
 		if curToken == lnTOKEN {
 			lineCount++
+			continue
+		}
+
+		if keyMode && isIgnores(curToken) {
+			continue
 		}
 
 		if keyMode {
 			returnedIdx, returnedKey = returnKey(idx, inputRune, keyBuf)
-			idx += returnedIdx
+			idx = returnedIdx
 			keyMode = false
 		}
 
 		if !keyMode && curToken == LBRACKET {
 			returnedIdx, returnedLineCount, returnedSlice = returnArr(idx, lineCount, inputRune)
-			idx += returnedIdx
-			lineCount += returnedLineCount
+			idx = returnedIdx
+			lineCount = returnedLineCount
+
 			if _, ok := assembledMap[lineCount]; !ok {
 				assembledMap[lineCount] = make(map[string]any, 1)
 				assembledMap[lineCount][returnedKey] = returnedSlice
@@ -93,8 +109,9 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		} else if !keyMode && curToken == LBRACE {
 			returnedIdx, returnedLineCount, returnedMap = returnObj(idx, lineCount, inputRune)
-			idx += returnedIdx
-			lineCount += returnedLineCount
+			idx = returnedIdx
+			lineCount = returnedLineCount
+
 			if _, ok := assembledMap[lineCount]; !ok {
 				assembledMap[lineCount] = make(map[string]any, 1)
 				assembledMap[lineCount][returnedKey] = returnedMap
@@ -104,7 +121,8 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		} else if !keyMode && !isIgnores(curToken) {
 			returnedIdx, returnedValue = returnValue(idx, inputRune, valBuf)
-			idx += returnedIdx
+			idx = returnedIdx
+
 			if _, ok := assembledMap[lineCount]; !ok {
 				assembledMap[lineCount] = make(map[string]any, 1)
 				assembledMap[lineCount][returnedKey] = returnedValue

@@ -58,7 +58,6 @@ func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx 
 			}
 		}
 	}
-	return 0, ""
 }
 
 

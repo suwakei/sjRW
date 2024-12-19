@@ -52,6 +52,8 @@ func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedId
 				ss = valBuf.String()
 				value = determineType(ss)
 				valBuf.Reset()
+				returnedIdx = idx
+				return returnedIdx, value
 			}
 
 		case RBRACKET:
