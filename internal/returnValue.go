@@ -12,11 +12,8 @@ func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedId
 		ss string
 		curToken rune
 		peekToken rune
-		valueTerminus int = int(searchValueTerminus(idx, inputRune))
 	)
 
-	// preallocation of memory.
-	valBuf.Grow(valueTerminus)
 
 	for ;; idx++ {
 		curToken = inputRune[idx]
@@ -96,40 +93,6 @@ func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedId
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
 			}
-		}
-	}
-}
-
-
-func searchValueTerminus(internalIdx uint, inputRune []rune) uint {
-	var (
-		dc uint8
-		curToken rune
-		peekToken rune
-		terminalIdx uint = internalIdx
-	)
-
-	for ;; internalIdx++{
-		curToken = inputRune[internalIdx]
-		switch curToken {
-		case DOUBLEQUOTE:
-			dc++
-			terminalIdx++
-			if dc == 2 {
-				dc = 0
-				return terminalIdx
-			}
-
-		case BACKSLASH:
-			if dc > 0 {
-				if peekToken = inputRune[internalIdx + 1]; peekToken == DOUBLEQUOTE {
-				dc--
-			}
-			terminalIdx++
-		}
-
-		default:
-			terminalIdx++
 		}
 	}
 }

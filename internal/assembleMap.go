@@ -46,7 +46,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 	// preallocation of memory.
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
-	keyBuf.Grow(20)
+	keyBuf.Grow(20) /* dont use magic number */
 	keyBuf.Grow(40)
 
 	for ;; idx++ {

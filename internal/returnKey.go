@@ -10,11 +10,7 @@ func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx 
 		dc uint8
 		curToken rune
 		peekToken rune
-		keyTerminus int = int(searchKeyTerminus(idx, inputRune))
 	)
-
-	// preallocation of memory.
-	keyBuf.Grow(keyTerminus)
 
 	for ;; idx++ {
 		curToken = inputRune[idx]
@@ -56,43 +52,6 @@ func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx 
 			if dc > 0 {
 				keyBuf.WriteRune(curToken)
 			}
-		}
-	}
-}
-
-
-func searchKeyTerminus(internalIdx uint, inputRune []rune) uint {
-	var (
-		dc uint8
-		curToken rune
-		peekToken rune
-		terminalIdx uint = internalIdx
-	)
-
-	for ;; internalIdx++ {
-		curToken = inputRune[internalIdx]
-		peekToken = inputRune[internalIdx + 1]
-		switch curToken {
-		case DOUBLEQUOTE:
-			dc++
-			terminalIdx++
-			if dc == 2 {
-				dc = 0
-			}
-
-		case BACKSLASH:
-			if dc > 0 && peekToken == DOUBLEQUOTE {
-				dc--
-				terminalIdx++
-			}
-
-		case COLON:
-			if dc == 0 {
-				return terminalIdx
-			}
-
-		default:
-			terminalIdx++
 		}
 	}
 }
