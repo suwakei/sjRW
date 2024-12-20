@@ -42,3 +42,6 @@ func (b *Buffer) bufReset() {
 	b.address = nil
 	b.buf = nil
 }
+
+
+func (b *Buffer) Available() int { return cap(b.buf) - len(b.buf) }
