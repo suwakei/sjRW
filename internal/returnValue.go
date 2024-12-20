@@ -6,13 +6,16 @@ import (
 )
 
 
-func returnValue(idx uint, inputRune []rune, valBuf strings.Builder) (returnedIdx uint, value any) {
+func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
     var (
 		dc uint8
 		ss string
 		curToken rune
 		peekToken rune
+		valBuf strings.Builder
 	)
+	// preallocate memory
+	valBuf.Grow(40)
 
 
 	for ;; idx++ {

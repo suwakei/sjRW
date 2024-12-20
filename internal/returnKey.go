@@ -5,12 +5,15 @@ import (
 )
 
 
-func returnKey(idx uint, inputRune []rune, keyBuf strings.Builder) (returnedIdx uint, key string){
+func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 	var (
 		dc uint8
 		curToken rune
 		peekToken rune
+		keyBuf strings.Builder
 	)
+	// preallocate memory
+	keyBuf.Grow(20)
 
 	for ;; idx++ {
 		curToken = inputRune[idx]

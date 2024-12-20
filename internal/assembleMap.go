@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"strings"
+	
 )
 
 
@@ -35,9 +35,6 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		firstLoop bool = true // First loop flag.
 		keyMode bool = true //  If true, read jsonKey.
 
-        keyBuf strings.Builder
-        valBuf strings.Builder
-
 		returnedSlice []any
 		returnedMap map[string]any
 		returnedKey string
@@ -46,8 +43,6 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 	// preallocation of memory.
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
-	keyBuf.Grow(20) /* dont use magic number */
-	keyBuf.Grow(40)
 
 	for ;; idx++ {
 		curToken = inputRune[idx]
@@ -90,7 +85,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		}
 
 		if keyMode {
-			returnedIdx, returnedKey = returnKey(idx, inputRune, keyBuf)
+			returnedIdx, returnedKey = returnKey(idx, inputRune)
 			idx = returnedIdx
 			keyMode = false
 		}
@@ -120,7 +115,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			continue
 
 		} else if !keyMode && !isIgnores(curToken) {
-			returnedIdx, returnedValue = returnValue(idx, inputRune, valBuf)
+			returnedIdx, returnedValue = returnValue(idx, inputRune)
 			idx = returnedIdx
 
 			if _, ok := assembledMap[lineCount]; !ok {
