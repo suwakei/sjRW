@@ -6,18 +6,18 @@ import (
 
 
 const (
-	SPACE = ' '
-	TAB = '\t'
-	lnTOKEN = '\n'
-	lrTOKEN = '\r'
-	DOUBLEQUOTE = '"'
-	COLON = ':'
-	LBRACE = '{'
-	RBRACE = '}'
-	LBRACKET = '['
-	RBRACKET = ']'
-	COMMA = ','
-	BACKSLASH = '\\'
+	SPACE rune = ' '
+	TAB rune = '\t'
+	lnTOKEN rune = '\n'
+	lrTOKEN rune = '\r'
+	DOUBLEQUOTE rune = '"'
+	COLON rune = ':'
+	LBRACE rune = '{'
+	RBRACE rune = '}'
+	LBRACKET rune = '['
+	RBRACKET rune = ']'
+	COMMA rune = ','
+	BACKSLASH rune = '\\'
 	)
 
 // AssembleMap returns map created by input []rune
@@ -88,6 +88,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			returnedIdx, returnedKey = returnKey(idx, inputRune)
 			idx = returnedIdx
 			keyMode = false
+			continue
 		}
 
 		if !keyMode && curToken == LBRACKET {
