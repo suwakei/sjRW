@@ -169,5 +169,8 @@ func isIgnores(curToken rune) bool {
 	if curToken == COMMA {
 		return true
 	}
+	if curToken == COLON {
+		return true
+	}
 	return false
 }
