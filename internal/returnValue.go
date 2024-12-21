@@ -20,7 +20,10 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 
 	for ;; idx++ {
 		curToken = inputRune[idx]
-		peekToken = inputRune[idx + 1]
+
+		if int(idx + 1) <= len(inputRune) {
+			peekToken = inputRune[idx + 1]
+		}
 
 		switch curToken {
 		case SPACE, TAB:

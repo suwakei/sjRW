@@ -246,6 +246,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 func mapLength(idx uint, inputRune []rune) uint {
 	var (
 		curToken rune
+		peekToken rune
 		dc uint8
 		mapLength uint
 		lb uint8
@@ -254,6 +255,11 @@ func mapLength(idx uint, inputRune []rune) uint {
 
 	for ;; idx++ {
 		curToken = inputRune[idx]
+
+		if int(idx + 1) <= len(inputRune) {
+			peekToken = inputRune[idx + 1]
+		}
+
 		switch curToken {
 		case DOUBLEQUOTE:
 			dc++
@@ -262,7 +268,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 			}
 
 		case BACKSLASH:
-			if peekToken := inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
+			if peekToken == DOUBLEQUOTE {
 				dc--
 			}
 

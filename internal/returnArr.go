@@ -21,6 +21,10 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 	for ;; idx++ {
 		curToken = inputRune[idx]
 
+		if int(idx + 1) <= len(inputRune) {
+			peekToken = inputRune[idx + 1]
+		}
+
 		switch curToken {
 		case DOUBLEQUOTE:
 			
@@ -32,7 +36,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case BACKSLASH:
 			
 			tempArrBuf.WriteRune(curToken)
-			if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
+			if peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
@@ -96,7 +100,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			}
 
 			if dc == 0 {
-				if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
+				if peekToken == lnTOKEN {
 					
 					continue
 				}
