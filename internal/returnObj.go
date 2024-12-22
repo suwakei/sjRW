@@ -90,6 +90,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 
 				if dc == 0 {
 					key = keyBuf.String()
+  keyBuf.Reset()
 				}
 			}
 
