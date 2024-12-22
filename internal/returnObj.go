@@ -247,6 +247,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 	var (
 		curToken rune
 		peekToken rune
+		firstLoop bool = true
 		dc uint8
 		mapLength uint
 		lb uint8
@@ -258,6 +259,11 @@ func mapLength(idx uint, inputRune []rune) uint {
 
 		if int(idx + 1) <= len(inputRune) {
 			peekToken = inputRune[idx + 1]
+		}
+
+		if firstLoop {
+			idx++
+			firstLoop =  false
 		}
 
 		switch curToken {

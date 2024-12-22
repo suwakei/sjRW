@@ -9,6 +9,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 	var (
 		curToken rune
 		peekToken rune
+		firstLoop bool = true
 		dc uint8
 		ss string
 		arrVal any
@@ -23,6 +24,11 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 
 		if int(idx + 1) <= len(inputRune) {
 			peekToken = inputRune[idx + 1]
+		}
+
+		if firstLoop {
+			idx++
+			firstLoop = false
 		}
 
 		switch curToken {
@@ -168,6 +174,7 @@ func arrLength(idx uint, inputRune []rune) uint {
 			if lb == rb {
 				return arrLength + 1
 			}
+
 		}
 	}
 }
