@@ -16,7 +16,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 	)
 	// preallocate memory
 	rs = make([]any, 0, arrLength(idx, inputRune))
-	tempArrBuf.Grow(10)
+	tempArrBuf.Grow(15)
 
 	for ;; idx++ {
 		curToken = inputRune[idx]
