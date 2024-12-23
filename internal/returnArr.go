@@ -28,7 +28,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 
 		if firstLoop {
 			firstLoop = false
-  continue
+			continue
 		}
 
 		switch curToken {

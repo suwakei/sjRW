@@ -265,6 +265,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 		if firstLoop {
 			idx++
 			firstLoop =  false
+			continue
 		}
 
 		switch curToken {
