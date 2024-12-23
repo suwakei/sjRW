@@ -57,7 +57,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		}
 
 		// last loop.
-		if (idx + 1 == runeLength) && (curToken == RBRACE || curToken == RBRACKET){
+		if idx + 1 == runeLength {
 			lineCount++
 			if _, ok := assembledMap[lineCount]; !ok {
 				assembledMap[lineCount] = make(map[string]any, 1)

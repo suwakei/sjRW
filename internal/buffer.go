@@ -2,6 +2,7 @@ package internal
 
 import (
 	"unsafe"
+	"log"
 )
 
 type Buffer struct {
@@ -43,5 +44,10 @@ func (b *Buffer) bufReset() {
 	b.buf = nil
 }
 
-
-func (b *Buffer) Available() int { return cap(b.buf) - len(b.buf) }
+// resetを使うとGrowした容量が消えて再度Builderを使うときまた再割り当てが発生するため
+// bufの容量を残したままbufの内容を消す処理をする
+// b.buf[:0]で容量のみ遺す
+func (b *Buffer) LeaveCap() {
+	b.address = nil
+	b.buf = b.buf[:0]
+}

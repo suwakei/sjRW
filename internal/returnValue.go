@@ -53,7 +53,11 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 
 			if dc == 0 {
 				ss = valBuf.String()
-				value = determineType(ss)
+				if ss != "" {
+					value = determineType(ss)
+				} else {
+					value = ss
+				}
 				valBuf.Reset()
 				returnedIdx = idx
 				return returnedIdx, value
@@ -96,9 +100,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 			}
 
 		default:
-			if dc > 0 {
-				valBuf.WriteRune(curToken)
-			}
+			valBuf.WriteRune(curToken)
 		}
 	}
 }

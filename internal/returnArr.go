@@ -44,14 +44,12 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 				dc = 0
 			}
 		case BACKSLASH:
-			
 			tempArrBuf.WriteRune(curToken)
 			if peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
 		case LBRACKET:
-			
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			}
@@ -65,14 +63,17 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			}
 
 		case RBRACKET:
-			
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			}
 
 			if dc == 0 {
 				ss = tempArrBuf.String()
-				arrVal = determineType(ss)
+				if ss != "" {
+					arrVal = determineType(ss)
+				} else {
+					arrVal = ss
+				}
 				rs = append(rs, arrVal)
 				returnedIdx = idx
 				returnedLineCount = lineCount
@@ -81,7 +82,6 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			}
 
 		case COMMA:
-			
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			}
@@ -94,7 +94,6 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			}
 
 		case LBRACE:
-			
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			}
@@ -108,13 +107,11 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 
 		case lrTOKEN:
 			if dc > 0 {
-				
 				tempArrBuf.WriteRune(curToken)
 			}
 
 			if dc == 0 {
 				if peekToken == lnTOKEN {
-					
 					continue
 				}
 				
@@ -123,19 +120,15 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		
 		case lnTOKEN:
 			if dc > 0 {
-				
 				tempArrBuf.WriteRune(curToken)
 			}
 
 			if dc == 0 {
-				
 				lineCount++
 			}
 
 		default:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			}
+			tempArrBuf.WriteRune(curToken)
 		}
 	}
 }
