@@ -26,14 +26,18 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			peekToken = inputRune[idx + 1]
 		}
 
-		if firstLoop {
+			if firstLoop {
 			firstLoop = false
 			continue
 		}
 
 		switch curToken {
+		case SPACE, TAB:
+			if dc > 0 {
+				tempArrBuf.WriteRune(curToken)
+			}
+
 		case DOUBLEQUOTE:
-			
 			dc++
 			tempArrBuf.WriteRune(curToken)
 			if dc == 2 {
@@ -57,6 +61,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 				idx += rdx
 				lineCount += rlc
 				rs = append(rs, rrs)
+				tempArrBuf.Reset()
 			}
 
 		case RBRACKET:
@@ -69,8 +74,9 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 				ss = tempArrBuf.String()
 				arrVal = determineType(ss)
 				rs = append(rs, arrVal)
-				returnedIdx = idx + 1
+				returnedIdx = idx
 				returnedLineCount = lineCount
+				tempArrBuf.Reset()
 				return returnedIdx, returnedLineCount, rs
 			}
 
@@ -84,6 +90,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 				ss := tempArrBuf.String()
 				arrVal = determineType(ss)
 				rs = append(rs, arrVal)
+				tempArrBuf.Reset()
 			}
 
 		case LBRACE:
