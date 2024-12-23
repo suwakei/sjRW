@@ -155,7 +155,7 @@ func lnNum(r []rune) uint {
 			lnCount++
 		}
 	}
-	return lnCount
+	return lnCount + 1
 }
 
 
