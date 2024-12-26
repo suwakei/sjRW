@@ -1,10 +1,25 @@
 {
-    "boolArray": [
-        true,
-        false,
-        false,
-        true
-    ],
+    "Dict": {
+        "a": "a",
+        "1": 1,
+        "true": true,
+        "arr": [
+            "arr",
+            123,
+            false,
+            [
+                "arr in arr"
+            ],
+            {
+                "arr in": "obj"
+            }
+        ],
+        "obj": {
+            "arr": 123,
+            "arrlist": "list",
+            "false": false
+        }
+    },
     "numDict": {
         "numArrayInDict": [
             234,
