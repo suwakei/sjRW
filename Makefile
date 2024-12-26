@@ -14,30 +14,30 @@ all:
 # 1回あたりのアロケーション回数(allocs/op) 
 
 b:
-	go test -bench=. -benchmem
+	@go test -bench=. -benchmem
 
 bp:
-	go test -bench=. -benchmem -cpuprofile cpu.prof
+	@go test -bench=. -benchmem -cpuprofile cpu.prof
 
 bm:
-	go test -bench=. -benchmem -memprofile mem.prof
+	@go test -bench=. -benchmem -memprofile mem.prof
 
 bpm:
-	go test -bench=. -benchmem -memprofile mem.prof -cpuprofile cpu.prof
+	@go test -bench=. -benchmem -memprofile mem.prof -cpuprofile cpu.prof
 
 tm:
-	go test -run TestReadAsMapFrom
+	@go test -run TestReadAsMapFrom
 
 ts:
-	go test -run TestReadAsStrFrom
+	@go test -run TestReadAsStrFrom
 
 tb:
-	go test -run TestReadAsByteFrom
+	@go test -run TestReadAsByteFrom
 
 
 test:
-	go test -v .
+	@go test -v .
 
 fmt:
-	echo "[info ***********************formatting****************************]"
-	go fmt ./...
+	@echo "[info ***********************formatting****************************]"
+	@go fmt ./...
