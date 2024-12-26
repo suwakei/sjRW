@@ -1,9 +1,11 @@
 .PHONY: build test clean static_analysis lint vet fmt chkfmt
 
 
+default:
+	all
 
 all:
-	go test -v .
+	test fmt b
 
 
 # 実行した回数
@@ -31,3 +33,11 @@ ts:
 
 tb:
 	go test -run TestReadAsByteFrom
+
+
+test:
+	go test -v .
+
+fmt:
+	echo "[info ***********************formatting****************************]"
+	go fmt ./...
