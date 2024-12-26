@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/suwakei/sjrw"
 )
@@ -26,6 +27,10 @@ func main() {
 		}
 	}()
 
-	m, _ := sj.ReadAsMapFrom(f5)
-	_ = m
+	ext := filepath.Ext(f5.Name())
+
+	if ext == ".json" || ext == ".jsonc" {
+		m, _ := sj.ReadAsMapFrom(f5)
+		_ = m
+	}
 }
