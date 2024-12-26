@@ -22,10 +22,6 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 	for ;; idx++ {
 		curToken = inputRune[idx]
 
-		if int(idx + 1) <= len(inputRune) {
-			peekToken = inputRune[idx + 1]
-		}
-
 			if firstLoop {
 			firstLoop = false
 			continue
@@ -45,7 +41,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			}
 		case BACKSLASH:
 			tempArrBuf.WriteRune(curToken)
-			if peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
@@ -56,8 +52,8 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 
 			if dc == 0 {
 				rdx, rlc, rrs := returnArr(idx, lineCount, inputRune)
-				idx += rdx
-				lineCount += rlc
+				idx = rdx
+				lineCount = rlc
 				rs = append(rs, rrs)
 				tempArrBuf.Reset()
 			}
@@ -71,7 +67,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 				ss = tempArrBuf.String()
 				if ss != "" {
 					arrVal = determineType(ss)
-				} else {
+				} else if ss == "" {
 					arrVal = ss
 				}
 				rs = append(rs, arrVal)
@@ -100,8 +96,8 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 
 			if dc == 0 {
 				rdx, rlc, rrs := returnObj(idx, lineCount, inputRune)
-				idx += rdx
-				lineCount += rlc
+				idx = rdx
+				lineCount = rlc
 				rs = append(rs, rrs)
 			}
 
@@ -111,10 +107,9 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			}
 
 			if dc == 0 {
-				if peekToken == lnTOKEN {
+				if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
 					continue
 				}
-				
 				lineCount++
 			}
 		
@@ -174,7 +169,6 @@ func arrLength(idx uint, inputRune []rune) uint {
 			if lb == rb {
 				return arrLength + 1
 			}
-
 		}
 	}
 }

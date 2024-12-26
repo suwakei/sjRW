@@ -4,7 +4,6 @@ import (
 	"strings"
 )
 
-//returnObjでinf recursionが起きてるっぽい.
 // returnObj returns map[string]any
 func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLineCount uint, rm map[string]any) {
 	var (
@@ -18,7 +17,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 		keyBuf strings.Builder // When in "keyMode" is true, buf for accumulating key token.
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
 		key string // The variable is for concatenated tokens stored in "keyBuf". 
-		value any
+		value any = nil
 	)
 
 	// preallocation of memory
@@ -37,21 +36,19 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			continue
 		}
 
-		if int(idx) + 1 <= len(inputRune) {
-			peekToken = inputRune[idx + 1]
-		}
-
 		switch curToken {
 		case SPACE, TAB:
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+					continue
 				}
 			}
 
@@ -61,6 +58,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				keyBuf.WriteRune(curToken)
 				if dc == 2 {
 					dc = 0
+					continue
 				}
 			}
 
@@ -68,40 +66,48 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				valBuf.WriteRune(curToken)
 				if dc == 2 {
 					dc = 0
+					continue
 				}
 			}
 			
 		case BACKSLASH:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
-				if peekToken == DOUBLEQUOTE {
+				if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
 					dc--
-			}
+					continue
+				}
+				continue
 		}
 
 			if !keyMode {
 				valBuf.WriteRune(curToken)
-				if peekToken == DOUBLEQUOTE {
+				if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
 					dc--
-			}
+					continue
+				}
+				continue
 		}
 
 		case COLON:
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
 					key = keyBuf.String()
 					keyBuf.Reset()
 					keyMode = false
+					continue
 				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+					continue
 				}
 			}
 
@@ -109,19 +115,22 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
 					rdx, rlc, rrs := returnObj(idx, lineCount, inputRune)
-					idx += rdx
-					lineCount += rlc
+					idx = rdx
+					lineCount = rlc
 					value = rrs
+					continue
 				}
 			}
 
@@ -129,21 +138,32 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+					continue
 				}
-
 				if dc == 0 {
-					ss := valBuf.String()
-					valBuf.Reset()
-					if ss != "" {
-						value = determineType(ss)
+					if value != nil {
+						rm[key] = value
+
+					} else {
+						ss := valBuf.String()
+						valBuf.Reset()
+						value = nil
+
+						if ss != "" {
+							value = determineType(ss)
+							rm[key] = value
+
+						} else if ss == "" {
+							rm[key] = ss
+						}
 					}
-					rm[key] = value
 					rm[string(curToken)] = ""
 					returnedIdx = idx
 					returnedLineCount = lineCount
@@ -155,20 +175,23 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
 					rdx, rlc, rrs := returnArr(idx, lineCount, inputRune)
-					idx += rdx
-					lineCount += rlc
+					idx = rdx
+					lineCount = rlc
 					value = rrs
 					valBuf.Reset()
+					continue
 				}
 			}
 
@@ -177,25 +200,36 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
-					ss := valBuf.String()
-					valBuf.Reset()
-					if ss != "" {
-						value = determineType(ss)
+					if value != nil {
 						rm[key] = value
+						value = nil
+
 					} else {
-						rm[key] = ss
+						ss := valBuf.String()
+						valBuf.Reset()
+
+						if ss != "" {
+							value = determineType(ss)
+							rm[key] = value
+
+						} else if ss == "" {
+							rm[key] = ss
+						}
 					}
 
 					keyMode = true
+					continue
 				}
 			}
 
@@ -203,26 +237,30 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
-					if peekToken == lnTOKEN {
+					if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
 						continue
 					}
 					lineCount++
-			}
+					continue
+				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
-					if peekToken == lnTOKEN {
+					if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
 						continue
 					}
 					lineCount++
+					continue
 				}
 			}
 		
@@ -230,20 +268,24 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
 					lineCount++
+					continue
 				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+					continue
 				}
 
 				if dc == 0 {
 					lineCount++
+					continue
 				}
 			}
 		
@@ -265,25 +307,14 @@ func mapLength(idx uint, inputRune []rune) uint {
 	var (
 		curToken rune
 		peekToken rune
-		firstLoop bool = true
 		dc uint8
 		mapLength uint
 		lb uint8
 		rb uint8
 	)
 
-	for ;; idx++ {
+	for ;lb != rb; idx++ {
 		curToken = inputRune[idx]
-
-		if int(idx + 1) <= len(inputRune) {
-			peekToken = inputRune[idx + 1]
-		}
-
-		if firstLoop {
-			idx++
-			firstLoop =  false
-			continue
-		}
 
 		switch curToken {
 		case DOUBLEQUOTE:
@@ -293,11 +324,11 @@ func mapLength(idx uint, inputRune []rune) uint {
 			}
 
 		case BACKSLASH:
-			if peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
-		case COMMA:
+		case COLON:
 			if dc == 0 {
 				mapLength++
 			}
@@ -311,9 +342,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 			if dc == 0 {
 				rb++
 			}
-			if lb == rb {
-				return mapLength + 1
-			}
 		}
 	}
+	return mapLength + 2
 }

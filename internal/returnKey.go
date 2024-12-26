@@ -18,10 +18,6 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 	for ;; idx++ {
 		curToken = inputRune[idx]
 
-		if int(idx + 1) <= len(inputRune) {
-			peekToken = inputRune[idx + 1]
-		}
-
 		switch curToken {
 		case SPACE, TAB:
 			if dc > 0 {
@@ -38,7 +34,7 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 
 		case BACKSLASH:
 			keyBuf.WriteRune(curToken)
-			if dc > 0 && peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx + 1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
 			}
 

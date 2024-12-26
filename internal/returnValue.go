@@ -21,10 +21,6 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 	for ;; idx++ {
 		curToken = inputRune[idx]
 
-		if int(idx + 1) <= len(inputRune) {
-			peekToken = inputRune[idx + 1]
-		}
-
 		switch curToken {
 		case SPACE, TAB:
 			if dc > 0 {
@@ -42,7 +38,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 
 		case BACKSLASH:
 			valBuf.WriteRune(curToken)
-			if dc > 0 && peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx + 1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
@@ -55,7 +51,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 				ss = valBuf.String()
 				if ss != "" {
 					value = determineType(ss)
-				} else {
+				} else if ss == "" {
 					value = ss
 				}
 				valBuf.Reset()
@@ -68,25 +64,9 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 				valBuf.WriteRune(curToken)
 			}
 
-			if dc == 0 {
-				ss = valBuf.String()
-				value = determineType(ss)
-				valBuf.Reset()
-				returnedIdx = idx
-				return returnedIdx, value
-			}
-
 		case RBRACE:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
-				ss = valBuf.String()
-				value = determineType(ss)
-				valBuf.Reset()
-				returnedIdx = idx
-				return returnedIdx, value
 			}
 
 		case lrTOKEN:
