@@ -1,6 +1,6 @@
-{
+{ // dummy
     "Dict": {
-        "a": "a",
+        "a": "a",// testdummy
         "1": 1,
         "true": true,
         "arr": [
@@ -9,10 +9,10 @@
             false,
             [
                 "arr in arr"
-            ],
+            ], // ここで謎の要素が入る
             {
                 "arr in": "obj"
-            }
+            } // ここで謎の要素が入る
         ],
         "obj": {
             "arr": 123,
