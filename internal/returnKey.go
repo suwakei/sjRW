@@ -23,7 +23,9 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 			if dc > 0 {
 				keyBuf.WriteRune(curToken)
 			}
-			continue
+			if dc == 0 {
+				idx = ignoreSpaceTab(idx, inputRune)
+			}
 
 		case DOUBLEQUOTE:
 			keyBuf.WriteRune(curToken)
@@ -36,6 +38,14 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 			keyBuf.WriteRune(curToken)
 			if peekToken = inputRune[idx + 1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
+			}
+
+		case SLASH:
+			if dc > 0 {
+				keyBuf.WriteRune(curToken)
+			}
+			if dc == 0 {
+				idx = ignoreComments(idx, inputRune)
 			}
 
 		case COLON:

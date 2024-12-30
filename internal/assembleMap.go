@@ -18,6 +18,7 @@ const (
 	RBRACKET rune = ']'
 	COMMA rune = ','
 	BACKSLASH rune = '\\'
+	SLASH rune = '/'
 	)
 
 // AssembleMap returns map created by input []rune
@@ -65,6 +66,10 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 			assembledMap[lineCount][string(curToken)] = ""
 			break
+		}
+
+		if curToken == SLASH {
+			idx = ignoreComments(idx, inputRune)
 		}
 
 		if curToken == lrTOKEN {
@@ -173,4 +178,45 @@ func isIgnores(curToken rune) bool {
 		return true
 	}
 	return false
+}
+
+func ignoreComments(idx uint, inputRune []rune) uint {
+	var (
+		curToken rune
+		peekToken rune
+	)
+
+	for ;; idx++{
+		curToken = inputRune[idx]
+		switch curToken {
+		case lrTOKEN:
+			if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
+				continue
+			} else if peekToken = inputRune[idx + 1]; peekToken != lnTOKEN {
+				return idx
+			}
+		case lnTOKEN:
+			return idx
+
+		default:
+			continue
+		}
+	}
+}
+
+func ignoreSpaceTab(idx uint, inputRune []rune) uint {
+	var (
+		curToken rune
+	)
+
+	for ;; idx++ {
+		curToken = inputRune[idx]
+		switch curToken {
+		case SPACE, TAB:
+			continue
+
+		default:
+			return idx
+		}
+	}
 }

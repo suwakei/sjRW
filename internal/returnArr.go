@@ -32,6 +32,9 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			}
+			if dc == 0 {
+				idx = ignoreSpaceTab(idx, inputRune)
+			}
 
 		case DOUBLEQUOTE:
 			dc++
@@ -39,10 +42,19 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			if dc == 2 {
 				dc = 0
 			}
+
 		case BACKSLASH:
 			tempArrBuf.WriteRune(curToken)
 			if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
 				dc--
+			}
+
+		case SLASH:
+			if dc > 0 {
+				tempArrBuf.WriteRune(curToken)
+			}
+			if dc == 0 {
+				idx = ignoreComments(idx, inputRune)
 			}
 
 		case LBRACKET:

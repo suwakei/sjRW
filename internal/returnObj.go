@@ -22,9 +22,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 
 	// preallocation of memory
 	rm = make(map[string]any, mapLength(idx, inputRune))
-
 	keyBuf.Grow(20)
-
 	valBuf.Grow(30)
 
 	for ;; idx++ {
@@ -43,12 +41,19 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					keyBuf.WriteRune(curToken)
 					continue
 				}
+				if dc == 0 {
+					idx = ignoreSpaceTab(idx, inputRune)
+					continue
+				}
 			}
 
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
 					continue
+				}
+				if dc == 0 {
+					idx = ignoreSpaceTab(idx, inputRune)
 				}
 			}
 
@@ -88,6 +93,28 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				}
 				continue
 		}
+
+		case SLASH:
+			if keyMode {
+				if dc > 0 {
+					keyBuf.WriteRune(curToken)
+					continue
+				}
+				if dc == 0 {
+					idx = ignoreComments(idx, inputRune)
+					continue
+				}
+			}
+
+			if !keyMode {
+				if dc > 0 {
+					valBuf.WriteRune(curToken)
+				}
+
+				if dc == 0 {
+					idx = ignoreComments(idx, inputRune)
+				}
+			}
 
 		case COLON:
 			if keyMode {
@@ -195,6 +222,21 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				}
 			}
 
+		case RBRACKET:
+			if keyMode {
+				if dc > 0 {
+					keyBuf.WriteRune(curToken)
+					continue
+				}
+			}
+
+			if !keyMode {
+				if dc > 0 {
+					valBuf.WriteRune(curToken)
+					continue
+				}
+			}
+
 
 		case COMMA:
 			if keyMode {
@@ -222,9 +264,11 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 						if ss != "" {
 							value = determineType(ss)
 							rm[key] = value
+							value = nil
 
 						} else if ss == "" {
 							rm[key] = ss
+							value = nil
 						}
 					}
 

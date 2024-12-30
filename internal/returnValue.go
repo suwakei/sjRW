@@ -25,9 +25,10 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 		case SPACE, TAB:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-				continue
 			}
-			continue
+			if dc == 0 {
+				idx = ignoreSpaceTab(idx, inputRune)
+			}
 		
 		case DOUBLEQUOTE:
 			valBuf.WriteRune(curToken)
@@ -40,6 +41,13 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 			valBuf.WriteRune(curToken)
 			if peekToken = inputRune[idx + 1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
+			}
+
+			if dc > 0 {
+				valBuf.WriteRune(curToken)
+			}
+			if dc == 0 {
+				idx = ignoreComments(idx, inputRune)
 			}
 
 		case COMMA:
