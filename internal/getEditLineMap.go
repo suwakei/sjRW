@@ -6,14 +6,14 @@ import (
 )
 
 // getEditLineMap returns a map with only the difference changed from the original string
-func GetEditLineMap[targetType []byte | string] (str targetType, editMapFromDiff map[string]map[int]string) map[int]string {
+func GetEditLineMap[targetType []byte | string](str targetType, editMapFromDiff map[string]map[int]string) map[int]string {
 	content := strings.TrimSpace(string(str))
 	contentLines := strings.Split(content, "\n")
 
 	indexes := make(map[int]string, 0)
 
 	for i, line := range contentLines {
-		indexes[i + 1] = line
+		indexes[i+1] = line
 	}
 
 	rm := editMapFromDiff["rm"]

@@ -22,7 +22,7 @@ package sjrw
 // 	var to []byte
 
 // 	f, err := os.OpenFile(filepathToWrite, os.O_RDWR, 0o666)
-	
+
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
@@ -60,15 +60,11 @@ package sjrw
 // 	writer.Flush()
 // }
 
-
-
 // func (SjWriter) WriteFromByte(byteSlice []byte, filePath io.Writer) {
 // }
 
-
 // func (SjWriter) WriteFromMap(writemap map[string]any, filePath io.Writer) {
 // }
-
 
 // func (sj *SjWriter) WriteFromTextFile(readFile, writeFile string) {
 // }

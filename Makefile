@@ -5,39 +5,43 @@ default:
 	all
 
 all:
-	test fmt b
+	@echo "[info] ***********************exec test fmt bench****************************"
+	@t fmt b
 
-
-# 実行した回数
-# １回あたりの実行に掛かった時間(ns/op)
-# １回あたりのアロケーションで確保した容量(B/op)
-# 1回あたりのアロケーション回数(allocs/op) 
 
 b:
+	@echo "[info] ***********************benchmark****************************"
 	@go test -bench=. -benchmem
 
 bp:
+	@echo "[info] ***********************benchmark cpuprof****************************"
 	@go test -bench=. -benchmem -cpuprofile cpu.prof
 
 bm:
+	@echo "[info] ***********************benchmark memprof****************************"
 	@go test -bench=. -benchmem -memprofile mem.prof
 
 bpm:
+	@echo "[info] ***********************benchmark memprof cpuprof****************************"
 	@go test -bench=. -benchmem -memprofile mem.prof -cpuprofile cpu.prof
 
 tm:
-	@go test -run TestReadAsMapFrom
+	@echo "[info] ***********************testing ReadAsMapFrom****************************"
+	@go test -run TestReadAsMap
 
 ts:
-	@go test -run TestReadAsStrFrom
+	@echo "[info] ***********************testing ReadAsStrFrom****************************"
+	@go test -run TestReadAsStr
 
 tb:
-	@go test -run TestReadAsByteFrom
+	@echo "[info] ***********************testing ReadAsByteFrom****************************"
+	@go test -run TestReadAsByte
 
 
-test:
+t:
+	@echo "[info] ***********************testing****************************"
 	@go test -v .
 
 fmt:
-	@echo "[info ***********************formatting****************************]"
+	@echo "[info] ***********************formatting****************************"
 	@go fmt ./...

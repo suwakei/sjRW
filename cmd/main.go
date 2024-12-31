@@ -19,7 +19,6 @@ func main() {
 		log.Fatal(oerr)
 	}
 
-
 	defer func() {
 		err := f5.Close()
 		if err != nil {

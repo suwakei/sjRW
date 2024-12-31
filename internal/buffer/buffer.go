@@ -1,14 +1,14 @@
 package internal
 
 import (
-	"unsafe"
 	"log"
 	"unicode/utf8"
+	"unsafe"
 )
 
 type Buffer struct {
 	address *Buffer
-	buf []byte
+	buf     []byte
 }
 
 func (b *Buffer) copyCheck() {
@@ -28,7 +28,7 @@ func NoEscape(p unsafe.Pointer) unsafe.Pointer {
 
 func (b *Buffer) ToString() string {
 	return unsafe.String(unsafe.SliceData(b.buf), len(b.buf))
-	
+
 }
 
 func (b *Buffer) Grow(n int) {
@@ -46,7 +46,7 @@ func (b *Buffer) bufLen() int {
 	return len(b.buf)
 }
 
-func (b *Buffer) bufCap() int  {
+func (b *Buffer) bufCap() int {
 	return cap(b.buf)
 }
 

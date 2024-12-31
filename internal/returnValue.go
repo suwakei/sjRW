@@ -4,20 +4,18 @@ import (
 	"strings"
 )
 
-
 func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
-    var (
-		dc uint8
-		ss string
-		curToken rune
+	var (
+		dc        uint8
+		ss        string
+		curToken  rune
 		peekToken rune
-		valBuf strings.Builder
+		valBuf    strings.Builder
 	)
 	// preallocate memory
 	valBuf.Grow(40)
 
-
-	for ;; idx++ {
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 
 		switch curToken {
@@ -27,7 +25,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 			} else if dc == 0 {
 				idx = ignoreSpaceTab(idx, inputRune)
 			}
-		
+
 		case DOUBLEQUOTE:
 			valBuf.WriteRune(curToken)
 			dc++
@@ -37,7 +35,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 
 		case BACKSLASH:
 			valBuf.WriteRune(curToken)
-			if peekToken = inputRune[idx + 1]; dc > 0 && peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
 			}
 

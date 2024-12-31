@@ -4,25 +4,24 @@ import (
 	"strings"
 )
 
-// 
-func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLineCount uint, rs []any) {
+func returnArr(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLineCount uint, rs []any) {
 	var (
-		curToken rune
-		peekToken rune
-		firstLoop bool = true
-		dc uint8
-		ss string
-		arrVal any
+		curToken   rune
+		peekToken  rune
+		firstLoop  bool = true
+		dc         uint8
+		ss         string
+		arrVal     any
 		tempArrBuf strings.Builder
 	)
 	// preallocate memory
 	rs = make([]any, 0, arrLength(idx, inputRune))
 	tempArrBuf.Grow(15)
 
-	for ;; idx++ {
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 
-			if firstLoop {
+		if firstLoop {
 			firstLoop = false
 			continue
 		}
@@ -44,7 +43,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 
 		case BACKSLASH:
 			tempArrBuf.WriteRune(curToken)
-			if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx+1]; peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
@@ -107,12 +106,12 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			} else if dc == 0 {
-				if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
+				if peekToken = inputRune[idx+1]; peekToken == lnTOKEN {
 					continue
 				}
 				lineCount++
 			}
-		
+
 		case lnTOKEN:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
@@ -126,17 +125,16 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 	}
 }
 
-
 func arrLength(idx uint, inputRune []rune) uint {
 	var (
-		curToken rune
-		dc uint8
+		curToken  rune
+		dc        uint8
 		arrLength uint
-		lb uint8
-		rb uint8
+		lb        uint8
+		rb        uint8
 	)
 
-	for ;; idx++ {
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 		switch curToken {
 		case DOUBLEQUOTE:
@@ -146,7 +144,7 @@ func arrLength(idx uint, inputRune []rune) uint {
 			}
 
 		case BACKSLASH:
-			if peekToken := inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
+			if peekToken := inputRune[idx+1]; peekToken == DOUBLEQUOTE {
 				dc--
 			}
 

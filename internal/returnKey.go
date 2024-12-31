@@ -4,18 +4,17 @@ import (
 	"strings"
 )
 
-
-func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
+func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string) {
 	var (
-		dc uint8
-		curToken rune
+		dc        uint8
+		curToken  rune
 		peekToken rune
-		keyBuf strings.Builder
+		keyBuf    strings.Builder
 	)
 	// preallocate memory
 	keyBuf.Grow(20)
 
-	for ;; idx++ {
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 
 		switch curToken {
@@ -36,7 +35,7 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string){
 
 		case BACKSLASH:
 			keyBuf.WriteRune(curToken)
-			if peekToken = inputRune[idx + 1]; dc > 0 && peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
 			}
 

@@ -1,7 +1,6 @@
 package testdata
 
-const Expected4 string = 
-`{
+const Expected4 string = `{
       "_id": "672d31b26f1316908fa81a41",
       "index": 0,
       "guid": "126bf441-05a3-4b3e-9868-43827b2054c4",

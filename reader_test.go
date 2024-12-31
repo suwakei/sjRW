@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"testing"
 
-  "github.com/suwakei/sjrw/internal"
-  "github.com/suwakei/sjrw/testdata"
+	"github.com/google/go-cmp/cmp"
+	"github.com/suwakei/sjrw/testdata"
 )
 
 const (
-	acceptExt string = ".json"
-	acceptExt2 string = ".json2"
+	acceptExt  string = ".json"
+	acceptExt2 string = ".jsonc"
 )
 
 func BenchmarkReadAsStrfrom(b *testing.B) {
@@ -37,7 +37,7 @@ func BenchmarkReadAsStrfrom(b *testing.B) {
 		}
 	}()
 
-  if ext := filepath.Ext(f.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -72,7 +72,7 @@ func BenchmarkReadAsBytefrom(b *testing.B) {
 		}
 	}()
 
-  if ext := filepath.Ext(f.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -127,7 +127,7 @@ func TestReadAsStr(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f1.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f1.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -154,7 +154,7 @@ func TestReadAsStr(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f2.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f2.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -181,7 +181,7 @@ func TestReadAsStr(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f3.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f3.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -208,7 +208,7 @@ func TestReadAsStr(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f4.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f4.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -240,17 +240,14 @@ func TestReadAsStr(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for tname, tt := range tests {
 		tt := tt
 		t.Run("testReadAsStrFrom", func(t *testing.T) {
 			t.Parallel()
 			if tt.input != tt.expected {
-				//bInput := []byte(tt.input)
-				//bExpected := []byte(tt.expected)
-
-				//diff := internal.Diff(tname, bInput, "ReadAsStrExpected", bExpected)
-				//fmt.Println(string(diff))
-				t.Errorf("these values are not same")
+				diff := cmp.Diff(tt.expected, tt.input)
+				fmt.Printf("----------%q----------\n%s", tname, diff)
+				t.Errorf("---------- %q these values are not same----------", tname)
 			}
 		})
 	}
@@ -280,7 +277,7 @@ func TestReadAsByteFrom(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f1.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f1.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -307,7 +304,7 @@ func TestReadAsByteFrom(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f2.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f2.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -334,7 +331,7 @@ func TestReadAsByteFrom(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f3.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f3.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -361,7 +358,7 @@ func TestReadAsByteFrom(t *testing.T) {
 		}
 	}()
 
-  if ext := filepath.Ext(f4.Name()); ext != acceptExt && ext != acceptExt2 {
+	if ext := filepath.Ext(f4.Name()); ext != acceptExt && ext != acceptExt2 {
 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
 	}
 
@@ -392,47 +389,45 @@ func TestReadAsByteFrom(t *testing.T) {
 		},
 	}
 	for tname, tt := range tests {
-		
 		tt := tt
 		t.Run("testReadAsStrFrom", func(t *testing.T) {
 			t.Parallel()
 			if string(tt.input) != string(tt.expected) {
-				diff := internal.Diff(tname, tt.input, "ReadAsStrExpected", tt.expected)
-				fmt.Println(string(diff))
-				t.Errorf("these values are not same")
+				diff := cmp.Diff(string(tt.input), string(tt.expected))
+				fmt.Printf("----------%q----------\n%s", tname, diff)
+				t.Errorf("---------- %q these values are not same----------", tname)
 			}
 		})
 	}
 }
 
-func TestReadAsMapFrom(t *testing.T) {
-  t.Helper()
-	t.Parallel()
-	var jsonPath5 string = "./testdata/readtest5.json"
-	var sj5 SjReader
+// func TestReadAsMapFrom(t *testing.T) {
+// 	t.Helper()
+// 	t.Parallel()
+// 	var jsonPath5 string = "./testdata/readtest5.json"
+// 	var sj5 SjReader
 
-	if _, err := os.Stat(jsonPath5); err != nil {
-		log.Fatalf("this path is not exist \"%s\"", jsonPath5)
-	}
+// 	if _, err := os.Stat(jsonPath5); err != nil {
+// 		log.Fatalf("this path is not exist \"%s\"", jsonPath5)
+// 	}
 
-	f5, err := os.OpenFile(jsonPath5, os.O_RDONLY, 0o666)
+// 	f5, err := os.OpenFile(jsonPath5, os.O_RDONLY, 0o666)
 
-	if err != nil {
-		log.Fatalf("could not open file \"%s\"", jsonPath5)
-	}
+// 	if err != nil {
+// 		log.Fatalf("could not open file \"%s\"", jsonPath5)
+// 	}
 
-	defer func() {
-		err := f5.Close()
-		if err != nil {
-			log.Fatalf("could not close file \"%s\"", jsonPath5)
-		}
-	}()
+// 	defer func() {
+// 		err := f5.Close()
+// 		if err != nil {
+// 			log.Fatalf("could not close file \"%s\"", jsonPath5)
+// 		}
+// 	}()
 
-  if ext := filepath.Ext(f5.Name()); ext != acceptExt && ext != acceptExt2 {
-		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
-	}
+// 	if ext := filepath.Ext(f5.Name()); ext != acceptExt && ext != acceptExt2 {
+// 		log.Fatalf("read file %q is not %q or %q file", ext, acceptExt, acceptExt2)
+// 	}
 
-	m, _ := sj5.ReadAsMapFrom(f5)
-	fmt.Println(m)
-}
-
+// 	m, _ := sj5.ReadAsMapFrom(f5)
+// 	fmt.Println(m)
+// }

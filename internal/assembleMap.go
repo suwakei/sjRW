@@ -5,22 +5,21 @@ import (
 	"strings"
 )
 
-
 const (
-	SPACE rune = ' '
-	TAB rune = '\t'
-	lnTOKEN rune = '\n'
-	lrTOKEN rune = '\r'
+	SPACE       rune = ' '
+	TAB         rune = '\t'
+	lnTOKEN     rune = '\n'
+	lrTOKEN     rune = '\r'
 	DOUBLEQUOTE rune = '"'
-	COLON rune = ':'
-	LBRACE rune = '{'
-	RBRACE rune = '}'
-	LBRACKET rune = '['
-	RBRACKET rune = ']'
-	COMMA rune = ','
-	BACKSLASH rune = '\\'
-	SLASH rune = '/'
-	)
+	COLON       rune = ':'
+	LBRACE      rune = '{'
+	RBRACE      rune = '}'
+	LBRACKET    rune = '['
+	RBRACKET    rune = ']'
+	COMMA       rune = ','
+	BACKSLASH   rune = '\\'
+	SLASH       rune = '/'
+)
 
 // AssembleMap returns map created by input []rune
 func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
@@ -29,24 +28,24 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 
 		runeLength uint = uint(len(inputRune)) // The length of input rune slice.
 
-		idx uint
-		returnedIdx uint
-		lineCount uint = 1 // Counter for current number of line.
+		idx               uint
+		returnedIdx       uint
+		lineCount         uint = 1 // Counter for current number of line.
 		returnedLineCount uint
 
 		firstLoop bool = true // First loop flag.
-		keyMode bool = true //  If true, read jsonKey.
+		keyMode   bool = true //  If true, read jsonKey.
 
 		returnedSlice []any
-		returnedMap map[string]any
-		returnedKey string
+		returnedMap   map[string]any
+		returnedKey   string
 		returnedValue any
 	)
 
 	// preallocation of memory.
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
 
-	for ;; idx++ {
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 
 		if firstLoop {
@@ -59,7 +58,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		}
 
 		// last loop.
-		if idx + 1 == runeLength - 1 {
+		if idx+1 == runeLength-1 {
 			lineCount++
 			if _, ok := assembledMap[lineCount]; !ok {
 				assembledMap[lineCount] = make(map[string]any, 1)
@@ -74,7 +73,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		}
 
 		if curToken == lrTOKEN {
-			if inputRune[idx + 1] == lnTOKEN {
+			if inputRune[idx+1] == lnTOKEN {
 				continue
 			}
 			lineCount++
@@ -132,7 +131,7 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 			keyMode = true
 			continue
 
-		}else if !keyMode && isIgnores(curToken) {
+		} else if !keyMode && isIgnores(curToken) {
 			continue
 		}
 	}
@@ -153,13 +152,13 @@ func determineType(ss string) any {
 }
 
 // "lnNum" returns the number of "\n" or "\r" from "r".
-// this return value used for initializing memory of "initMap" 
+// this return value used for initializing memory of "initMap"
 func lnNum(r []rune) uint {
 	var lnCount uint = 0
 	var dc uint8 = 0
 
-	for i := 0 ; i < len(r); i++ {
-		if dc > 0 && r[i] == BACKSLASH && r[i + 1] == DOUBLEQUOTE {
+	for i := 0; i < len(r); i++ {
+		if dc > 0 && r[i] == BACKSLASH && r[i+1] == DOUBLEQUOTE {
 			dc--
 		}
 
@@ -176,7 +175,6 @@ func lnNum(r []rune) uint {
 	}
 	return lnCount + 1
 }
-
 
 func isIgnores(curToken rune) bool {
 	if curToken == SPACE {
@@ -196,17 +194,17 @@ func isIgnores(curToken rune) bool {
 
 func ignoreComments(idx uint, inputRune []rune) uint {
 	var (
-		curToken rune
+		curToken  rune
 		peekToken rune
 	)
 
-	for ;; idx++{
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 		switch curToken {
 		case lrTOKEN:
-			if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
+			if peekToken = inputRune[idx+1]; peekToken == lnTOKEN {
 				continue
-			} else if peekToken = inputRune[idx + 1]; peekToken != lnTOKEN {
+			} else if peekToken = inputRune[idx+1]; peekToken != lnTOKEN {
 				return idx
 			}
 		case lnTOKEN:
@@ -223,7 +221,7 @@ func ignoreSpaceTab(idx uint, inputRune []rune) uint {
 		curToken rune
 	)
 
-	for ;; idx++ {
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 		switch curToken {
 		case SPACE, TAB:

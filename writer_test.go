@@ -10,11 +10,10 @@ package sjrw
 // 	"github.com/suwakei/sjrw/internal"
 // )
 
-
 // func TestWriteFromStr(t *testing.T) {
 //   t.Helper()
 // 	var sj SjWriter
-// 	str := 
+// 	str :=
 //   `{
 // 	"add": [
 // 	    "git add .",
@@ -81,7 +80,6 @@ package sjrw
 // 	sj.WriteFromStr(str, "C:/Users/ns072/OneDrive/ドキュメント/Github/sjrw/testdata/writetest2.json")
 // }
 
-
 // func TestGetEditLineMap(t *testing.T) {
 // 	targetStr, testEditMapFromDiff := writerTestSetup()
 
@@ -110,7 +108,6 @@ package sjrw
 // 	}
 // }
 
-
 // func writerTestSetup() (string, map[string]map[int]string) {
 // 	fmt.Println("----writerTestSetup start----")
 
@@ -121,7 +118,7 @@ package sjrw
 // 		testEditMapFromDiff["rm"] = make(map[int]string)
 // 	}
 
-// 	testEditMapFromDiff["rm"][6] = `        "gitmfmf"`	
+// 	testEditMapFromDiff["rm"][6] = `        "gitmfmf"`
 // 	testEditMapFromDiff["rm"][11] = `        "git push origin master",`
 // 	testEditMapFromDiff["rm"][17] = `        "git reset --hard HEAD^"`
 
@@ -148,7 +145,6 @@ package sjrw
 // 	editMapFromDiff, _ := internal.DiffReturn(filepath.Base(jsonPath2), s2, filepath.Base(jsonPath1), s1)
 // 	fmt.Println(editMapFromDiff)
 // }
-
 
 // func writerTearDown() {
 

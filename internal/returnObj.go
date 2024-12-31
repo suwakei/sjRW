@@ -7,17 +7,17 @@ import (
 // returnObj returns map[string]any
 func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLineCount uint, rm map[string]any) {
 	var (
-		curToken rune // The target token.
+		curToken  rune // The target token.
 		peekToken rune // The token for confirmation of next character.
 
-		dc uint8 // Counter for number of ".
-		keyMode bool = true // If true, mode which read json key. if false read json value.
-		firstLoop bool = true // First loop flag.
+		dc        uint8        // Counter for number of ".
+		keyMode   bool  = true // If true, mode which read json key. if false read json value.
+		firstLoop bool  = true // First loop flag.
 
 		keyBuf strings.Builder // When in "keyMode" is true, buf for accumulating key token.
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
-		key string // The variable is for concatenated tokens stored in "keyBuf". 
-		value any = nil
+		key    string          // The variable is for concatenated tokens stored in "keyBuf".
+		value  any             = nil
 	)
 
 	// preallocation of memory
@@ -25,7 +25,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 	keyBuf.Grow(20)
 	valBuf.Grow(30)
 
-	for ;; idx++ {
+	for ; ; idx++ {
 		curToken = inputRune[idx]
 
 		if firstLoop {
@@ -70,25 +70,25 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					continue
 				}
 			}
-			
+
 		case BACKSLASH:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
-				if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
+				if peekToken = inputRune[idx+1]; peekToken == DOUBLEQUOTE {
 					dc--
 					continue
 				}
 				continue
-		}
+			}
 
 			if !keyMode {
 				valBuf.WriteRune(curToken)
-				if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
+				if peekToken = inputRune[idx+1]; peekToken == DOUBLEQUOTE {
 					dc--
 					continue
 				}
 				continue
-		}
+			}
 
 		case SLASH:
 			if keyMode {
@@ -225,7 +225,6 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				}
 			}
 
-
 		case COMMA:
 			if keyMode {
 				if dc > 0 {
@@ -269,7 +268,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					keyBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
+					if peekToken = inputRune[idx+1]; peekToken == lnTOKEN {
 						continue
 					}
 					lineCount++
@@ -282,14 +281,14 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					valBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
+					if peekToken = inputRune[idx+1]; peekToken == lnTOKEN {
 						continue
 					}
 					lineCount++
 					continue
 				}
 			}
-		
+
 		case lnTOKEN:
 			if keyMode {
 				if dc > 0 {
@@ -310,7 +309,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					continue
 				}
 			}
-		
+
 		default:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
@@ -327,15 +326,15 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 
 func mapLength(idx uint, inputRune []rune) uint {
 	var (
-		curToken rune
+		curToken  rune
 		peekToken rune
-		dc uint8
+		dc        uint8
 		mapLength uint
-		lb uint8
-		rb uint8
+		lb        uint8
+		rb        uint8
 	)
 
-	for ;lb != rb; idx++ {
+	for ; lb != rb; idx++ {
 		curToken = inputRune[idx]
 
 		switch curToken {
@@ -346,7 +345,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 			}
 
 		case BACKSLASH:
-			if peekToken = inputRune[idx + 1]; peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[idx+1]; peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
