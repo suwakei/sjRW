@@ -39,9 +39,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
-					continue
-				}
-				if dc == 0 {
+				} else if dc == 0 {
 					idx = ignoreSpaceTab(idx, inputRune)
 					continue
 				}
@@ -50,9 +48,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
-					continue
-				}
-				if dc == 0 {
+				} else if dc == 0 {
 					idx = ignoreSpaceTab(idx, inputRune)
 				}
 			}
@@ -99,8 +95,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
 					continue
-				}
-				if dc == 0 {
+				} else if dc == 0 {
 					idx = ignoreComments(idx, inputRune)
 					continue
 				}
@@ -109,10 +104,10 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
-				}
-
-				if dc == 0 {
+					continue
+				} else if dc == 0 {
 					idx = ignoreComments(idx, inputRune)
+					continue
 				}
 			}
 
@@ -121,9 +116,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					key = keyBuf.String()
 					keyBuf.Reset()
 					keyMode = false
@@ -150,9 +143,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					rdx, rlc, rrs := returnObj(idx, lineCount, inputRune)
 					idx = rdx
 					lineCount = rlc
@@ -173,8 +164,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
 					continue
-				}
-				if dc == 0 {
+				} else if dc == 0 {
 					if value != nil {
 						rm[key] = value
 
@@ -210,9 +200,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					rdx, rlc, rrs := returnArr(idx, lineCount, inputRune)
 					idx = rdx
 					lineCount = rlc
@@ -250,9 +238,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					if value != nil {
 						rm[key] = value
 						value = nil
@@ -282,9 +268,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
 						continue
 					}
@@ -297,9 +281,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
 						continue
 					}
@@ -313,9 +295,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					lineCount++
 					continue
 				}
@@ -325,9 +305,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
 					continue
-				}
-
-				if dc == 0 {
+				} else if dc == 0 {
 					lineCount++
 					continue
 				}

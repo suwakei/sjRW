@@ -1,7 +1,8 @@
 package internal
 
 import (
-	
+	"strconv"
+	"strings"
 )
 
 
@@ -136,6 +137,19 @@ func AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 		}
 	}
 	return assembledMap
+}
+
+func determineType(ss string) any {
+	if num, err := strconv.Atoi(ss); err == nil {
+		return num
+
+	} else if tr := strings.TrimSpace(ss); tr == "true" || tr == "false" {
+		b, _ := strconv.ParseBool(tr)
+		return b
+
+	} else {
+		return ss
+	}
 }
 
 // "lnNum" returns the number of "\n" or "\r" from "r".

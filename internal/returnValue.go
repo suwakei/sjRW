@@ -2,7 +2,6 @@ package internal
 
 import (
 	"strings"
-	"strconv"
 )
 
 
@@ -25,8 +24,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 		case SPACE, TAB:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-			}
-			if dc == 0 {
+			} else if dc == 0 {
 				idx = ignoreSpaceTab(idx, inputRune)
 			}
 		
@@ -45,17 +43,14 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-			}
-			if dc == 0 {
+			} else if dc == 0 {
 				idx = ignoreComments(idx, inputRune)
 			}
 
 		case COMMA:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
+			} else if dc == 0 {
 				ss = valBuf.String()
 				if ss != "" {
 					value = determineType(ss)
@@ -90,19 +85,5 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 		default:
 			valBuf.WriteRune(curToken)
 		}
-	}
-}
-
-
-func determineType(ss string) any {
-	if num, err := strconv.Atoi(ss); err == nil {
-		return num
-
-	} else if tr := strings.TrimSpace(ss); tr == "true" || tr == "false" {
-		b, _ := strconv.ParseBool(tr)
-		return b
-
-	} else {
-		return ss
 	}
 }

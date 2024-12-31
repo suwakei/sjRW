@@ -31,8 +31,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case SPACE, TAB:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-			if dc == 0 {
+			} else if dc == 0 {
 				idx = ignoreSpaceTab(idx, inputRune)
 			}
 
@@ -52,17 +51,14 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case SLASH:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-			if dc == 0 {
+			} else if dc == 0 {
 				idx = ignoreComments(idx, inputRune)
 			}
 
 		case LBRACKET:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
+			} else if dc == 0 {
 				rdx, rlc, rrs := returnArr(idx, lineCount, inputRune)
 				idx = rdx
 				lineCount = rlc
@@ -73,9 +69,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case RBRACKET:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
+			} else if dc == 0 {
 				ss = tempArrBuf.String()
 				if ss != "" {
 					arrVal = determineType(ss)
@@ -92,9 +86,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case COMMA:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
+			} else if dc == 0 {
 				ss := tempArrBuf.String()
 				arrVal = determineType(ss)
 				rs = append(rs, arrVal)
@@ -104,9 +96,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case LBRACE:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
+			} else if dc == 0 {
 				rdx, rlc, rrs := returnObj(idx, lineCount, inputRune)
 				idx = rdx
 				lineCount = rlc
@@ -116,9 +106,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case lrTOKEN:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
+			} else if dc == 0 {
 				if peekToken = inputRune[idx + 1]; peekToken == lnTOKEN {
 					continue
 				}
@@ -128,9 +116,7 @@ func returnArr(idx, lineCount uint, inputRune []rune) ( returnedIdx, returnedLin
 		case lnTOKEN:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			}
-
-			if dc == 0 {
+			} else if dc == 0 {
 				lineCount++
 			}
 
