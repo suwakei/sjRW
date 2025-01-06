@@ -17,9 +17,7 @@ type SjReader struct {
 func (SjReader) ReadAsStrFrom(readFile io.Reader) (contentAsStr string, err error) {
 	var jsonByte []byte = make([]byte, 200)
 	if readFile != nil {
-
 		reader := bufio.NewReaderSize(readFile, 24*1024)
-
 		for {
 			readByte, err := reader.ReadByte()
 			jsonByte = append(jsonByte, readByte)

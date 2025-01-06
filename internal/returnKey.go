@@ -14,7 +14,7 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string) {
 	// preallocate memory
 	keyBuf.Grow(20)
 
-	for ; ; idx++ {
+	for ;; idx++ {
 		curToken = inputRune[idx]
 
 		switch curToken {

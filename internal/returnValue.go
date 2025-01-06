@@ -15,7 +15,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 	// preallocate memory
 	valBuf.Grow(40)
 
-	for ; ; idx++ {
+	for ;; idx++ {
 		curToken = inputRune[idx]
 
 		switch curToken {
