@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string) {
+func (a *Assemble) returnKey(inputRune []rune) (key string) {
 	var (
 		dc        uint8
 		curToken  rune
@@ -14,15 +14,15 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string) {
 	// preallocate memory
 	keyBuf.Grow(20)
 
-	for ;; idx++ {
-		curToken = inputRune[idx]
+	for ; ; a.idx++ {
+		curToken = inputRune[a.idx]
 
 		switch curToken {
 		case SPACE, TAB:
 			if dc > 0 {
 				keyBuf.WriteRune(curToken)
 			} else if dc == 0 {
-				idx = ignoreSpaceTab(idx, inputRune)
+				a.ignoreSpaceTab(inputRune)
 				continue
 			}
 
@@ -35,7 +35,7 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string) {
 
 		case BACKSLASH:
 			keyBuf.WriteRune(curToken)
-			if peekToken = inputRune[idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[a.idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
@@ -43,7 +43,7 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string) {
 			if dc > 0 {
 				keyBuf.WriteRune(curToken)
 			} else if dc == 0 {
-				idx = ignoreComments(idx, inputRune)
+				a.ignoreComments(inputRune)
 			}
 
 		case COLON:
@@ -52,8 +52,7 @@ func returnKey(idx uint, inputRune []rune) (returnedIdx uint, key string) {
 			} else if dc == 0 {
 				key = keyBuf.String()
 				keyBuf.Reset()
-				returnedIdx = idx
-				return returnedIdx, key
+				return key
 			}
 
 		default:

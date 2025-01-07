@@ -78,6 +78,7 @@ func (SjReader) ReadAsMapFrom(readFile io.Reader) (contentAsMap map[uint]map[str
 			}
 		}
 	}
-	contentAsMap = internal.AssembleMap(jsonRune)
+	var a internal.Assemble
+	contentAsMap = a.AssembleMap(jsonRune)
 	return contentAsMap, err
 }

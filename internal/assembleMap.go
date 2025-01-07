@@ -6,36 +6,34 @@ import (
 )
 
 const (
-	SPACE       rune = ' '
-	TAB         rune = '\t'
-	lnTOKEN     rune = '\n'
-	lrTOKEN     rune = '\r'
-	DOUBLEQUOTE rune = '"'
-	COLON       rune = ':'
-	LBRACE      rune = '{'
-	RBRACE      rune = '}'
-	LBRACKET    rune = '['
-	RBRACKET    rune = ']'
-	COMMA       rune = ','
-	BACKSLASH   rune = '\\'
-	SLASH       rune = '/'
+	SPACE       rune = ' '  // U+0020 32
+	TAB         rune = '\t' // U+0009 9 
+	lnTOKEN     rune = '\n' // U+000A 10
+	lrTOKEN     rune = '\r' // U+000D 13
+	DOUBLEQUOTE rune = '"'  // U+0022 34
+	COLON       rune = ':'  // U+003A 58
+	LBRACE      rune = '{'  // U+007B 123
+	RBRACE      rune = '}'  // U+007D 125
+	LBRACKET    rune = '['  // U+005B 91
+	RBRACKET    rune = ']'  // U+005D 93
+	COMMA       rune = ','  // U+002C 44
+	BACKSLASH   rune = '\\' // U+005C 92
+	SLASH       rune = '/'  // U+002F 47
 )
 
 type Assemble struct {
-	idx uint
+	idx       uint
 	lineCount uint // Counter for current number of line.
 }
 
 // AssembleMap returns map created by input []rune
 func (a *Assemble) AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	var (
-		curToken rune // The target token.
-		peekToken rune
+		curToken   rune // The target token.
+		peekToken  rune
 		runeLength uint = uint(len(inputRune)) // The length of input rune slice.
 
-		returnedIdx       uint
-		lineCount         uint = 1 
-		returnedLineCount uint
+		tempLineCount uint
 
 		firstLoop bool = true // First loop flag.
 		keyMode   bool = true //  If true, read jsonKey.
@@ -51,7 +49,7 @@ func (a *Assemble) AssembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 	// preallocation of memory.
 	assembledMap = make(map[uint]map[string]any, lnNum(inputRune))
 
-	for ;; a.idx++ {
+	for ; ; a.idx++ {
 		curToken = inputRune[a.idx]
 
 		if firstLoop {
@@ -75,7 +73,7 @@ func (a *Assemble) AssembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 		}
 
 		if peekToken = inputRune[a.idx+1]; curToken == SLASH && peekToken == SLASH {
-			a.idx = a.ignoreComments(a.idx, inputRune)
+			a.ignoreComments(inputRune)
 		}
 
 		if curToken == lrTOKEN {
@@ -96,39 +94,35 @@ func (a *Assemble) AssembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 		}
 
 		if keyMode {
-			returnedIdx, returnedKey = returnKey(a.idx, inputRune)
-			a.idx = returnedIdx
+			returnedKey = a.returnKey(inputRune)
 			keyMode = false
 			continue
 		}
 
 		if !keyMode && curToken == LBRACKET {
-			returnedIdx, returnedLineCount, returnedSlice = returnArr(a.idx, lineCount, inputRune)
-			a.idx = returnedIdx
+			tempLineCount = a.lineCount
+			returnedSlice = a.returnArr(inputRune)
 
-			if _, ok := assembledMap[a.lineCount]; !ok {
-				assembledMap[a.lineCount] = make(map[string]any, 1)
-				assembledMap[a.lineCount][returnedKey] = returnedSlice
+			if _, ok := assembledMap[tempLineCount]; !ok {
+				assembledMap[tempLineCount] = make(map[string]any, 1)
+				assembledMap[tempLineCount][returnedKey] = returnedSlice
 			}
-			a.lineCount = returnedLineCount
 			keyMode = true
 			continue
 
 		} else if !keyMode && curToken == LBRACE {
-			returnedIdx, returnedLineCount, returnedMap = returnObj(a.idx, lineCount, inputRune)
-			a.idx = returnedIdx
+			tempLineCount = a.lineCount
+			returnedMap = a.returnObj(inputRune)
 
-			if _, ok := assembledMap[a.lineCount]; !ok {
-				assembledMap[a.lineCount] = make(map[string]any, 1)
-				assembledMap[a.lineCount][returnedKey] = returnedMap
+			if _, ok := assembledMap[tempLineCount]; !ok {
+				assembledMap[tempLineCount] = make(map[string]any, 1)
+				assembledMap[tempLineCount][returnedKey] = returnedMap
 			}
-			a.lineCount = returnedLineCount
 			keyMode = true
 			continue
 
 		} else if !keyMode && !isIgnores(curToken) {
-			returnedIdx, returnedValue = returnValue(a.idx, inputRune)
-			a.idx = returnedIdx
+			returnedValue = a.returnValue(inputRune)
 
 			if _, ok := assembledMap[a.lineCount]; !ok {
 				assembledMap[a.lineCount] = make(map[string]any, 1)
@@ -198,31 +192,31 @@ func isIgnores(curToken rune) bool {
 	return false
 }
 
-func (a *Assemble )ignoreComments(idx uint, inputRune []rune) uint {
+func (a *Assemble) ignoreComments(inputRune []rune) {
 	var (
 		peekToken rune
 	)
 
-	for ;; a.idx++ {
+	for ; ; a.idx++ {
 		peekToken = inputRune[a.idx+1]
 		if peekToken == lrTOKEN || peekToken == lnTOKEN {
-			return a.idx
+			return
 		}
 	}
 }
 
-func (a *Assemble)ignoreSpaceTab(idx uint, inputRune []rune) uint {
+func (a *Assemble) ignoreSpaceTab(inputRune []rune) {
 	var (
-		curToken rune
+		curToken  rune
 		peekToken rune
 	)
 
-	for ;; a.idx++ {
+	for ; ; a.idx++ {
 		curToken = inputRune[a.idx]
 		switch curToken {
 		case SPACE, TAB:
 			if peekToken = inputRune[a.idx+1]; peekToken != SPACE && peekToken != TAB {
-				return a.idx
+				return
 			}
 			continue
 		}

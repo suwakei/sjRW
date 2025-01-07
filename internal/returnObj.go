@@ -5,7 +5,7 @@ import (
 )
 
 // returnObj returns map[string]any
-func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLineCount uint, rm map[string]any) {
+func (a *Assemble) returnObj(inputRune []rune) (rm map[string]any) {
 	var (
 		curToken  rune // The target token.
 		peekToken rune // The token for confirmation of next character.
@@ -21,12 +21,12 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 	)
 
 	// preallocation of memory
-	rm = make(map[string]any, mapLength(idx, inputRune))
+	rm = make(map[string]any, mapLength(a.idx, inputRune))
 	keyBuf.Grow(20)
 	valBuf.Grow(30)
 
-	for ; ; idx++ {
-		curToken = inputRune[idx]
+	for ; ; a.idx++ {
+		curToken = inputRune[a.idx]
 
 		if firstLoop {
 			rm[string(curToken)] = ""
@@ -40,7 +40,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
 				} else if dc == 0 {
-					idx = ignoreSpaceTab(idx, inputRune)
+					a.ignoreSpaceTab(inputRune)
 					continue
 				}
 			}
@@ -49,7 +49,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
 				} else if dc == 0 {
-					idx = ignoreSpaceTab(idx, inputRune)
+					a.ignoreSpaceTab(inputRune)
 				}
 			}
 
@@ -74,7 +74,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 		case BACKSLASH:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
-				if peekToken = inputRune[idx+1]; peekToken == DOUBLEQUOTE {
+				if peekToken = inputRune[a.idx+1]; peekToken == DOUBLEQUOTE {
 					dc--
 					continue
 				}
@@ -83,7 +83,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 
 			if !keyMode {
 				valBuf.WriteRune(curToken)
-				if peekToken = inputRune[idx+1]; peekToken == DOUBLEQUOTE {
+				if peekToken = inputRune[a.idx+1]; peekToken == DOUBLEQUOTE {
 					dc--
 					continue
 				}
@@ -96,7 +96,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					keyBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					idx = ignoreComments(idx, inputRune)
+					a.ignoreComments(inputRune)
 					continue
 				}
 			}
@@ -106,7 +106,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					valBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					idx = ignoreComments(idx, inputRune)
+					a.ignoreComments(inputRune)
 					continue
 				}
 			}
@@ -144,9 +144,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					keyBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					rdx, rlc, rrs := returnObj(idx, lineCount, inputRune)
-					idx = rdx
-					lineCount = rlc
+					rrs := a.returnObj(inputRune)
 					value = rrs
 					continue
 				}
@@ -182,9 +180,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 						}
 					}
 					rm[string(curToken)] = ""
-					returnedIdx = idx
-					returnedLineCount = lineCount
-					return returnedIdx, returnedLineCount, rm
+					return rm
 				}
 			}
 
@@ -201,9 +197,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					valBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					rdx, rlc, rrs := returnArr(idx, lineCount, inputRune)
-					idx = rdx
-					lineCount = rlc
+					rrs := a.returnArr(inputRune)
 					value = rrs
 					valBuf.Reset()
 					continue
@@ -236,29 +230,6 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
-					continue
-				} else if dc == 0 {
-					if value != nil {
-						rm[key] = value
-						value = nil
-
-					} else {
-						ss := valBuf.String()
-						valBuf.Reset()
-
-						if ss != "" {
-							value = determineType(ss)
-							rm[key] = value
-							value = nil
-
-						} else if ss == "" {
-							rm[key] = ss
-							value = nil
-						}
-					}
-
-					keyMode = true
-					continue
 				}
 			}
 
@@ -268,10 +239,10 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					keyBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					if peekToken = inputRune[idx+1]; peekToken == lnTOKEN {
+					if peekToken = inputRune[a.idx+1]; peekToken == lnTOKEN {
 						continue
 					}
-					lineCount++
+					a.lineCount++
 					continue
 				}
 			}
@@ -281,10 +252,10 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					valBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					if peekToken = inputRune[idx+1]; peekToken == lnTOKEN {
+					if peekToken = inputRune[a.idx+1]; peekToken == lnTOKEN {
 						continue
 					}
-					lineCount++
+					a.lineCount++
 					continue
 				}
 			}
@@ -295,7 +266,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					keyBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					lineCount++
+					a.lineCount++
 					continue
 				}
 			}
@@ -305,7 +276,7 @@ func returnObj(idx, lineCount uint, inputRune []rune) (returnedIdx, returnedLine
 					valBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					lineCount++
+					a.lineCount++
 					continue
 				}
 			}

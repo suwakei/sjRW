@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
+func (a *Assemble) returnValue(inputRune []rune) (value any) {
 	var (
 		dc        uint8
 		ss        string
@@ -15,15 +15,15 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 	// preallocate memory
 	valBuf.Grow(40)
 
-	for ;; idx++ {
-		curToken = inputRune[idx]
+	for ; ; a.idx++ {
+		curToken = inputRune[a.idx]
 
 		switch curToken {
 		case SPACE, TAB:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
 			} else if dc == 0 {
-				idx = ignoreSpaceTab(idx, inputRune)
+				a.ignoreSpaceTab(inputRune)
 			}
 
 		case DOUBLEQUOTE:
@@ -35,14 +35,14 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 
 		case BACKSLASH:
 			valBuf.WriteRune(curToken)
-			if peekToken = inputRune[idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
+			if peekToken = inputRune[a.idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
 			} else if dc == 0 {
-				idx = ignoreComments(idx, inputRune)
+				a.ignoreComments(inputRune)
 			}
 
 		case COMMA:
@@ -56,8 +56,7 @@ func returnValue(idx uint, inputRune []rune) (returnedIdx uint, value any) {
 					value = ss
 				}
 				valBuf.Reset()
-				returnedIdx = idx
-				return returnedIdx, value
+				return value
 			}
 
 		case RBRACKET:
