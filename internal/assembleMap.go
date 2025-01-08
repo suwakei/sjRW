@@ -195,14 +195,25 @@ func isIgnores(curToken rune) bool {
 
 func (a *Assemble) ignoreComments(inputRune []rune) {
 	var (
-		peekToken rune
+ curToken rune = inputRune[a.idx]
+		peekToken rune = inputRune[a.idx+1]
 	)
 
-	for ; ; a.idx++ {
-		if peekToken = inputRune[a.idx+1]; peekToken == lrTOKEN || peekToken == lnTOKEN {
-			return
-		}
-	}
+	if curToken == SLASH && peekToken == SLASH {
+for ;; a.idx {
+peekToken = inputRune[a.idx+1]
+ if peekToken == lrToken || peekToken == lnToken {
+return
+}
+}
+
+if curToken == SLASH && peekToken == ASTARISK {
+for ;; a.idx {
+curToken = inputRune[a.idx]
+peekToken = inputRune[a.idx+1]
+ if peekToken == ASTARISK && peekToken == SLASH {
+return
+}
 }
 
 func (a *Assemble) ignoreSpaceTab(inputRune []rune) {
