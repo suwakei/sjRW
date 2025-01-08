@@ -19,6 +19,7 @@ const (
 	COMMA       rune = ','  // U+002C 44
 	BACKSLASH   rune = '\\' // U+005C 92
 	SLASH       rune = '/'  // U+002F 47
+ASTARISK rune = '*'
 )
 
 type Assemble struct {
