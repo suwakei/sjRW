@@ -35,13 +35,16 @@ func (a *Assemble) returnValue(inputRune []rune) (value any) {
 
 		case BACKSLASH:
 			valBuf.WriteRune(curToken)
-			if peekToken = inputRune[a.idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
-				dc--
+			if dc > 0 {
+				if peekToken = inputRune[a.idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
+					dc--
+				}
 			}
 
+		case SLASH:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-			} else if dc == 0 {
+			} else if peekToken = inputRune[a.idx+1]; dc == 0 && peekToken == SLASH  {
 				a.ignoreComments(inputRune)
 			}
 
@@ -50,37 +53,15 @@ func (a *Assemble) returnValue(inputRune []rune) (value any) {
 				valBuf.WriteRune(curToken)
 			} else if dc == 0 {
 				ss = valBuf.String()
-				if ss != "" {
-					value = determineType(ss)
-				} else if ss == "" {
-					value = ss
-				}
+				value = determineType(ss)
 				valBuf.Reset()
 				return value
 			}
 
-		case RBRACKET:
-			if dc > 0 {
-				valBuf.WriteRune(curToken)
-			}
-
-		case RBRACE:
-			if dc > 0 {
-				valBuf.WriteRune(curToken)
-			}
-
-		case lrTOKEN:
-			if dc > 0 {
-				valBuf.WriteRune(curToken)
-			}
-
-		case lnTOKEN:
-			if dc > 0 {
-				valBuf.WriteRune(curToken)
-			}
-
 		default:
-			valBuf.WriteRune(curToken)
+			if dc > 0 {
+				valBuf.WriteRune(curToken)
+			}
 		}
 	}
 }

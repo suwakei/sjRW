@@ -42,7 +42,7 @@ func (a *Assemble) returnKey(inputRune []rune) (key string) {
 		case SLASH:
 			if dc > 0 {
 				keyBuf.WriteRune(curToken)
-			} else if dc == 0 {
+			} else if peekToken = inputRune[a.idx+1]; dc == 0 && peekToken == SLASH  {
 				a.ignoreComments(inputRune)
 			}
 

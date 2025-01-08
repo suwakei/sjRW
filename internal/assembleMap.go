@@ -198,8 +198,7 @@ func (a *Assemble) ignoreComments(inputRune []rune) {
 	)
 
 	for ; ; a.idx++ {
-		peekToken = inputRune[a.idx+1]
-		if peekToken == lrTOKEN || peekToken == lnTOKEN {
+		if peekToken = inputRune[a.idx+1]; peekToken == lrTOKEN || peekToken == lnTOKEN {
 			return
 		}
 	}

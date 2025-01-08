@@ -68,11 +68,7 @@ func (a *Assemble) returnArr(inputRune []rune) (rs []any) {
 				tempArrBuf.WriteRune(curToken)
 			} else if dc == 0 {
 				ss = tempArrBuf.String()
-				if ss != "" {
-					arrVal = determineType(ss)
-				} else if ss == "" {
-					arrVal = ss
-				}
+				arrVal = determineType(ss)
 				rs = append(rs, arrVal)
 				tempArrBuf.Reset()
 				return rs
@@ -81,6 +77,12 @@ func (a *Assemble) returnArr(inputRune []rune) (rs []any) {
 		case COMMA:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
+			} else if dc == 0 {
+				ss = tempArrBuf.String()
+				arrVal = determineType(ss)
+				rs = append(rs, arrVal)
+				tempArrBuf.Reset()
+				return rs
 			}
 
 		case LBRACE:

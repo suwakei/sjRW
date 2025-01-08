@@ -115,7 +115,6 @@ func (a *Assemble) returnObj(inputRune []rune) (rm map[string]any) {
 			if keyMode {
 				if dc > 0 {
 					keyBuf.WriteRune(curToken)
-					continue
 				} else if dc == 0 {
 					key = keyBuf.String()
 					keyBuf.Reset()
@@ -165,6 +164,7 @@ func (a *Assemble) returnObj(inputRune []rune) (rm map[string]any) {
 				} else if dc == 0 {
 					if value != nil {
 						rm[key] = value
+						value = nil
 
 					} else {
 						ss := valBuf.String()
@@ -230,6 +230,23 @@ func (a *Assemble) returnObj(inputRune []rune) (rm map[string]any) {
 			if !keyMode {
 				if dc > 0 {
 					valBuf.WriteRune(curToken)
+				} else if dc == 0 {
+					if value != nil {
+						rm[key] = value
+
+					} else {
+						ss := valBuf.String()
+						valBuf.Reset()
+						value = nil
+
+						if ss != "" {
+							value = determineType(ss)
+							rm[key] = value
+
+						} else if ss == "" {
+							rm[key] = ss
+						}
+					}
 				}
 			}
 
