@@ -1,4 +1,4 @@
-package internal
+package sjrw
 
 import (
 	"strconv"
@@ -19,16 +19,16 @@ const (
 	COMMA       rune = ','  // U+002C 44
 	BACKSLASH   rune = '\\' // U+005C 92
 	SLASH       rune = '/'  // U+002F 47
-ASTARISK rune = '*'
+	ASTERISK    rune = '*'  // U+002A 42
 )
 
-type Assemble struct {
+type assemble struct {
 	idx       uint
 	lineCount uint // Counter for current number of line.
 }
 
 // AssembleMap returns map created by input []rune
-func (a *Assemble) AssembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
+func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	var (
 		curToken   rune // The target token.
 		peekToken  rune
@@ -193,30 +193,32 @@ func isIgnores(curToken rune) bool {
 	return false
 }
 
-func (a *Assemble) ignoreComments(inputRune []rune) {
+func (a *assemble) ignoreComments(inputRune []rune) {
 	var (
- curToken rune = inputRune[a.idx]
+		curToken rune = inputRune[a.idx]
 		peekToken rune = inputRune[a.idx+1]
 	)
 
 	if curToken == SLASH && peekToken == SLASH {
-for ;; a.idx {
-peekToken = inputRune[a.idx+1]
- if peekToken == lrToken || peekToken == lnToken {
-return
-}
+		for ;; a.idx++ {
+			peekToken = inputRune[a.idx+1]
+			if peekToken == lrTOKEN || peekToken == lnTOKEN {
+				return
+			}
+		}
+	} else if curToken == SLASH && peekToken == ASTERISK {
+		for ;; a.idx++ {
+			curToken = inputRune[a.idx]
+			peekToken = inputRune[a.idx+1]
+			if curToken == ASTERISK && peekToken == SLASH {
+				a.idx += 2
+				return
+			}
+		}
+	}
 }
 
-if curToken == SLASH && peekToken == ASTARISK {
-for ;; a.idx {
-curToken = inputRune[a.idx]
-peekToken = inputRune[a.idx+1]
- if peekToken == ASTARISK && peekToken == SLASH {
-return
-}
-}
-
-func (a *Assemble) ignoreSpaceTab(inputRune []rune) {
+func (a *assemble) ignoreSpaceTab(inputRune []rune) {
 	var (
 		curToken  rune
 		peekToken rune

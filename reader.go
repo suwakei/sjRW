@@ -6,8 +6,6 @@ import (
 	"io"
 	"log"
 	"unsafe"
-
-	"github.com/suwakei/sjrw/internal"
 )
 
 type SjReader struct {
@@ -78,7 +76,7 @@ func (SjReader) ReadAsMapFrom(readFile io.Reader) (contentAsMap map[uint]map[str
 			}
 		}
 	}
-	var a internal.Assemble
-	contentAsMap = a.AssembleMap(jsonRune)
+	var a assemble
+	contentAsMap = a.assembleMap(jsonRune)
 	return contentAsMap, err
 }

@@ -1,4 +1,4 @@
-package internal
+package sjrw
 
 import (
 	"sort"
@@ -6,7 +6,7 @@ import (
 )
 
 // getEditLineMap returns a map with only the difference changed from the original string
-func GetEditLineMap[targetType []byte | string](str targetType, editMapFromDiff map[string]map[int]string) map[int]string {
+func getEditLineMap[targetType []byte | string](str targetType, editMapFromDiff map[string]map[int]string) map[int]string {
 	content := strings.TrimSpace(string(str))
 	contentLines := strings.Split(content, "\n")
 
@@ -17,11 +17,11 @@ func GetEditLineMap[targetType []byte | string](str targetType, editMapFromDiff 
 	}
 
 	rm := editMapFromDiff["rm"]
-	RMNUMS := GetKey(rm)
+	RMNUMS := getKey(rm)
 	sort.Ints(RMNUMS)
 
 	add := editMapFromDiff["add"]
-	ADDNUMS := GetKey(add)
+	ADDNUMS := getKey(add)
 	sort.Ints(ADDNUMS)
 
 	// remove
@@ -38,7 +38,7 @@ func GetEditLineMap[targetType []byte | string](str targetType, editMapFromDiff 
 }
 
 // GetKey returns keySlice of "m"
-func GetKey(m map[int]string) (keySlice []int) {
+func getKey(m map[int]string) (keySlice []int) {
 	keySlice = make([]int, len(m))
 	for k := range m {
 		keySlice = append(keySlice, k)

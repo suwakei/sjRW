@@ -1,10 +1,10 @@
-package internal
+package sjrw
 
 import (
 	"strings"
 )
 
-func (a *Assemble) returnKey(inputRune []rune) (key string) {
+func (a *assemble) returnKey(inputRune []rune) (key string) {
 	var (
 		dc        uint8
 		curToken  rune

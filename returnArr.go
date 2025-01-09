@@ -1,10 +1,10 @@
-package internal
+package sjrw
 
 import (
 	"strings"
 )
 
-func (a *Assemble) returnArr(inputRune []rune) (rs []any) {
+func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 	var (
 		curToken   rune
 		peekToken  rune

@@ -7,14 +7,10 @@ package sjrw
 // 	"os"
 // 	"sort"
 // 	"strings"
-
-// 	"github.com/suwakei/sjrw/internal"
 // )
 
 // type SjWriter struct {
 // }
-
-// TODO: 必ずそれぞれの関数でベンチマークもとる
 
 // WriteFromStr writes str to filepathToWrite
 // func (SjWriter) WriteFromStr(str string, filepathToWrite io.ReadWriter) {

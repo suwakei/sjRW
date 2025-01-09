@@ -1,11 +1,11 @@
-package internal
+package sjrw
 
 import (
 	"strings"
 )
 
 // returnObj returns map[string]any
-func (a *Assemble) returnObj(inputRune []rune) (rm map[string]any) {
+func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 	var (
 		curToken  rune // The target token.
 		peekToken rune // The token for confirmation of next character.

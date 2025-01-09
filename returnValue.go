@@ -1,10 +1,10 @@
-package internal
+package sjrw
 
 import (
 	"strings"
 )
 
-func (a *Assemble) returnValue(inputRune []rune) (value any) {
+func (a *assemble) returnValue(inputRune []rune) (value any) {
 	var (
 		dc        uint8
 		ss        string
