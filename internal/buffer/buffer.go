@@ -31,7 +31,7 @@ func (b *Buffer) ToString() string {
 
 }
 
-func (b *Buffer) Grow(n int) {
+func (b *Buffer) AllocMem(n int) {
 	if n < 0 {
 		log.Fatal("neganive number is invalid")
 	}

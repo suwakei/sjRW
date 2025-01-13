@@ -23,7 +23,6 @@ func (a *assemble) returnKey(inputRune []rune) (key string) {
 				keyBuf.WriteRune(curToken)
 			} else if dc == 0 {
 				a.ignoreSpaceTab(inputRune)
-				continue
 			}
 
 		case DOUBLEQUOTE:

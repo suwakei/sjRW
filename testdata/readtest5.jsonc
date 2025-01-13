@@ -2,7 +2,12 @@
     "Dict": {
         "a": "a",// testdummy
         "1": 1,
+        // testcomment
         "true": true,
+        /*
+        multiline comment
+        multiline
+        */
         "arr": [
             "arr",
             123,

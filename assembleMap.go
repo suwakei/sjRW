@@ -73,9 +73,11 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			break
 		}
 
+
 		if peekToken = inputRune[a.idx+1]; curToken == SLASH && peekToken == SLASH {
 			a.ignoreComments(inputRune)
 		}
+
 
 		if curToken == lrTOKEN {
 			if inputRune[a.idx+1] == lnTOKEN {
@@ -85,10 +87,12 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			continue
 		}
 
+
 		if curToken == lnTOKEN {
 			a.lineCount++
 			continue
 		}
+
 
 		if keyMode && isIgnores(curToken) {
 			continue
@@ -211,7 +215,7 @@ func (a *assemble) ignoreComments(inputRune []rune) {
 			curToken = inputRune[a.idx]
 			peekToken = inputRune[a.idx+1]
 			if curToken == ASTERISK && peekToken == SLASH {
-				a.idx += 2
+				a.idx += 1
 				return
 			}
 		}
