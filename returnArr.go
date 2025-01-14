@@ -8,11 +8,11 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 	var (
 		curToken   rune
 		peekToken  rune
-		firstLoop  bool = true
 		dc         uint8
 		ss         string
 		arrVal     any
 		tempArrBuf strings.Builder
+		firstLoop  bool = true
 	)
 	// preallocate memory
 	rs = make([]any, 0, arrLength(a.idx, inputRune))
@@ -119,10 +119,10 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 func arrLength(idx uint, inputRune []rune) uint {
 	var (
 		curToken  rune
-		dc        uint8
-		arrLength uint
-		lb        uint8
-		rb        uint8
+		dc        uint8 = 0
+		arrLength uint  = 0
+		lb        uint8 = 0
+		rb        uint8 = 0
 	)
 
 	for ; ; idx++ {

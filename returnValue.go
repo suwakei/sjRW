@@ -44,7 +44,7 @@ func (a *assemble) returnValue(inputRune []rune) (value any) {
 		case SLASH:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-			} else if peekToken = inputRune[a.idx+1]; dc == 0 && peekToken == SLASH  {
+			} else if peekToken = inputRune[a.idx+1]; dc == 0 && peekToken == SLASH {
 				a.ignoreComments(inputRune)
 			}
 

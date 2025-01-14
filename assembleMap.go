@@ -7,7 +7,7 @@ import (
 
 const (
 	SPACE       rune = ' '  // U+0020 32
-	TAB         rune = '\t' // U+0009 9 
+	TAB         rune = '\t' // U+0009 9
 	lnTOKEN     rune = '\n' // U+000A 10
 	lrTOKEN     rune = '\r' // U+000D 13
 	DOUBLEQUOTE rune = '"'  // U+0022 34
@@ -73,11 +73,15 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			break
 		}
 
-
 		if peekToken = inputRune[a.idx+1]; curToken == SLASH && peekToken == SLASH {
 			a.ignoreComments(inputRune)
+			continue
 		}
 
+		if curToken == SPACE || curToken == TAB {
+			a.ignoreSpaceTab(inputRune)
+			continue
+		}
 
 		if curToken == lrTOKEN {
 			if inputRune[a.idx+1] == lnTOKEN {
@@ -87,14 +91,12 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			continue
 		}
 
-
 		if curToken == lnTOKEN {
 			a.lineCount++
 			continue
 		}
 
-
-		if keyMode && isIgnores(curToken) {
+		if isIgnores(curToken) {
 			continue
 		}
 
@@ -134,9 +136,6 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 				assembledMap[a.lineCount][returnedKey] = returnedValue
 			}
 			keyMode = true
-			continue
-
-		} else if !keyMode && isIgnores(curToken) {
 			continue
 		}
 	}
@@ -199,19 +198,20 @@ func isIgnores(curToken rune) bool {
 
 func (a *assemble) ignoreComments(inputRune []rune) {
 	var (
-		curToken rune = inputRune[a.idx]
+		curToken  rune = inputRune[a.idx]
 		peekToken rune = inputRune[a.idx+1]
 	)
 
 	if curToken == SLASH && peekToken == SLASH {
-		for ;; a.idx++ {
+		for ; ; a.idx++ {
 			peekToken = inputRune[a.idx+1]
 			if peekToken == lrTOKEN || peekToken == lnTOKEN {
 				return
 			}
 		}
+
 	} else if curToken == SLASH && peekToken == ASTERISK {
-		for ;; a.idx++ {
+		for ; ; a.idx++ {
 			curToken = inputRune[a.idx]
 			peekToken = inputRune[a.idx+1]
 			if curToken == ASTERISK && peekToken == SLASH {
