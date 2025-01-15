@@ -17,6 +17,7 @@ func (a *assemble) returnValue(inputRune []rune) (value any) {
 
 	for ; ; a.idx++ {
 		curToken = inputRune[a.idx]
+		peekToken = inputRune[a.idx+1]
 
 		switch curToken {
 		case SPACE, TAB:
@@ -36,7 +37,7 @@ func (a *assemble) returnValue(inputRune []rune) (value any) {
 		case BACKSLASH:
 			valBuf.WriteRune(curToken)
 			if dc > 0 {
-				if peekToken = inputRune[a.idx+1]; dc > 0 && peekToken == DOUBLEQUOTE {
+				if dc > 0 && peekToken == DOUBLEQUOTE {
 					dc--
 				}
 			}
@@ -44,7 +45,7 @@ func (a *assemble) returnValue(inputRune []rune) (value any) {
 		case SLASH:
 			if dc > 0 {
 				valBuf.WriteRune(curToken)
-			} else if peekToken = inputRune[a.idx+1]; dc == 0 && peekToken == SLASH {
+			} else if dc == 0 && peekToken == SLASH {
 				a.ignoreComments(inputRune)
 			}
 

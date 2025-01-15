@@ -1,6 +1,7 @@
 package sjrw
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -52,6 +53,11 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 
 	for ; ; a.idx++ {
 		curToken = inputRune[a.idx]
+		peekToken = inputRune[a.idx+1]
+
+		// TODO for debug
+		fmt.Println("idx", a.idx, "lineCount", a.lineCount, "curToken", string(curToken))
+		fmt.Println("idx", a.idx+1, "lineCount", a.lineCount, "peekToken", string(peekToken))
 
 		if firstLoop {
 			if _, ok := assembledMap[a.lineCount]; !ok {
@@ -73,7 +79,7 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			break
 		}
 
-		if peekToken = inputRune[a.idx+1]; curToken == SLASH && peekToken == SLASH {
+		if curToken == SLASH {
 			a.ignoreComments(inputRune)
 			continue
 		}
@@ -83,7 +89,7 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			continue
 		}
 
-		if curToken == lrTOKEN {
+		if curToken == lrTOKEN {//TODO:  改行文字が\r\n か\rだけかでa.idxがずれるかも要検証
 			if inputRune[a.idx+1] == lnTOKEN {
 				continue
 			}
@@ -214,6 +220,20 @@ func (a *assemble) ignoreComments(inputRune []rune) {
 		for ; ; a.idx++ {
 			curToken = inputRune[a.idx]
 			peekToken = inputRune[a.idx+1]
+
+			if curToken == lrTOKEN {//TODO:  改行文字が\r\n か\rだけかでa.idxがずれるかも要検証
+				if inputRune[a.idx+1] == lnTOKEN {
+					continue
+				}
+				a.lineCount++
+				continue
+			}
+	
+			if curToken == lnTOKEN {
+				a.lineCount++
+				continue
+			}
+
 			if curToken == ASTERISK && peekToken == SLASH {
 				a.idx += 1
 				return
@@ -230,9 +250,11 @@ func (a *assemble) ignoreSpaceTab(inputRune []rune) {
 
 	for ; ; a.idx++ {
 		curToken = inputRune[a.idx]
+		peekToken = inputRune[a.idx+1]
+
 		switch curToken {
 		case SPACE, TAB:
-			if peekToken = inputRune[a.idx+1]; peekToken != SPACE && peekToken != TAB {
+			if peekToken != SPACE && peekToken != TAB {
 				return
 			}
 			continue

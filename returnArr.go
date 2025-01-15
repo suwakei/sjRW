@@ -2,6 +2,7 @@ package sjrw
 
 import (
 	"strings"
+	"fmt"
 )
 
 func (a *assemble) returnArr(inputRune []rune) (rs []any) {
@@ -20,6 +21,11 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 
 	for ; ; a.idx++ {
 		curToken = inputRune[a.idx]
+		peekToken = inputRune[a.idx+1]
+
+		// FIXME for debug
+		fmt.Println("idx", a.idx, "lineCount", a.lineCount, "curToken", string(curToken))
+		fmt.Println("idx", a.idx+1, "lineCount", a.lineCount, "peekToken", string(peekToken))
 
 		if firstLoop {
 			firstLoop = false
@@ -43,14 +49,14 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 
 		case BACKSLASH:
 			tempArrBuf.WriteRune(curToken)
-			if peekToken = inputRune[a.idx+1]; peekToken == DOUBLEQUOTE {
+			if peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
 		case SLASH:
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
+			} else if peekToken == SLASH && dc == 0 {
 				a.ignoreComments(inputRune)
 			}
 
@@ -74,7 +80,7 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 				return rs
 			}
 
-		case COMMA:
+		case COMMA:// TODO commaとlbracket が続いたときいらない処理をしてしまう
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			} else if dc == 0 {
@@ -97,7 +103,7 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 			if dc > 0 {
 				tempArrBuf.WriteRune(curToken)
 			} else if dc == 0 {
-				if peekToken = inputRune[a.idx+1]; peekToken == lnTOKEN {
+				if peekToken == lnTOKEN {
 					continue
 				}
 				a.lineCount++
@@ -119,6 +125,7 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 func arrLength(idx uint, inputRune []rune) uint {
 	var (
 		curToken  rune
+		peekToken rune
 		dc        uint8 = 0
 		arrLength uint  = 0
 		lb        uint8 = 0
@@ -127,6 +134,7 @@ func arrLength(idx uint, inputRune []rune) uint {
 
 	for ; ; idx++ {
 		curToken = inputRune[idx]
+		peekToken = inputRune[idx+1]
 		switch curToken {
 		case DOUBLEQUOTE:
 			dc++
@@ -135,7 +143,7 @@ func arrLength(idx uint, inputRune []rune) uint {
 			}
 
 		case BACKSLASH:
-			if peekToken := inputRune[idx+1]; peekToken == DOUBLEQUOTE {
+			if peekToken == DOUBLEQUOTE {
 				dc--
 			}
 

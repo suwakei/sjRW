@@ -1,6 +1,7 @@
 package sjrw
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -27,9 +28,13 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 	for ; ; a.idx++ {
 		curToken = inputRune[a.idx]
+		peekToken = inputRune[a.idx+1]
+
+		// FIXME for debug
+		fmt.Println("idx", a.idx, "lineCount", a.lineCount, "curToken", string(curToken))
+		fmt.Println("idx", a.idx+1, "lineCount", a.lineCount, "peekToken", string(peekToken))
 
 		if firstLoop {
-			rm[string(curToken)] = ""
 			firstLoop = false
 			continue
 		}
@@ -74,7 +79,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 		case BACKSLASH:
 			if keyMode {
 				keyBuf.WriteRune(curToken)
-				if peekToken = inputRune[a.idx+1]; peekToken == DOUBLEQUOTE {
+				if peekToken == DOUBLEQUOTE {
 					dc--
 					continue
 				}
@@ -83,7 +88,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 			if !keyMode {
 				valBuf.WriteRune(curToken)
-				if peekToken = inputRune[a.idx+1]; peekToken == DOUBLEQUOTE {
+				if peekToken == DOUBLEQUOTE {
 					dc--
 					continue
 				}
@@ -179,7 +184,6 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 							rm[key] = ss
 						}
 					}
-					rm[string(curToken)] = ""
 					return rm
 				}
 			}
@@ -233,6 +237,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 				} else if dc == 0 {
 					if value != nil {
 						rm[key] = value
+						keyMode = true
 
 					} else {
 						ss := valBuf.String()
@@ -242,9 +247,11 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 						if ss != "" {
 							value = determineType(ss)
 							rm[key] = value
+							keyMode = true
 
 						} else if ss == "" {
 							rm[key] = ss
+							keyMode = true
 						}
 					}
 				}
@@ -256,7 +263,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 					keyBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					if peekToken = inputRune[a.idx+1]; peekToken == lnTOKEN {
+					if peekToken == lnTOKEN {
 						continue
 					}
 					a.lineCount++
@@ -269,7 +276,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 					valBuf.WriteRune(curToken)
 					continue
 				} else if dc == 0 {
-					if peekToken = inputRune[a.idx+1]; peekToken == lnTOKEN {
+					if peekToken == lnTOKEN {
 						continue
 					}
 					a.lineCount++
@@ -306,10 +313,8 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 			if !keyMode {
 				valBuf.WriteRune(curToken)
 			}
-
 		}
 	}
-
 }
 
 func mapLength(idx uint, inputRune []rune) uint {
@@ -324,6 +329,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 
 	for ; lb != rb; idx++ {
 		curToken = inputRune[idx]
+		peekToken = inputRune[idx+1]
 
 		switch curToken {
 		case DOUBLEQUOTE:
@@ -333,7 +339,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 			}
 
 		case BACKSLASH:
-			if peekToken = inputRune[idx+1]; peekToken == DOUBLEQUOTE {
+			if peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
