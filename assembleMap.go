@@ -32,7 +32,7 @@ type assemble struct {
 func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[string]any) {
 	var (
 		curToken   rune // The target token.
-		peekToken  rune
+		peekToken  rune // The next target token.
 		runeLength uint = uint(len(inputRune)) // The length of input rune slice.
 
 		tempLineCount uint
