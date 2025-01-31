@@ -42,20 +42,27 @@ func (b *Buffer) AllocMem(n int) {
 	}
 }
 
-func (b *Buffer) bufLen() int {
+func (b *Buffer) BufLen() int {
 	return len(b.buf)
 }
 
-func (b *Buffer) bufCap() int {
+func (b *Buffer) BufCap() int {
 	return cap(b.buf)
 }
 
-func (b *Buffer) AccumuRune(r rune) {
+func (b *Buffer) AccumuRune(r rune) error {
 	b.copyCheck()
 	b.buf = utf8.AppendRune(b.buf, r)
+	return nil
 }
 
-func (b *Buffer) bufReset() {
+func (b *Buffer) AccumuBytes(p []byte) error {
+	b.copyCheck()
+	b.buf = append(b.buf, p...)
+	return nil
+}
+
+func (b *Buffer) BufReset() {
 	b.address = nil
 	b.buf = nil
 }
