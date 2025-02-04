@@ -61,10 +61,10 @@ func (a *assemble) handlePremitive(inputRune []rune, assembledMap map[uint]map[s
 				ss = valBuf.String()
 				value = determineType(ss)
 				valBuf.Reset()
-				if _, ok := assembledMap[lineCount]; !ok {
-					assembledMap[lineCount] = make(map[string]any, 1)
+				if _, ok := assembledMap[a.lineCount]; !ok {
+					assembledMap[a.lineCount] = make(map[string]any, 1)
 				}
-				assembledMap[lineCount][key] = value
+				assembledMap[a.lineCount][key] = value
 			}
 
 		default:
