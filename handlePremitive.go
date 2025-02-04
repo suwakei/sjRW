@@ -54,7 +54,7 @@ func (a *assemble) handlePremitive(inputRune []rune, assembledMap map[uint]map[s
 				a.ignoreComments(inputRune)
 			}
 
-		case COMMA:
+		case COMMA, LBLACE:
 			if inQuote {
 				valBuf.WriteRune(curToken)
 			} else if !inQuote {
