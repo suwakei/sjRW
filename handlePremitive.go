@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-func (a *assemble) handlePremitive(inputRune []rune, assembledMap *map[uint]map[string]any, key string, ) {
+func (a *assemble) handlePremitive(inputRune []rune, assembledMap map[uint]map[string]any, key string, ) {
 	var (
 		dc        uint8
 		inQuote bool = false
@@ -61,10 +61,10 @@ func (a *assemble) handlePremitive(inputRune []rune, assembledMap *map[uint]map[
 				ss = valBuf.String()
 				value = determineType(ss)
 				valBuf.Reset()
-				if _, ok := *assembledMap[lineCount]; !ok {
-					*assembledMap[lineCount] = make(map[string]any, 1)
+				if _, ok := assembledMap[lineCount]; !ok {
+					assembledMap[lineCount] = make(map[string]any, 1)
 				}
-				*assembledMap[lineCount][key] = value
+				assembledMap[lineCount][key] = value
 			}
 
 		default:
