@@ -68,9 +68,7 @@ func (a *assemble) handlePremitive(inputRune []rune, assembledMap map[uint]map[s
 			}
 
 		default:
-			if inQuote {
-				valBuf.WriteRune(curToken)
-			}
+valBuf.WriteRune(curToken)
 		}
 	}
 }
