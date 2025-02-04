@@ -95,7 +95,7 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			continue
 		}
 	}
-	return assembledMap
+	return assembledMap, nil
 }
 
 func initializeFirstEntry(m map[uint]map[string]any, lineCount uint, curToken rune) {
