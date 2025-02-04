@@ -13,46 +13,27 @@ type SjReader struct {
 
 // ReadAsStr returns json content as string
 func (SjReader) ReadAsStrFrom(readFile io.Reader) (contentAsStr string, err error) {
-	var jsonByte []byte = make([]byte, 200)
 	if readFile != nil {
-		reader := bufio.NewReaderSize(readFile, 24*1024)
-		for {
-			readByte, err := reader.ReadByte()
-			jsonByte = append(jsonByte, readByte)
-
-			if err == io.EOF {
-				break
-			}
-
-			if err != nil {
-				log.Fatal(err)
-			}
-
+		reader := new(bytes.Buffer)
+		_, err := reader.ReadFrom(readFile)
+		if err != nil {
+			return "", err
 		}
+		contentAsStr = unsafe.String(unsafe.SliceData(bytes.TrimSpace(reader.Bytes())), len(bytes.TrimSpace(reader.Bytes())))
 	}
-	contentAsStr = unsafe.String(unsafe.SliceData(bytes.TrimSpace(jsonByte)), len(bytes.TrimSpace(jsonByte)))
-	return contentAsStr, err
-}
+		return contentAsStr, nil
+	}
 
 func (SjReader) ReadAsByteFrom(readFile io.Reader) (contentAsByte []byte, err error) {
-	var jsonByte []byte = make([]byte, 200)
 	if readFile != nil {
-		reader := bufio.NewReaderSize(readFile, 24*1024)
-		for {
-			readByte, err := reader.ReadByte()
-			jsonByte = append(jsonByte, readByte)
-
-			if err == io.EOF {
-				break
-			}
-
-			if err != nil {
-				log.Fatal(err)
-			}
+		reader := new(bytes.Buffer)
+		_, err := reader.ReadFrom(readFile)
+		if err != nil {
+			return []byte(""), err
 		}
+	contentAsByte = bytes.TrimSpace(reader.Bytes())	
 	}
-	contentAsByte = bytes.TrimSpace(jsonByte)
-	return contentAsByte, err
+	return contentAsByte, nil
 }
 
 func (SjReader) ReadAsMapFrom(readFile io.Reader) (contentAsMap map[uint]map[string]any, err error) {
@@ -77,6 +58,9 @@ func (SjReader) ReadAsMapFrom(readFile io.Reader) (contentAsMap map[uint]map[str
 		}
 	}
 	var a assemble
-	contentAsMap = a.assembleMap(jsonRune)
-	return contentAsMap, err
+	contentAsMap, err = a.assembleMap(jsonRune)
+	if err != nil {
+		return nil, err
+	}
+	return contentAsMap, nil
 }
