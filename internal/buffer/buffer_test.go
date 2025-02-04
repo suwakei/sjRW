@@ -82,17 +82,17 @@ func TestBufferAccumuMultiBytesChar(t *testing.T) {
 	}{
 		{
 			"AccumuBytes",
-			func(b *Buffer) { return b.AccumuBytes([]byte(s0)) },
+			func(b *Buffer) (error) { return b.AccumuBytes([]byte(s0)) },
 			s0,
 		},
 		{
 			"AccumuRune",
-			func(b *Buffer) { return b.AccumuRune('a') },
+			func(b *Buffer) (error) { return b.AccumuRune('a') },
 			"a",
 		},
 		{
 			"AccumuRuneWide",
-			func(b *Buffer) { return b.AccumuRune('世') },
+			func(b *Buffer) (error) { return b.AccumuRune('世') },
 			"世",
 		},
 	} {
@@ -238,7 +238,7 @@ func benchmarkBuffer(b *testing.B, f func(b *testing.B, numWrite int, grow bool)
 	})
 }
 
-func BenchmarkBuildString_Builder(b *testing.B) {
+func BenchmarkBuildString_Buffer(b *testing.B) {
 	benchmarkBuffer(b, func(b *testing.B, numWrite int, grow bool) {
 		for i := 0; i < b.N; i++ {
 			var buf Buffer
@@ -268,7 +268,7 @@ func BenchmarkBufferString_ByteBuffer(b *testing.B) {
 	})
 }
 
-func TestBfferAllocMemSizeclasses(t *testing.T) {
+func TestBufferAllocMemSizeclasses(t *testing.T) {
 	ss := strings.Repeat("a", 19)
 	allocs := testing.AllocsPerRun(100, func() {
 		var b Buffer

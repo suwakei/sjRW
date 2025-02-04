@@ -11,6 +11,7 @@ type Buffer struct {
 	buf     []byte
 }
 
+// Bufferがコピーされているかチェックする
 func (b *Buffer) copyCheck() {
 	if b.address == nil {
 		b.address = (*Buffer)(NoEscape(unsafe.Pointer(b)))
@@ -27,16 +28,19 @@ func NoEscape(p unsafe.Pointer) unsafe.Pointer {
 }
 
 func (b *Buffer) ToString() string {
+	if len(b.buf) == 0 {
+        return ""
+    }
 	return unsafe.String(unsafe.SliceData(b.buf), len(b.buf))
-
 }
 
 func (b *Buffer) AllocMem(n int) {
 	if n < 0 {
-		log.Fatal("neganive number is invalid")
+		log.Fatal("negative number is invalid")
 	}
 	if cap(b.buf)-len(b.buf) < n {
-		var tempBuf []byte = make([]byte, 0, n)
+		newCap := len(b.buf) + n  // 既存のデータ長 + 必要な追加容量
+		var tempBuf []byte = make([]byte, 0, newCap)
 		copy(tempBuf, b.buf)
 		b.buf = tempBuf
 	}
@@ -68,6 +72,10 @@ func (b *Buffer) BufReset() {
 }
 
 func (b *Buffer) LeaveCap() {
-	b.address = nil
-	b.buf = b.buf[:0]
+	if b.buf != nil {
+		b.buf = b.buf[:0]
+	}
+	if b.address != nil {
+		b.address = nil
+	}
 }
