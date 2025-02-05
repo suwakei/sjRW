@@ -4,10 +4,11 @@ import (
 	"strings"
 )
 
-func (a *assemble) handlePremitive(inputRune []rune, assembledMap map[uint]map[string]any, key string, ) {
+func (a *assemble) handlePrimitive(inputRune []rune, key string) {
 	var (
 		dc        uint8
 		inQuote bool = false
+		value any
 		ss        string
 		curToken  rune
 		peekToken rune
@@ -54,21 +55,23 @@ func (a *assemble) handlePremitive(inputRune []rune, assembledMap map[uint]map[s
 				a.ignoreComments(inputRune)
 			}
 
-		case COMMA, LBLACE:
+		case COMMA, RBRACE:
 			if inQuote {
 				valBuf.WriteRune(curToken)
 			} else if !inQuote {
 				ss = valBuf.String()
 				value = determineType(ss)
 				valBuf.Reset()
-				if _, ok := assembledMap[a.lineCount]; !ok {
-					assembledMap[a.lineCount] = make(map[string]any, 1)
+				if _, ok := a.assembledMap[a.lineCount]; !ok {
+					a.assembledMap[a.lineCount] = make(map[string]any, 1)
 				}
-				assembledMap[a.lineCount][key] = value
+				a.assembledMap[a.lineCount][key] = value
+				return
 			}
 
+
 		default:
-valBuf.WriteRune(curToken)
+			valBuf.WriteRune(curToken)
 		}
 	}
 }

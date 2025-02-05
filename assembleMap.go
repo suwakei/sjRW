@@ -26,10 +26,11 @@ const (
 type assemble struct {
 	idx       uint
 	lineCount uint // Counter for current number of line.
+	assembledMap map[uint]map[string]any
 }
 
 // AssembleMap returns map created by input []rune
-func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[string]any, err error) {
+func (a *assemble) assembleMap(inputRune []rune) (map[uint]map[string]any, error) {
 	var (
 		curToken   rune                        // The target token.
 		peekToken  rune                        // The next target token.
@@ -39,9 +40,6 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 		keyMode   bool = true //  If true, read jsonKey.
 
 		returnedKey   string
-		returnedValue any
-		returnedSlice []any
-		returnedMap   map[string]any
 	)
 
 	if runeLength == 0 {
@@ -52,7 +50,7 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 
 	// preallocation of memory.
 	initialCap := lnNum(inputRune)
-	assembledMap = make(map[uint]map[string]any, initialCap)
+	a.assembledMap = make(map[uint]map[string]any, initialCap)
 
 	for ; a.idx < runeLength-1; a.idx++ {
 		curToken = inputRune[a.idx]
@@ -64,7 +62,7 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 
 		switch {
 		case firstLoop:
-			initializeFirstEntry(assembledMap, a.lineCount, curToken)
+			a.initializeFirstEntry(a.lineCount, curToken)
 			firstLoop = false
 			continue
 
@@ -72,6 +70,7 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			if err := a.ignoreComments(inputRune); err != nil {
 				return nil, err
 			}
+
 			continue
 
 		case isNewline(curToken):
@@ -87,7 +86,7 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			continue
 
 		case !keyMode:
-			err := handleValue(inputRune, &assembledMap, returnedKey, curToken)
+			err := a.handleValue(inputRune, returnedKey, curToken)
 			if err != nil {
 				return nil, err
 			}
@@ -95,26 +94,80 @@ func (a *assemble) assembleMap(inputRune []rune) (assembledMap map[uint]map[stri
 			continue
 		}
 	}
-	return assembledMap, nil
+	return a.assembledMap, nil
 }
 
-func initializeFirstEntry(m map[uint]map[string]any, lineCount uint, curToken rune) {
-	if _, ok := m[lineCount]; !ok {
-		m[lineCount] = make(map[string]any, 1)
+func (a *assemble) initializeFirstEntry(lineCount uint, curToken rune) {
+	if _, ok := a.assembledMap[lineCount]; !ok {
+		a.assembledMap[lineCount] = make(map[string]any, 1)
 	}
-	m[lineCount][string(curToken)] = ""
+	a.assembledMap[lineCount][string(curToken)] = ""
 }
 
-func handleValue(inputRune []rune, assembledMap *map[uint]map[string]any, key string, curToken rune) error {
+
+
+func (a *assemble) handleValue(inputRune []rune, key string, curToken rune) error {
 	switch curToken {
 	case LBRACKET:
-		return a.handleArray(inputRune, assembledMap, key)
+		a.handleArray(inputRune, key)
 	case LBRACE:
-		return a.handleObject(inputRune, assembledMap, key)
+		a.handleObject(inputRune, key)
 	default:
-		return a.handlePrimitive(inputRune, assembledMap, key)
+		a.handlePrimitive(inputRune, key)
+	}
+	return nil
+}
+
+func (a *assemble) ignoreComments(inputRune []rune) error {
+	var (
+		curToken  rune = inputRune[a.idx]
+		peekToken rune = inputRune[a.idx+1]
+	)
+
+	if curToken == SLASH && peekToken == SLASH {
+		for ; ; a.idx++ {
+			peekToken = inputRune[a.idx+1]
+			if isNewline(peekToken) {
+				break
+			}
+		}
+
+	} else if curToken == SLASH && peekToken == ASTERISK {
+		for ; ; a.idx++ {
+			curToken = inputRune[a.idx]
+			peekToken = inputRune[a.idx+1]
+
+			if isNewline(curToken) {
+				a.lineCount++
+				continue
+			}
+
+			if curToken == ASTERISK && peekToken == SLASH {
+				a.idx += 1
+				break
+			}
+		}
+	}
+	return nil
+}
+
+func (a *assemble) ignoreSpaceTab(inputRune []rune) {
+	var (
+		curToken rune = inputRune[a.idx]
+	)
+	for ; ; a.idx++ {
+		curToken = inputRune[a.idx]
+		if curToken == SPACE || curToken == TAB {
+			continue
+		}
+		break
 	}
 }
+
+func isNewline(r rune) bool {
+	return r == lrTOKEN || r == lnTOKEN
+}
+
 func determineType(ss string) any {
 	if num, err := strconv.Atoi(ss); err == nil {
 		return num
@@ -167,54 +220,4 @@ func isIgnores(curToken rune) bool {
 		return true
 	}
 	return false
-}
-
-func (a *assemble) ignoreComments(inputRune []rune) error {
-	var (
-		curToken  rune = inputRune[a.idx]
-		peekToken rune = inputRune[a.idx+1]
-	)
-
-	if curToken == SLASH && peekToken == SLASH {
-		for ; ; a.idx++ {
-			peekToken = inputRune[a.idx+1]
-			if isNewline(peekToken) {
-				break
-			}
-		}
-
-	} else if curToken == SLASH && peekToken == ASTERISK {
-		for ; ; a.idx++ {
-			curToken = inputRune[a.idx]
-			peekToken = inputRune[a.idx+1]
-
-			if isNewline(curToken) {
-				a.lineCount++
-				continue
-			}
-
-			if curToken == ASTERISK && peekToken == SLASH {
-				a.idx += 1
-				break
-			}
-		}
-	}
-	return nil
-}
-
-func (a *assemble) ignoreSpaceTab(inputRune []rune) {
-	var (
-		curToken rune = inputRune[a.idx]
-	)
-	for ; ; a.idx++ {
-		curToken = inputRune[a.idx]
-		if curToken == SPACE || curToken == TAB {
-			continue
-		}
-		break
-	}
-}
-
-func isNewline(r rune) bool {
-	return r == lrTOKEN || r == lnTOKEN
 }

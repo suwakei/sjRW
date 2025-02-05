@@ -6,19 +6,20 @@ import (
 )
 
 // returnObj returns map[string]any
-func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
+func (a *assemble) handleObject(inputRune []rune, key string) {
 	var (
 		curToken  rune // The target token.
 		peekToken rune // The token for confirmation of next character.
 
 		dc        uint8        // Counter for number of ".
+		inQuote   bool         = false
 		keyMode   bool  = true // If true, mode which read json key. if false read json value.
 		firstLoop bool  = true // First loop flag.
 
 		keyBuf strings.Builder // When in "keyMode" is true, buf for accumulating key token.
 		valBuf strings.Builder // When in "keyMode" is false, buf for accumulating value token.
-		key    string          // The variable is for concatenated tokens stored in "keyBuf".
 		value  any             = nil
+		rm     map[string]any
 	)
 
 	// preallocation of memory
@@ -42,18 +43,18 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 		switch curToken {
 		case SPACE, TAB:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
-				} else if dc == 0 {
+				} else if !inQuote {
 					a.ignoreSpaceTab(inputRune)
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
-				} else if dc == 0 {
+				} else if !inQuote {
 					a.ignoreSpaceTab(inputRune)
 				}
 			}
@@ -64,6 +65,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 				keyBuf.WriteRune(curToken)
 				if dc == 2 {
 					dc = 0
+					inQuote = false
 					continue
 				}
 			}
@@ -72,6 +74,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 				valBuf.WriteRune(curToken)
 				if dc == 2 {
 					dc = 0
+					inQuote = false
 					continue
 				}
 			}
@@ -97,20 +100,20 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 		case SLASH:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
+				} else if !inQuote {
 					a.ignoreComments(inputRune)
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
+				} else if !inQuote {
 					a.ignoreComments(inputRune)
 					continue
 				}
@@ -118,9 +121,9 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 		case COLON:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
-				} else if dc == 0 {
+				} else if !inQuote {
 					key = keyBuf.String()
 					keyBuf.Reset()
 					keyMode = false
@@ -129,7 +132,7 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
 					continue
 				}
@@ -137,36 +140,35 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 		case LBRACE:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
-					rrs := a.returnObj(inputRune)
-					value = rrs
+				} else if !inQuote {
+					a.handleObject(inputRune, key)
 					continue
 				}
 			}
 
 		case RBRACE:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
+				} else if !inQuote {
 					if value != nil {
 						rm[key] = value
 						value = nil
@@ -184,25 +186,25 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 							rm[key] = ss
 						}
 					}
-					return rm
+					a.assembledMap[a.lineCount][key] = rm
+					return 
 				}
 			}
 
 		case LBRACKET:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
-					rrs := a.returnArr(inputRune)
-					value = rrs
+				} else if !inQuote {
+					a.handleArray(inputRune, key)
 					valBuf.Reset()
 					continue
 				}
@@ -210,14 +212,14 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 		case RBRACKET:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
 					continue
 				}
@@ -225,16 +227,16 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 		case COMMA:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
-				} else if dc == 0 {
+				} else if !inQuote {
 					if value != nil {
 						rm[key] = value
 						keyMode = true
@@ -259,10 +261,10 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 		case lrTOKEN:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
+				} else if !inQuote {
 					if peekToken == lnTOKEN {
 						continue
 					}
@@ -272,10 +274,10 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
+				} else if !inQuote {
 					if peekToken == lnTOKEN {
 						continue
 					}
@@ -286,20 +288,20 @@ func (a *assemble) returnObj(inputRune []rune) (rm map[string]any) {
 
 		case lnTOKEN:
 			if keyMode {
-				if dc > 0 {
+				if inQuote {
 					keyBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
+				} else if !inQuote {
 					a.lineCount++
 					continue
 				}
 			}
 
 			if !keyMode {
-				if dc > 0 {
+				if inQuote {
 					valBuf.WriteRune(curToken)
 					continue
-				} else if dc == 0 {
+				} else if !inQuote {
 					a.lineCount++
 					continue
 				}
@@ -325,6 +327,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 		mapLength uint
 		lb        uint8
 		rb        uint8
+		inQuote   bool = false
 	)
 
 	for ; lb != rb; idx++ {
@@ -336,6 +339,7 @@ func mapLength(idx uint, inputRune []rune) uint {
 			dc++
 			if dc == 2 {
 				dc = 0
+				inQuote = false
 			}
 
 		case BACKSLASH:
@@ -344,17 +348,17 @@ func mapLength(idx uint, inputRune []rune) uint {
 			}
 
 		case COLON:
-			if dc == 0 {
+			if !inQuote {
 				mapLength++
 			}
 
 		case LBRACE:
-			if dc == 0 {
+			if !inQuote {
 				lb++
 			}
 
 		case RBRACE:
-			if dc == 0 {
+			if !inQuote {
 				rb++
 			}
 		}

@@ -5,23 +5,28 @@ import (
 	"fmt"
 )
 
-func (a *assemble) returnArr(inputRune []rune) (rs []any) {
+func (a *assemble) handleArray(inputRune []rune, key string) {
 	var (
 		curToken   rune
 		peekToken  rune
 		dc         uint8
+		inQuote    bool
 		ss         string
 		arrVal     any
-		tempArrBuf strings.Builder
+		rs         []any
+		arrBuf strings.Builder
 		firstLoop  bool = true
 	)
 	// preallocate memory
-	rs = make([]any, 0, arrLength(a.idx, inputRune))
-	tempArrBuf.Grow(15)
+	estimatedLen := arrLength(a.idx, inputRune)
+	rs = make([]any, 0, estimatedLen)
+	arrBuf.Grow(15)
 
-	for ; ; a.idx++ {
+	for ; a.idx < uint(len(inputRune)); a.idx++ {
 		curToken = inputRune[a.idx]
-		peekToken = inputRune[a.idx+1]
+		if a.idx+1 < uint(len(inputRune)) {
+			peekToken = inputRune[a.idx+1]
+		}
 
 		// FIXME for debug
 		fmt.Println("idx", a.idx, "lineCount", a.lineCount, "curToken", string(curToken))
@@ -34,75 +39,78 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 
 		switch curToken {
 		case SPACE, TAB:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
+			if inQuote {
+				arrBuf.WriteRune(curToken)
+			} else if !inQuote {
 				a.ignoreSpaceTab(inputRune)
 			}
 
 		case DOUBLEQUOTE:
 			dc++
-			tempArrBuf.WriteRune(curToken)
-			if dc == 2 {
-				dc = 0
-			}
+            arrBuf.WriteRune(curToken)
+            if dc == 1 {
+                inQuote = true
+            } else if dc == 2 {
+                dc = 0
+                inQuote = false
+            }
 
 		case BACKSLASH:
-			tempArrBuf.WriteRune(curToken)
+			arrBuf.WriteRune(curToken)
 			if peekToken == DOUBLEQUOTE {
 				dc--
 			}
 
 		case SLASH:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
+			if inQuote {
+				arrBuf.WriteRune(curToken)
 			} else if peekToken == SLASH && dc == 0 {
 				a.ignoreComments(inputRune)
 			}
 
 		case LBRACKET:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
-				rrs := a.returnArr(inputRune)
-				rs = append(rs, rrs)
-				tempArrBuf.Reset()
+			if inQuote {
+				arrBuf.WriteRune(curToken)
+			} else if !inQuote {
+				a.handleArray(inputRune, key)
+				arrBuf.Reset()
 			}
 
 		case RBRACKET:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
-				ss = tempArrBuf.String()
+			if inQuote {
+				arrBuf.WriteRune(curToken)
+			} else if !inQuote {
+				ss = arrBuf.String()
 				arrVal = determineType(ss)
 				rs = append(rs, arrVal)
-				tempArrBuf.Reset()
-				return rs
+				arrBuf.Reset()
+				a.assembledMap[a.lineCount][key] = rs
+				return 
 			}
 
 		case COMMA:// TODO commaとlbracket が続いたときいらない処理をしてしまう
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
-				ss = tempArrBuf.String()
+			if inQuote {
+				arrBuf.WriteRune(curToken)
+			} else if !inQuote {
+				ss = arrBuf.String()
 				arrVal = determineType(ss)
 				rs = append(rs, arrVal)
-				tempArrBuf.Reset()
-				return rs
+				arrBuf.Reset()
+				a.assembledMap[a.lineCount][key] = rs
+				return
 			}
 
 		case LBRACE:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
-				rrs := a.returnObj(inputRune)
-				rs = append(rs, rrs)
+			if inQuote {
+				arrBuf.WriteRune(curToken)
+			} else if !inQuote {
+				a.handleObject(inputRune, key)
 			}
 
 		case lrTOKEN:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
+			if inQuote {
+				arrBuf.WriteRune(curToken)
+			} else if !inQuote {
 				if peekToken == lnTOKEN {
 					continue
 				}
@@ -110,14 +118,14 @@ func (a *assemble) returnArr(inputRune []rune) (rs []any) {
 			}
 
 		case lnTOKEN:
-			if dc > 0 {
-				tempArrBuf.WriteRune(curToken)
-			} else if dc == 0 {
+			if inQuote {
+				arrBuf.WriteRune(curToken)
+			} else if !inQuote {
 				a.lineCount++
 			}
 
 		default:
-			tempArrBuf.WriteRune(curToken)
+			arrBuf.WriteRune(curToken)
 		}
 	}
 }
@@ -127,20 +135,27 @@ func arrLength(idx uint, inputRune []rune) uint {
 		curToken  rune
 		peekToken rune
 		dc        uint8 = 0
+		inQuote   bool = false
 		arrLength uint  = 0
 		lb        uint8 = 0
 		rb        uint8 = 0
 	)
 
-	for ; ; idx++ {
+	for ; idx < uint(len(inputRune)); idx++ {
 		curToken = inputRune[idx]
-		peekToken = inputRune[idx+1]
+		if idx+1 < uint(len(inputRune)) {
+			peekToken = inputRune[idx+1]
+		}
+
 		switch curToken {
 		case DOUBLEQUOTE:
 			dc++
-			if dc == 2 {
-				dc = 0
-			}
+            if dc == 1 {
+                inQuote = true
+            } else if dc == 2 {
+                dc = 0
+                inQuote = false
+            }
 
 		case BACKSLASH:
 			if peekToken == DOUBLEQUOTE {
@@ -148,17 +163,17 @@ func arrLength(idx uint, inputRune []rune) uint {
 			}
 
 		case COMMA:
-			if dc == 0 {
+			if inQuote {
 				arrLength++
 			}
 
 		case LBRACKET:
-			if dc == 0 {
+			if inQuote {
 				lb++
 			}
 
 		case RBRACKET:
-			if dc == 0 {
+			if inQuote {
 				rb++
 			}
 			if lb == rb {
@@ -166,4 +181,5 @@ func arrLength(idx uint, inputRune []rune) uint {
 			}
 		}
 	}
+	return arrLength
 }
