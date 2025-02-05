@@ -12,7 +12,7 @@ func main() {
 	var sj sjrw.SjReader
 
 	// カレントディレクトリを変える
-	jsonPath5 := "../testdata/readtest5.jsonc"
+	jsonPath5 := "../testdata/singleArr.json"
 	f5, oerr := os.OpenFile(jsonPath5, os.O_RDONLY, 0o666)
 
 	if oerr != nil {
